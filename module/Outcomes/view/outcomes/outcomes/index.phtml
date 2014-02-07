@@ -1,0 +1,29 @@
+<?php
+
+
+$title = 'Students Enrolled';
+$this->headTitle($title);
+?>
+<h1><?php echo $this->escapeHtml($title); ?></h1>
+<p>
+    <a href="<?php echo $this->url('outcomes', array('action'=>'add'));?>">Add student</a>
+</p>
+
+<table class="table">
+<tr>
+    <th>Student ID</th>
+    <th>Student Name</th>
+    <th>Course ID</th>
+    <th>Course Name</th>
+    <th>&nbsp;</th>
+</tr>
+<?php foreach ($outcomes as $outcome) : ?>
+<tr>
+    <td><?php echo $this->escapeHtml($outcome->sid);?></td>
+    <td><?php echo $this->escapeHtml($outcome->sname);?></td>
+    <td><?php echo $this->escapeHtml($outcome->cid);?></td>
+    <td><?php echo $this->escapeHtml($outcome->cname);?></td>
+    
+</tr>
+<?php endforeach; ?>
+</table>

@@ -1,0 +1,45 @@
+<?php
+// module/Student/view/mock/mock/index.phtml:
+
+$title = 'Mock-up Home';
+$this->headTitle($title);
+?>
+<p></p>
+<html><body>
+    <div class="container">
+        <center><h3>NCC Acad Assessment Mock-up!</h3>
+            <p>Instructions for use...</p>
+            <!-- Student Outcomes button -->
+            <a class="btn btn-primary btn-lg" href="<?php echo $this->url
+            ('mock', array('action'=>'so'));?>"><?php echo $this->translate
+            ('Student Outcomes') ?> &raquo;</a>
+            <p></p>
+            <!-- Plans button -->
+            <a class="btn btn-primary btn-lg" href="<?php echo $this->url
+            ('mock', array('action'=>'plans'));?>"><?php echo $this->translate
+            ('Plans') ?> &raquo;</a>
+            <p></p>
+            <!-- Reports button -->
+            <a class="btn btn-primary btn-lg" href="<?php echo $this->url
+            ('mock', array('action'=>'reports'));?>"><?php echo $this->translate
+            ('Reports') ?> &raquo;</a>
+            <p></p>
+        </center>
+    </div>
+    <!--Typeahead working example-->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div style="margin":50px 50px>
+                    <label for="product_search">Product Search: </label>
+                    <input id="product_search" type="text" data-provide="typeahead"
+                    data-source='["Deluxe Bicycle", "Super Deluxe Trampoline", "Super Duper Scooter"]'>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Script for typeahead-->
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/bootstrap3-typeahead.js"></script>
+    </body>
+</html>

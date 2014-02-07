@@ -1,0 +1,161 @@
+<?php
+// module/Mock/view/mock/mock/add.phtml:
+
+$title = 'Add New Assessment Report';
+$this->headTitle($title);
+?>	
+<html>
+    <body>
+	<div class="container">
+	<center><h3>Add New Assessment Report</h3>
+            <p><h6>Instructions for use...</h6></p></center>
+            <div class="row">
+		<div class="col-md-4">
+                    <!-- Dept typeahead -->
+		    <div class="container">
+			<div class="input-group" >
+			    <p></p>
+			</div><!-- /input-group -->
+			<h6>Enter Department Name</h6>
+			<div class="input-group">
+			    <input type="text" class="form-control" placeholder="Type ahead here...">
+				<span class="input-group-btn">
+				    <button class="btn btn-primary" type="button">Enter</button>
+				</span>
+			</div><!-- /input-group -->
+		    <!-- Prog/Degree dropdown -->
+		    <h6>Select Program/Degree</h6>
+		    <div class="input-group">
+			<div class="input-group-btn">
+			    <button type="button" class="btn btn-primary dropdown-toggle"
+			    data-toggle="dropdown">Select
+			    <span class="caret"></span>
+			    </button>
+			    <ul class="dropdown-menu">
+				<li><a href="#">Computer Science/BS</a></li>
+				<li><a href="#">Computer Science/MS</a></li>
+				<li><a href="#">Computer Science/BS</a></li>
+			    </ul>
+			</div>
+			<input type="text" class="form-control" placeholder="Prog/Deg appears here">
+		    </div>
+		<!-- Year  -->
+		<h6>Select Academic year</h6>
+		    <div class="input-group">
+			<div class="input-group-btn">
+			    <button type="button" class="btn btn-primary dropdown-toggle"
+				    data-toggle="dropdown">2014-15
+				<span class="caret"></span>
+			    </button>
+			    <ul class="dropdown-menu" >
+				<li><a href="#">2015-16</a></li>
+				<li><a href="#">2016-17</a></li>
+				<li><a href="#">2017-18</a></li>
+			    </ul>
+			</div>
+			<input type="text" class="form-control" placeholder="Year appears here">
+		    </div>
+		    <p></p>
+		    <a class="btn btn-primary btn-lg" href="#"><?php echo $this->translate
+		    ('Start New Report') ?> &raquo;</a>
+		    <div class="control-group">
+			<div class="controls">
+			    <h4>Upload Prepared Report File:</h4>
+			<input class="input-file" id="fileInput" type="file">
+			    <button type="submit" class="btn btn-primary btn-xs">Upload</button>
+			    <button type="submit" class="btn btn-warning btn-xs">Cancel</button>
+			</div>
+		    </div>
+		    </div><!--close container-->
+		</div><!--close column-->
+		
+		<!--column 2-->
+		<p></p>
+                    <div class="col-md-6">
+                        <p><h6>Enter answers below:</h6></p>
+                        <div class="panel-group" id="accordion">
+			    <div class="panel panel-success">
+				<div class="panel-heading">
+				    <h4 class="panel-title">
+					<a data-toggle="collapse" data-parent="#accordion"
+					   href="#collapseOne">Question #1</a>
+				    </h4>
+				</div>
+				<div id="collapseOne" class="panel-collapse collapse in">
+				    <div class="panel-body">
+					<div class="control-group">
+					    <div class="controls">
+						
+						<div class="bs-example">
+    <table class="table">
+	<tr>
+	  <th> <input type="checkbox"></th> <td>Student Outcome name</td>
+	</tr> <tr class="active">
+	  <td> <input type="checkbox"></td> <td>Student Outcome name</td>
+	</tr>
+    </table>
+    <p></p></div>
+						
+						
+						
+						
+						
+						
+					    </div>
+					</div>
+				    </div>
+				</div>
+				<div class="panel panel-success">
+				    <div class="panel-heading">
+					<h4 class="panel-title">
+					    <a data-toggle="collapse" data-parent="#accordion"
+					       href="#collapseTwo">Question #2</a>
+					</h4>
+				    </div>
+				    <div id="collapseTwo" class="panel-collapse collapse">
+					<div class="panel-body">
+					    <div class="control-group">
+						<div class="controls">
+						    <textarea class="input-xlarge" id="textarea"
+							      rows="3"placeholder="Need to get this text box to work like this...
+							      https://github.com/claystreet/bootstrap-rta..."></textarea>
+						</div>
+					    </div>
+					</div>
+				    </div>
+				    <div class="panel panel-success">
+					<div class="panel-heading">
+					    <h4 class="panel-title">
+						<a data-toggle="collapse" data-parent="#accordion"
+						   href="#collapseThree">Question #3</a>
+					    </h4>
+					</div>
+					<div id="collapseThree" class="panel-collapse collapse">
+					    <div class="panel-body">
+						<div class="control-group">
+						    <div class="controls">
+							<textarea class="input-xlarge" id="textarea" rows="3"
+							placeholder="Need to get this text box to work like this...
+							https://github.com/claystreet/bootstrap-rta..."></textarea>
+						    </div>
+						</div>
+					    </div>
+					</div>
+				    </div>
+				</div>
+			    </div>
+			</div>
+			<a class="btn btn-primary btn-md" href="../img/userguide.pdf"><?php echo $this->translate
+            ('Preview Report') ?> &raquo;</a>
+			<button type="submit" class="btn btn-primary">Submit Report</button>
+		    </div>
+	    </div>
+	</div>
+	<script src="js/jquery-1.8.3.min.js"></script>
+        <script src="js/bootstrap3-typeahead.js"></script>
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://code.jquery.com/jquery.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+	<script src="js/bootstrap.min.js"></script>
+    </body>
+</html>
