@@ -1,0 +1,203 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1265
+{\fonttbl\f0\fmodern\fcharset0 Courier;\f1\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720
+
+\f0\fs26 \cf0 -- Tables for Assessment Database\
+\
+CREATE DATABASE assessment;\
+USE assessment;\
+--\
+-- Users Table\
+-- \
+-- This table represents the users that have special privileges.\
+-- General users do not need to be represented in these tables.\
+-- Values must match datatel name entries.\
+--\
+CREATE TABLE IF NOT EXISTS users(\
+     id int(10) unsigned NOT NULL auto_increment, \
+     last_name varchar(50), \
+     first_name varchar(50),\
+     middle_init char(1),\
+     PRIMARY KEY (id)\
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=135;\
+\
+--\
+-- User_roles Table\
+-- \
+-- This table represents the roles of users.\
+-- A user may have multiple roles.\
+-- Roles: 1-Admin, 2-Liaison, 3-Chair, 4-Assessor\
+-- See additional system documentation for features available to each role.\
+--\
+\
+CREATE TABLE IF NOT EXISTS user_roles(\
+     id int(10) unsigned NOT NULL auto_increment, \
+     user_id int(10) unsigned NOT NULL,\
+     role char(1) NOT NULL,\
+     PRIMARY KEY (id)\
+\pard\pardeftab720\sa240
+
+\f1\fs24 \cf0             
+\f0\fs26 FOREIGN KEY
+\f1\fs24  (
+\f0\fs26 user_id)\
+\pard\pardeftab720
+\cf0 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=135;\
+\
+--\
+-- Units Table\
+-- \
+-- This table represents the units within the college that have programs to assess.\
+-- \
+CREATE TABLE IF NOT EXISTS units(\
+     id varchar(50) NOT NULL,\
+     type char(1),\
+     active tinyint(1) NOT NULL,\
+     PRIMARY KEY (id)\
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=135;\
+   \
+--\
+-- Unit_privs Table\
+-- \
+-- This table represents the users that have add/modify privileges for the corresponding\
+-- unit_id.\
+--  \
+CREATE TABLE IF NOT EXISTS unit_privs(\
+     id int(10) unsigned NOT NULL auto_increment, \
+     user_id int(10) unsigned NOT NULL,\
+     unit_id varchar(50) NOT NULL,\
+     PRIMARY KEY (id)\
+\pard\pardeftab720\sa240
+\cf0      FOREIGN KEY  \
+FOREIGN KEY (user_id)\
+\
+\
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=135;\
+\pard\pardeftab720
+\cf0 \
+--\
+-- Liaison_privs Table\
+-- \
+-- This table represents the units associated with each liaison.  \
+--  \
+CREATE TABLE IF NOT EXISTS liaison_privs(\
+     id int(10) unsigned NOT NULL auto_increment, \
+     user_id int(10) unsigned NOT NULL,\
+     unit_id varchar(50) NOT NULL,\
+     PRIMARY KEY (id)\
+     FOREIGN KEY (user_id)\
+\pard\pardeftab720\sa240
+
+\f1\fs24 \cf0            
+\f0\fs26 FOREIGN KEY
+\f1\fs24  (
+\f0\fs26 unit_id)\
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=135;\
+\pard\pardeftab720
+\cf0 \
+--\
+-- Programs Table\
+-- \
+-- This table represents programs that need to be assessed.\
+--\
+CREATE TABLE IF NOT EXISTS programs(\
+     id int(10) unsigned NOT NULL auto_increment, \
+     unit_id varchar(50) NOT NULL,\
+     name varchar(100), \
+     active tinyint(1) NOT NULL,\
+     PRIMARY KEY (id)\
+\pard\pardeftab720\sa240
+
+\f1\fs24 \cf0            
+\f0\fs26 FOREIGN KEY
+\f1\fs24  (
+\f0\fs26 unit_id)\
+\pard\pardeftab720
+\cf0 \
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=135;     \
+\
+--\
+-- Outcomes Table\
+--\
+-- This table represents the outcomes associated with programs.\
+-- Each outcome belongs to a program.\
+--\
+CREATE TABLE IF NOT EXISTS outcomes(\
+     id int(10) unsigned NOT NULL auto_increment, \
+     program_id int(10) unsigned NOT NULL,\
+     outcome_text text,\
+     active tinyint(1) NOT NULL,\
+     PRIMARY KEY (id)\
+     FOREIGN KEY (program_id)\
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=135;     \
+\
+--\
+-- Plans Table\
+-- \
+-- This table represents the plans associated with programs.\
+-- Meta_flag: 0-not meta assessment 1-is meta assessment\
+-- Feedback_flag: 1-in need of revision, 2-ready to be carried out\
+-- Plan_status: 1-in progress, 2-submitted\
+--\
+CREATE TABLE IF NOT EXISTS plans(\
+     id int(10) unsigned NOT NULL auto_increment, \
+     ts timestamp NOT NULL default CURRENT_TIMESTAMP,\
+     meta_flag tinyint(1),\
+     meta_description text,\
+     year smallint(5) NOT NULL,\
+     assessment_method text,\
+     population text, \
+     sample_size text, \
+     assessment_date text,\
+     cost text,\
+     analysis_type text,\
+     administrator text,\
+     analysis_method text,\
+     scope text,\
+     feedback text,\
+     feedback_flag char(1),\
+     plan_status char(1),\
+     PRIMARY KEY (id)\
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=135;     \
+\
+--\
+-- Plan_Outcomes Table\
+-- \
+-- This table represents each outcome associated with each plan.\
+-- A plan is responsible for assessing one or more outcomes.\
+--\
+CREATE TABLE IF NOT EXISTS plan_outcomes(\
+     id int(10) unsigned NOT NULL auto_increment, \
+     plan_id int(10) unsigned NOT NULL,\
+     outcome_id int(10) unsigned NOT NULL,\
+     PRIMARY KEY (id)\
+     FOREIGN KEY (outcome_id)\
+     FOREIGN KEY (plan_id)\
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=135;     \
+\
+--\
+-- Reports Table\
+--\
+-- This table represents the reports associated with plans.\
+-- Each report belongs to a single plan.\
+-- Feedback_flag: 1-in need of revision, 2-closes loop \
+-- Plan_status: 1-in progress, 2-submitted\
+--\
+\
+CREATE TABLE IF NOT EXISTS reports(\
+     id int(10) unsigned NOT NULL auto_increment, \
+     plan_id int(10) unsigned NOT NULL,\
+     ts timestamp NOT NULL default CURRENT_TIMESTAMP,\
+     population text, \
+     results text, \
+     conclusions text,\
+     actions text,\
+     feedback text,\
+     feedback_flag char(1),\
+     report_status char(1),\
+     PRIMARY KEY (id) \
+     FOREIGN KEY (plan_id)\
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLA}
