@@ -1,0 +1,14 @@
+USE testassess;
+drop table liaison_privs;
+drop table unit_privs;
+drop table plan_outcomes;
+drop table report_documents;
+drop table plan_documents;
+drop table meta_plans;
+drop table reports;
+drop table plans;
+drop table outcomes;
+drop table programs;
+drop table units;
+drop table user_roles;
+drop table users;
