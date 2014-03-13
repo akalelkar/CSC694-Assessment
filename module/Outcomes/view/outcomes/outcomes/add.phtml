@@ -1,0 +1,147 @@
+<?php
+// module/Student/view/mock/mock/viewSO.phtml:
+
+$title = 'Student Outcomes';
+$this->headTitle($title);
+?>
+<html>
+    <body>
+	         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="stylesheet" href="../css/bootstrap.min.css"> 
+    <link rel="stylesheet" href="../css/bootstrap-rta.min.css">
+    <style>
+        textarea {
+            width: 500px;
+        }</style>
+	<div class="container">
+	    <center><h3>Outcomes</h3><div class="input-group" >
+    
+</center>
+	<!-- Add new Student Outcomes button -->
+         
+	    
+
+
+	    
+	    
+	    
+            <p></p>  
+    </div><!-- /input-group -->
+		<p></p>
+	    
+	    <div class="row">
+		<div class="col-md-4">
+                    <!-- Dept typeahead -->
+		    <div class="container">
+			 
+			<h6>Department Name</h6>
+                        <div class="input-group">
+			   
+                            <input type="text" class="form-control"
+			    placeholder="Accounting">
+                                 <div class="input-group-btn">
+				<button type="button" class="btn btn-primary
+				dropdown-toggle"
+					data-toggle="dropdown">Select
+				    <span class="caret"></span>
+				</button> <ul class="dropdown-menu">
+				    <li><a href="#">Computer Science</a></li>
+				    <li><a href="#">Biology</a></li>
+				    <li><a href="#">Science</a></li>
+				</ul>
+			    </div>
+			
+			</div><!-- /input-group -->
+			<!-- Prog/Degree dropdown -->
+                        <h6>Degree/Program</h6>
+                        <div class="input-group">
+			   
+                            <input type="text" class="form-control"
+			    placeholder="MS/Accounting">
+                                 <div class="input-group-btn">
+				<button type="button" class="btn btn-primary
+				dropdown-toggle"
+					data-toggle="dropdown">Select
+				    <span class="caret"></span>
+				</button> <ul class="dropdown-menu">
+				    <li><a href="#">BS/Computer Science</a></li>
+				    <li><a href="#">MS/Computer Science</a></li>
+				    <li><a href="#">MA/Computer Science</a></li>
+				</ul>
+			    </div>
+			
+			</div>
+			<p></p>
+			<a class="btn btn-primary btn-md" href="./so">
+			<?php echo $this->translate('View Outcomes') ?> &raquo;</a>
+<button class="btn btn-primary btn-md">
+  Add Outcome &raquo;
+</button>
+<p></p>
+<a class="btn btn-primary btn-md" href="../mock">&laquo;<?php echo
+	    $this->translate ('Back to Main') ?> </a> <p></p>			
+		    </div><!--close container-->
+		</div><!--close column-->
+		<!--column 2-->
+		<p></p>
+		<div class="col-md-8">
+		   <div class="table-responsive">
+    <table class="table table-bordered table-striped">
+      <colgroup>
+        <col class="col-xs-8">
+
+      </colgroup>
+     
+  <div class="bs-example">
+    <table class="table">
+      
+          <h6>Add Outcome for MS/Accounting in Accounting</h6>
+       <div class="controls">
+            <textarea rows="6" cols="60" class="rta" id="ta_sample" name="ta_sample" placeholder=""></textarea>
+                                            
+       	    	<a type="submit" class="btn btn-primary" href="<?php echo $this->url('outcomes', array('action'=>'index'));?>">Back to Outcomes</a>
+		<a type="submit" class="btn btn-primary" href="/zendframework/outcomes">Submit</a>
+</div>
+
+      <tbody>
+       
+      </tbody>
+    </table></table>
+  </div><!-- /example -->
+   
+                   
+    </div>
+	 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	                <script src="../js/bootstrap.min.js"></script>
+                        <script src="../js/jquery.min.js"></script>
+                        <script src="../js/bootstrap3-typeahead.js"></script>
+                        <script src="https://code.jquery.com/jquery.js"></script>
+                        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+                        <script src="../js/bootstrap-rta.min.js"></script>
+                        <script>
+                            $(document).ready(function() {
+                                document.getElementById('ta_sample').value = "";
+                                $.rta(); // The simplest initialization... default button set on all class="rta" textarea's
+                            });
+                        </script>
+                    </div>
+		<?php
+$form = $this->form;
+$form->setAttribute('action', $this->url('outcomes', array('action' => 'add')));
+$form->prepare();
+
+echo $this->form()->openTag($form);
+//echo $this->formCollection($form);
+echo $this->formHidden($form->get('id'));
+echo $this->formHidden($form->get('program_id'));
+echo $this->formRow($form->get('outcome_text'));
+echo $this->formHidden($form->get('active'));
+
+
+echo $this->formSubmit($form->get('submit'));
+
+
+echo $this->form()->closeTag();
+?>
+        </body>
+</html>
