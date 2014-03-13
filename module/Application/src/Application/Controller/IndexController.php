@@ -43,7 +43,7 @@ class IndexController extends AbstractActionController
         $request = $this->getRequest();
         
         
-       
+        //This is for the demo only
         if ($request->isPost()) {
             $userName = $request->getPost('userName', null);
             $password = $request->getPost('password', null);
@@ -89,7 +89,8 @@ class IndexController extends AbstractActionController
             $namespace->datatelID = $userName;
             $namespace->message = NULL;
             return $this->redirect()->toRoute('application');
-        }else if ($userName == 'user') {
+        }
+        else if ($userName == 'user') {
             $namespace->userID = NULL;
             $namespace->role = NULL;
             $namespace->userEmail = NULL;   

@@ -7,16 +7,18 @@ $this->headTitle($title);
 $form = $this->form;
 $form->setAttribute('action', 'index/authenticate');
 $form->prepare();
+?>
 
-echo '<br>';
-echo $message;
-echo '<br><br>';
-echo 'Please log in with your NCC user ID and password';
+<center>
+<br>
+<?php echo $message; ?>
+<br><br>
+Please log in with your NCC user ID and password
+<br><br><br>
 
-
-echo '<br><br><br>';
+<?php
 echo $this->form()->openTag($form);
 echo $this->formCollection($form);
 echo $this->form()->closeTag($form);
-
 ?>
+</center>

@@ -2,6 +2,7 @@
 
 namespace Application\Form;
 
+use Zend\Form\Element;
 use Zend\Form\Form;
 
 class LoginForm extends Form
@@ -17,6 +18,7 @@ class LoginForm extends Form
             'name' => 'userName',
             'attributes' => array(
                 'type' => 'text',
+                'class' => 'form-control'
             ),
             'options' => array(
                 'label' => 'User ID ',                
@@ -26,6 +28,8 @@ class LoginForm extends Form
             'name' => 'password',
             'attributes' => array(
                 'type' => 'password',
+                'class' => 'form-control'
+                
             ),
             'options' => array(
                 'label' => 'Password ',                
@@ -36,7 +40,7 @@ class LoginForm extends Form
             'name' => 'submit',
             'attributes' => array(
                 'type' => 'submit',
-                'value' => 'Go',
+                'value' => 'Login',
                 'id' => 'submitbutton',
                 'class' => 'btn btn-primary',
             ),
