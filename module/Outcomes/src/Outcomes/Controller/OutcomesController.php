@@ -77,7 +77,7 @@ class OutcomesController extends AbstractActionController
       return $jsonData;
    }
     
-   public function getOutcomesAction()
+      public function getOutcomesAction()
    {
       // get the session variables
       $namespace = new Container('user');
@@ -92,38 +92,40 @@ class OutcomesController extends AbstractActionController
       
       // this gets flipped to 0 if no permissions are found when 'Submit' is clicked on the left side
       $adminFlag = 1;
+      $userAction = $request->getPost('action');
       
-      // handle a left-side submit button click
-      if ($request->getPost('action') == "submitClick"){
-         $unitId = $request->getPost('unitId');
-         // set admin flag based on user's permissions
-         $adminFlag = $this->getOutcomesQueries()->checkPermissions($userID, $unitId);             
-      }
-      // handle an add
-      else if ($request->getPost('action') == "add"){
-          // get outcome text from post data and use it to create outcome
-         $outcomeText = $request->getPost('outcomeText');
-         $this->getOutcomesQueries()->addOutcome($programSelected, $outcomeText, $userID);
-      }
-            
-      // handle an edit
-      else if ($request->getPost('action') == "edit"){
-         $oidToDeactivate = $request->getPost('oidToDeactivate');
-         $outcomeText = $request->getPost('outcomeText');
-         $this->getOutcomesQueries()->editOutcome($programSelected, $outcomeText, $oidToDeactivate, $userID);
-      }
-            
-      // handle a delete / deactivate
-      else if ($request->getPost('action') == "delete") {
-         $outcomeId = $request->getPost('oid');
-         $this->getOutcomesQueries()->deactivateOutcome($outcomeId, $userID);
-      }
-      
-      // handle the back button from the add or modify screen
-      else if ($request->getPost('action') == "back") {
-         // doesn't need to do anything but I wanted to include all the possible actions
-      }
+      // different code needs to run depending on how this action is being called
+      switch($userAction){
          
+         case "submitClick":
+            $unitId = $request->getPost('unitId');
+            // admin flag only needs to be checked here because only someone with permissions can get there from the other actions
+            $adminFlag = $this->getOutcomesQueries()->checkPermissions($userID, $unitId);
+            break;
+      
+         case "add":
+            // create the outcome in the database
+            $outcomeText = $request->getPost('outcomeText');
+            $this->getOutcomesQueries()->addOutcome($programSelected, $outcomeText, $userID);
+            break;
+            
+         case "edit":
+            // deactivate the outcoming being 'edited' and create a new one
+            $oidToDeactivate = $request->getPost('oidToDeactivate');
+            $outcomeText = $request->getPost('outcomeText');
+            $this->getOutcomesQueries()->editOutcome($programSelected, $outcomeText, $oidToDeactivate, $userID);
+            break;
+         
+         case "delete":
+            $outcomeId = $request->getPost('oid');
+            $this->getOutcomesQueries()->deactivateOutcome($outcomeId, $userID);
+            break;
+         
+         default:
+            // no extra steps needed - 'back' would fall into this category
+            break;
+      }
+      
       // get outcomes for the selected program
       $results = $this->getOutcomesQueries()->getAllActiveOutcomesForProgram($programSelected);
       

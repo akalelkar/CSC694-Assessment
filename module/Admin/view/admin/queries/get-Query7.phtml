@@ -4,11 +4,15 @@
     <tr>
          <th>Department</th>
          <th>Program</th>
+         <th>Type</th>
+         <th>Report ID</th>
     </tr>
     <?php
         if ($programs==''){ ?>
             <tr>
             <td><?php echo "No records found."; ?></td>
+            <td></td>
+            <td></td>
             <td></td>
             </tr>
         <?php
@@ -18,5 +22,7 @@
             <tr>
                 <td><?php echo $this->escapeHtml($program['unit_id']);?></td>
                 <td><?php echo $this->escapeHtml($program['name']);?></td>
+                <td><?php echo $this->escapeHtml($program['type']);?></td>
+                <td><?php echo $this->escapeHtml($program['id']);?></td>
             </tr>
             <?php endforeach; }?>

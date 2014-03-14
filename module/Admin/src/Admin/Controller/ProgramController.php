@@ -20,18 +20,20 @@ class ProgramController extends AbstractActionController {
     protected $unittableResults;
 
     public function onDispatch(\Zend\Mvc\MvcEvent $e) {
-      /*  $validUser = new AuthUser();
-        if (!$validUser->Validate()) {
-            return $this->redirect()->toRoute('home');
-        } else {
+        /*$validUser = new AuthUser();
+        if (!$validUser->Validate())
+        {
+            return $this->redirect()->toRoute('application');
+        }
+        else {
             $namespace = new Container('user');
             if($namespace->role != 1)
             {
-              return $this->redirect()->toRoute('home');
+              return $this->redirect()->toRoute('application');
             }
+        */
             return parent::onDispatch($e);
-        }*/
-         return parent::onDispatch($e);
+        //}
     }
 
     /*

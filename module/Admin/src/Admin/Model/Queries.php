@@ -190,13 +190,13 @@ class Queries extends AbstractTableGateway
     
         $previousYear = $currentYear - 1;
         $where = new Where();
-         // get programs that have a modified timestamp of this year but plan year previous year
+        // get programs that have changed a plan this year but plan year is previous year
         $select = $sql->select()
                       ->from('programs')
                       ->columns(array('unit_id', 'name'))
                       ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
                       ->join('plan_programs', 'plan_programs.program_id = programs.id',array())
-                      ->join('plans', 'plans.id = plan_programs.plan_id',array())
+                      ->join('plans', 'plans.id = plan_programs.plan_id',array('id'))
                       // instantiating new where must come first
                       ->where($where->like('plans.modified_ts', $currentYear . '%'))
                       ->where(array('plans.year' => $previousYear))
@@ -215,24 +215,44 @@ class Queries extends AbstractTableGateway
     {
         $sql = new Sql($this->adapter);
     
-        $previousYear = $currentYear - 1;
+        // create constants for report
+        $created = new \Zend\Db\Sql\Predicate\Expression("'Created'");
+        $modified = new \Zend\Db\Sql\Predicate\Expression("'Modified'");
+        
+        // reports for current year should match  previous year's plan
+        // this query shows reports that were entered or modified that match a plan two year's ago
+        $previousYear = $currentYear - 2;
         $where = new Where();
-         // get programs that have a modified timestamp of this year but plan year previous year
-        $select = $sql->select()
+         // get programs that have a created timestamp of this year but plan year is past two years
+        $select1 = $sql->select()
                       ->from('programs')
-                      ->columns(array('unit_id', 'name'))
+                      ->columns(array('unit_id', 'name', 'type' => $created))
                       ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
                       ->join('plan_programs', 'plan_programs.program_id = programs.id',array())
                       ->join('plans', 'plans.id = plan_programs.plan_id',array())
-                      ->join('reports', 'reports.plan_id = plans.id',array())
+                      ->join('reports', 'reports.plan_id = plans.id',array('id'))
+                      // instantiating new where must come first
+                      ->where($where->like('reports.created_ts', $currentYear . '%'))
+                      ->where(array('plans.year' => $previousYear))
+                      ->order(array('programs.id'))
+                   
+        ; 
+        // get programs that have a modified timestamp of this year but plan year is past two years
+        $select2 = $sql->select()
+                      ->from('programs')
+                      ->columns(array('unit_id', 'name', 'type' => $modified))
+                      ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
+                      ->join('plan_programs', 'plan_programs.program_id = programs.id',array())
+                      ->join('plans', 'plans.id = plan_programs.plan_id',array())
+                      ->join('reports', 'reports.plan_id = plans.id',array('id'))
                       // instantiating new where must come first
                       ->where($where->like('reports.modified_ts', $currentYear . '%'))
                       ->where(array('plans.year' => $previousYear))
                       ->order(array('programs.id'))
                    
-        ; 
-        
-        $statement = $sql->prepareStatementForSqlObject($select);
+        ;
+        $select1->combine($select2);
+        $statement = $sql->prepareStatementForSqlObject($select1);
         $result = $statement->execute();
       
         return $result;

@@ -26,18 +26,21 @@ class QueriesController extends AbstractActionController
    protected $tableResults;
    
    public function onDispatch(\Zend\Mvc\MvcEvent $e) {
-      /*  $validUser = new AuthUser();
-        if (!$validUser->Validate()) {
-            return $this->redirect()->toRoute('home');
-        } else {
+       /* $validUser = new AuthUser();
+        if (!$validUser->Validate())
+        {
+            return $this->redirect()->toRoute('application');
+        }
+        else {
             $namespace = new Container('user');
             if($namespace->role != 1)
             {
-              return $this->redirect()->toRoute('home');
+              return $this->redirect()->toRoute('application');
             }
+       */
             return parent::onDispatch($e);
-        }*/
-         return parent::onDispatch($e);
+       // }
+               
     }
 
    public function indexAction()
@@ -164,9 +167,9 @@ class QueriesController extends AbstractActionController
       $currentMonth = date('m', time());
       $currentYear = date('Y', time());
       
-      // determine current school year
+      // determine current school year July 1 - June 31
       // year in plans table is spring term year (2013-2014 school year is entered as 2014)
-      if ($currentMonth > 8){
+      if ($currentMonth > 6){
          $currentYear = $currentYear + 1;
       }
       $results = $this->getUserQueries()->getProgramsModifiedLastYearsPlans($currentYear);
@@ -192,9 +195,9 @@ class QueriesController extends AbstractActionController
       $currentMonth = date('m', time());
       $currentYear = date('Y', time());
       
-      // determine current school year
+      // determine current school year July 1 - June 31
       // year in plans table is spring term year (2013-2014 school year is entered as 2014)
-      if ($currentMonth > 8){
+      if ($currentMonth > 6){
          $currentYear = $currentYear + 1;
       }
       $results = $this->getUserQueries()->getProgramsModifiedLastYearsReports($currentYear);

@@ -345,6 +345,8 @@ class ReportsController extends AbstractActionController
    // This is called from addReport view for inserting new report
    public function addNewReportAction()
    {
+      $namespace = new Container('user');
+      $userID = $namespace->userID;
       // Call addReport method in ReportTable and give arguments from post data
       // Status goes to draft flag, 0 for no, 1 for draft
       $id = $this->getServiceLocator()->get('ReportTable')

@@ -882,6 +882,7 @@ group by p.name, o.id, o.outcome_text
 		      ->join('programs', 'programs.unit_id = units.id')
 		      ->join('outcomes', 'outcomes.program_id = programs.id')
 		      ->where(array('units.id' => $unitId, 'programs.name' => $names))
+		      ->where(array('outcomes.active_flag' => 1))
 		      ->group (array('program' => new Expression('programs.name'),
                                      'outcomeId' => new Expression('outcomes.id'),
 				     'outcomeText' => new Expression('outcomes.outcome_text'),
