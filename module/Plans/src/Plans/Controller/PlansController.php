@@ -274,14 +274,7 @@ class PlansController extends AbstractActionController
     */
    public function indexAction()
    {
-      // create session variables used for testing only
-      // TODO - remove or comment out for production
-//      $namespace = new Container('user');
-//      $namespace->userID = $this->testUserID;
-//      $namespace->userEmail = $this->testUserEmail;
-//      $namespace->role = $this->testRole; // if null then view only
-//      $namespace->datatelID = $this->testDatatelID; // if null the user is not logged in, redirect to the logon screen 
-  
+      
       
       // get the session variables
       $namespace = new Container('user');
@@ -289,7 +282,7 @@ class PlansController extends AbstractActionController
       $userEmail = $namespace->userEmail;
       $role = $namespace->role;
       $datatelID = $namespace->datatelID;
-  
+      $startyear = $namespace->startyear;
       // check to make sure the user is properly logged into the system
       if ($datatelID == null) {
           return $this->redirect()->toRoute('application');
@@ -301,6 +294,8 @@ class PlansController extends AbstractActionController
                    
          return new ViewModel(array(
             'useractions' => array('View'),
+            'startyear' => $startyear,
+            'role' => $role,
          ));
       }
       else{
@@ -309,6 +304,8 @@ class PlansController extends AbstractActionController
          // wait to populate units until action chosen
          return new ViewModel(array(
             'useractions' => array('View', 'Add', 'Modify'),
+            'startyear' => $startyear,
+            'role' => $role,
          ));
       }
    }

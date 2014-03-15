@@ -42,14 +42,14 @@ class ReportsController extends AbstractActionController
       $namespace = new Container('user');
       $userID = $namespace->userID;
       $role = $namespace->role;
-   
+      $startyear = $namespace->startyear;
       
       // Get select form for passing selected data
       $sl = $this->getServiceLocator();
 
       // if general user - only view
-     // get all units, since only view option is displayed
-     if ($role == null){
+      // get all units, since only view option is displayed
+      if ($role == null){
          $results = $this->getGenericQueries()->getUnits();
          // iterate over database results forming a php array
          foreach ($results as $result){
@@ -58,14 +58,16 @@ class ReportsController extends AbstractActionController
          return new ViewModel(array(
              'useractions' => array('View'),
              'units' => $unitarray,
+             'startyear' => $startyear,
          ));
-     }
-     else{
+      }
+      else{
          // user in table with role - show actions
          // wait to populate units until action chosen
          return new ViewModel(array(
-            'useractions' => array('View', 'Add', 'Modify')));
-     }
+            'useractions' => array('View', 'Add', 'Modify'),
+            'startyear' => $startyear,));
+      }
    }
     
     // Called to show all matching plans after selection is made on left nav

@@ -1,84 +1,65 @@
 <?php
-
-
-$title = 'Assessment Report Index';
-$this->headTitle($title);
+    $title = 'Assessment Report Index';
+    $this->headTitle($title);
 ?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-</head>
-    <body>  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-    <style>
-        textarea {
-            width: 300px;
-        }</style>
-	<div class="container">
-	<center><h3>Assessment Reports</h3>
-            
-	    </center>
-	    
-            <p></p>  
-            <div class="row">
-                <div class="col-md-4">
-                    <!-- Dept typeahead --> <div class="container">
-                       
-	<p></p>
-       <!-- Choose Action -->
-      <select class="selectpicker" id="action-menu" data-style="btn-primary" title='Choose Action'>
+<div class="container">
+    <center><h3>Assessment Reports</h3></center>
+    
+    <p></p>  
+    <div class="row">
+        <div class="col-md-4">
+        <div class="container">
+             
+        <p></p>
+        <!-- Choose Action -->
+        <select class="selectpicker" id="action-menu" data-style="btn-primary" title='Choose Action'>
          <option data-hidden="true"></option>
-      </select>  
-     <br />
-     <br />
-   
-      <!-- Choose Department/Unit -->
-      <select class="selectpicker" id="unit-menu" data-style="btn-primary" title='Choose Department/Unit'>
-         <option data-hidden="true"></option>
-      </select>  
-     <br />
-     <br />
-   
-      <!-- Choose Program/Degree -->
-      <select class="selectpicker" id="prog-menu" name="prog-menu" data-style="btn-primary" title='Choose Program/Degree' multiple>
+        </select>  
+        <br />
+        <br />
+       
+        <!-- Choose Department/Unit -->
+        <select class="selectpicker" id="unit-menu" data-style="btn-primary" title='Choose Department/Unit'>
+           <option data-hidden="true"></option>
+        </select>  
+        <br />
+        <br />
+     
+        <!-- Choose Program/Degree -->
+        <select class="selectpicker" id="prog-menu" name="prog-menu" data-style="btn-primary" title='Choose Program/Degree' multiple>
 	 <option data-hidden="true"></option>
-        
-
-      </select>
-     <br />
-     <br />
+        </select>
+        <br />
+        <br />
       
-      <!-- Choose Program/Degree -->
-     <select class="selectpicker" id="year-menu" name="year-menu" data-style="btn-primary" title='Choose Year'>
-         <option data-hidden="true"></option>
-     </select>
-     <br />
-     <br />
+        <!-- Choose Program/Degree -->
+        <select class="selectpicker" id="year-menu" name="year-menu" data-style="btn-primary" title='Choose Year'>
+             <option data-hidden="true"></option>
+        </select>
+        <br />
+        <br />
    
 	  <!-- Get Button trigger modal -->
-<a class="btn btn-primary btn-md" id="submit" name="submit" disabled>
-  Submit&nbsp&nbsp&raquo
-</a><p></p>
-                    </div><!--close container-->
-                </div><!--close column-->
+        <a class="btn btn-primary btn-md" id="submit" name="submit" disabled>
+            Submit&nbsp&nbsp&raquo
+        </a>
+        <p></p>
+        </div><!--close container-->
+        </div><!--close column-->
 		
-		<!--column 2-->
-		<div id="content">
-		</div>
-
+	<!--column 2-->
+	<div id="content">
 	</div>
-	                    
-    </body>
-</html>
+    </div>
+</div>
+    
 <script>
 function getReports(action, id) {
     var urlform = "<?php echo $this->url('default', array(
                                     'controller'=>'reports')); ?>";
     urlform = urlform + action + 'Report';
     // asynchronous ajax code to get Report
-   $.ajax({
+    $.ajax({
       url: urlform,
       type: "POST",
       data: 'id=' + id,
@@ -131,34 +112,54 @@ $(document).on('click', '#submit', function () {
        data: json,
        dataType: "text",
        error : function(xhr, status, error) {
-	alert(error);
-	console.log("ERROR: ", xhr, xhr.status, xhr.getAllResponseHeaders());
-
+            alert(error);
+            console.log("ERROR: ", xhr, xhr.status, xhr.getAllResponseHeaders());
        },
        success: function(html){
-	 document.getElementById('content').innerHTML = html;
+            document.getElementById('content').innerHTML = html;
        },
     });
-    
 });
 
 // load actions based on user privileges
 $(document).ready(function() {
-   var actions = <?php print json_encode($useractions); ?>;
-   for (var i = 0; i < actions.length; i++){
-      $('#action-menu').append('<option>' + actions[i] + '</option>');
-   }
-   // call code to initialize the selectpicker
-   // this must come after the options are initialized
-   $('.selectpicker').selectpicker();
+    var actions = <?php print json_encode($useractions); ?>;
+    for (var i = 0; i < actions.length; i++){
+       $('#action-menu').append('<option>' + actions[i] + '</option>');
+    }
+    // call code to initialize the selectpicker
+    // this must come after the options are initialized
+    $('.selectpicker').selectpicker();
    
-   // set all years for dropdowns
-    var currentYear = new Date().getFullYear();
+   // startyear for dropdowns set in session namespace variables
+    var startyear = <?php echo $startyear ?>;
+	    
+    // create the list of years the user can select
+    // identify today's date and adjust to the current school year
+    // 2013 - 2014 is from July 2013 - June 2014
+    // 2012 - 2013 is from July 2012 - June 2013
+    // repeat until startyear
+	    
+    // get today's data
+    var today = new Date();
     
+    // identify the month and year
+    var month= today.getMonth() + 1; //January is 0
+    var year = today.getFullYear(); // yyyy
+   
+    // if the current month is Jan - June the current year is correct
+    // if the current month is July - Dec then current year needs to be incremented by 1
+    if (month >= 7 && month <= 12) {
+	year++;
+    }
+	    
+    // set the complete number of years to display in the year selector 
+    var yearsToDisplay = year - startyear + 1; // add one since the last entry needs to be the (year before the low year) to the (low year)
+
     $('#year-menu').append('<option  data-hidden="true"></option>');
-    for (var year = currentYear; year > 2005; year--){
-	var yearText = (year - 1) + ' - ' + year;
-        $('#year-menu').append('<option value="' + year + '">' + yearText + '</option>');
+    for (var i = 0; i < yearsToDisplay; i++){	    
+        $('#year-menu').append('<option value = ' + year + '>' + (year-1) + ' - ' + year + '</option>');
+        year--;
     }
     $('#year-menu').selectpicker('refresh');
 });
@@ -178,34 +179,31 @@ $(document).on('change', '#action-menu', function () {
 	$("#submit").removeAttr('disabled');;
     }
     
-   $action = $('#action-menu option:selected').val();
-   // clear selectorlist before adding unit/department options
-   var oldSelections = $('#unit-menu option');
-   for (var i = 0; i < oldSelections.length; i++){
-      oldSelections.remove();
-   }
-   // data-hidden="true" shows title on button
-   $('#unit-menu').append('<option  data-hidden="true"></option>');
-   $('#unit-menu').selectpicker('refresh');
-   // create url for redirect
-   var urlform = "<?php echo $this->url('default', array(
+    $action = $('#action-menu option:selected').val();
+    // clear selectorlist before adding unit/department options
+    var oldSelections = $('#unit-menu option');
+    for (var i = 0; i < oldSelections.length; i++){
+       oldSelections.remove();
+    }
+    // data-hidden="true" shows title on button
+    $('#unit-menu').append('<option  data-hidden="true"></option>');
+    $('#unit-menu').selectpicker('refresh');
+    // create url for redirect
+    var urlform = "<?php echo $this->url('default', array(
                                     'controller'=>'reports',
                                     'action'=>'getUnits')); ?>";
 
-   urlform = urlform + '/' + $action;
-   // asynchronous ajax code to populate unit/department selector
-   $.ajax({
+    urlform = urlform + '/' + $action;
+    // asynchronous ajax code to populate unit/department selector
+    $.ajax({
       url: urlform,
       type: "GET",
       dataType: "json",
       error : function(xhr, status, error) {
-
          console.log("ERROR: ", xhr, xhr.status, xhr.getAllResponseHeaders());
       },
       success: function(unitsJson){
-
          for (var i = 0; i < unitsJson.length; i++){
-	    
             $('#unit-menu').append('<option>' + unitsJson[i].id + '</option>');
          }
          $('#unit-menu').selectpicker('refresh');
@@ -228,42 +226,41 @@ $(document).on('change', '#unit-menu', function () {
 	$("#submit").removeAttr('disabled');;
     }
     
-   $unit = $('#unit-menu option:selected').val();
-   // clear selectorlist before adding program/degree options
-   var oldSelections = $('#prog-menu option');
-   for (var i = 0; i < oldSelections.length; i++){
-      oldSelections.remove();
-   }
-   $('#prog-menu').selectpicker('refresh');
+    $unit = $('#unit-menu option:selected').val();
+    // clear selectorlist before adding program/degree options
+    var oldSelections = $('#prog-menu option');
+    for (var i = 0; i < oldSelections.length; i++){
+       oldSelections.remove();
+    }
+    $('#prog-menu').selectpicker('refresh');
    
-   // create url for redirect
-   var urlform = "<?php echo $this->url('default', array(
+    // create url for redirect
+    var urlform = "<?php echo $this->url('default', array(
                                     'controller'=>'reports',
                                     'action'=>'getPrograms')); ?>";
-   urlform = urlform + '/' + $unit;
-   // asynchronous ajax code to populate program/degree selector
-   // build stuff here and make it work
-    var stuff = {};
-    //key programs, value = array of programs
-   $.ajax({
-      url: urlform,
-      type: "GET", //post
-      dataType: "json",//data 
-      data:stuff,
-      // content type
+    urlform = urlform + '/' + $unit;
+    // asynchronous ajax code to populate program/degree selector
+    // build stuff here and make it work
+     var stuff = {};
+     //key programs, value = array of programs
+     $.ajax({
+       url: urlform,
+       type: "GET", //post
+       dataType: "json",//data 
+       data:stuff,
+       // content type
       
-      error : function(xhr, status, error) {
-	alert(error);
-         console.log("ERROR: ", xhr, xhr.status, xhr.getAllResponseHeaders());
-      },
-      success: function(programsJson){
+       error : function(xhr, status, error) {
+	  alert(error);
+          console.log("ERROR: ", xhr, xhr.status, xhr.getAllResponseHeaders());
+       },
+       success: function(programsJson){
          for (var i = 0; i < programsJson.length; i++){
-		 
-            $('#prog-menu').append('<option value="' + programsJson[i].id + '">' + programsJson[i].name + '</option>');
+	    $('#prog-menu').append('<option value="' + programsJson[i].id + '">' + programsJson[i].name + '</option>');
          }
          $('#prog-menu').selectpicker('refresh');
-      },
-   });
+       },
+    });
 });
 
 // Added this method because class voted to disable submit button
@@ -293,7 +290,6 @@ $(document).on('change', '#prog-menu', function () {
 	$("#submit").removeAttr('disabled');;
     }
 });
-
 
 </script>
                      

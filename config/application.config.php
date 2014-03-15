@@ -6,7 +6,6 @@ return array(
         'Outcomes',
         'Plans',
         'Reports',
-        'Mock',
     ),
 
     // These are various options for the listeners attached to the ModuleManager

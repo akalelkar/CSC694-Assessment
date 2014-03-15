@@ -120,31 +120,60 @@ $(document).ready(function () {
     
     // set years for year dropdowns
     var currentYear = new Date().getFullYear();
+    // startyear for dropdowns set in session namespace variables
+    var startyear = <?php echo $startyear ?>;
+	    
+    // create the list of years the user can select
+    // identify today's date and adjust to the current school year
+    // 2013 - 2014 is from July 2013 - June 2014
+    // 2012 - 2013 is from July 2012 - June 2013
+    // repeat until startyear
+	    
+    // get today's data
+    var today = new Date();
     
+    // identify the month and year
+    var month= today.getMonth() + 1; //January is 0
+    var year = today.getFullYear(); // yyyy
+   
+    // if the current month is Jan - June the current year is correct
+    // if the current month is July - Dec then current year needs to be incremented by 1
+    if (month >= 7 && month <= 12) {
+	year++;
+    }
+	    
+    // set the complete number of years to display in the year selector 
+    var yearsToDisplay = year - startyear + 1; // add one since the last entry needs to be the (year before the low year) to the (low year)
+
+    var resetyear = year;
     $('#q1year').append('<option  data-hidden="true"></option>');
-    for (var year = currentYear; year > 2005; year--){
+    for (var i = 0; i < yearsToDisplay; i++){	    
         $('#q1year').append('<option value = ' + year + '>' + (year-1) + ' - ' + year + '</option>');
+        year--;
     }
     $('#q1year').selectpicker('refresh');
    
-   
+    year = resetyear;
     $('#q2year').append('<option  data-hidden="true"></option>');
-    for (var year = currentYear; year > 2005; year--){
+    for (var i = 0; i < yearsToDisplay; i++){	    
         $('#q2year').append('<option value = ' + year + '>' + (year-1) + ' - ' + year + '</option>');
+        year--;
     }
     $('#q2year').selectpicker('refresh');
     
-    
+    year = resetyear;
     $('#q3year').append('<option  data-hidden="true"></option>');
-    for (var year = currentYear; year > 2005; year--){
+    for (var i = 0; i < yearsToDisplay; i++){	    
         $('#q3year').append('<option value = ' + year + '>' + (year-1) + ' - ' + year + '</option>');
+        year--;
     }
     $('#q3year').selectpicker('refresh');
     
-    
+    year = resetyear;
     $('#q4year').append('<option  data-hidden="true"></option>');
-    for (var year = currentYear; year > 2005; year--){
+    for (var i = 0; i < yearsToDisplay; i++){	    
         $('#q4year').append('<option value = ' + year + '>' + (year-1) + ' - ' + year + '</option>');
+        year--;
     }
     $('#q4year').selectpicker('refresh');
  
@@ -153,9 +182,11 @@ $(document).ready(function () {
         date:''
     });
     
+    year = resetyear;
     $('#q8year').append('<option  data-hidden="true"></option>');
-    for (var year = currentYear; year > 2005; year--){
+    for (var i = 0; i < yearsToDisplay; i++){	    
         $('#q8year').append('<option value = ' + year + '>' + (year-1) + ' - ' + year + '</option>');
+        year--;
     }
     $('#q8year').selectpicker('refresh');
 
@@ -259,6 +290,13 @@ $(document).on('click', '#query5', function () {
     
     // get date from datepicker
     var date = $('#dp5').val();
+    
+    // reset all drop downs
+    resetDropDowns();
+    
+    // put value selected back so displays in dropdown after clearing
+    $('#dp5').val(date);
+    
     // replace all dashes to send via URL
     date = date.replace(/-/g, '');
     // create url for redirect url(route, array(controller, action))
@@ -271,6 +309,9 @@ $(document).on('click', '#query6', function () {
     // clear rhs of page
     $('#resultsTable').html("");
     
+    // reset all drop downs
+    resetDropDowns();
+    
     // create url for redirect url(route, array(controller, action))
     var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery6')); ?>";
     ajaxCall(urlform);
@@ -279,6 +320,9 @@ $(document).on('click', '#query6', function () {
 $(document).on('click', '#query7', function () {
     // clear rhs of page
     $('#resultsTable').html("");
+    
+    // reset all drop downs
+    resetDropDowns();
     
     // create url for redirect url(route, array(controller, action))
     var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery7')); ?>";
@@ -313,6 +357,13 @@ $(document).on('click', '#query9', function () {
     
     // get date from datepicker
     var date = $('#dp9').val();
+    
+    // reset all drop downs
+    resetDropDowns();
+    
+    // put value selected back so displays in dropdown after clearing
+    $('#dp9').val(date);
+    
     // replace all dashes to send via URL
     date = date.replace(/-/g, '');
     // create url for redirect url(route, array(controller, action))
@@ -321,14 +372,6 @@ $(document).on('click', '#query9', function () {
     ajaxCall(urlform);
 });
 
-$(document).on('click', '#query10', function () {
-    // clear rhs of page
-    $('#resultsTable').html("");
-    
-    // create url for redirect url(route, array(controller, action))
-    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery10')); ?>";
-    ajaxCall(urlform);
-});
 
 function ajaxCall(urlform){
             // asynchronous ajax code to populate program/degree selector
@@ -356,6 +399,8 @@ function resetDropDowns(){
     $('select[name=q3year]').val(1);
     $('select[name=q4year]').val(1);
     $('select[name=q8year]').val(1);
+    $('#dp5').val('');
+    $('#dp9').val('');
     $('.selectpicker').selectpicker('refresh');
 }
 

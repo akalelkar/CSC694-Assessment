@@ -29,7 +29,6 @@ class IndexController extends AbstractActionController
     public function indexAction()
     {
         $namespace = new Container('user');
-        
         //Render LoginForm        
         $form = new LoginForm();
         return array('form' => $form,
@@ -39,6 +38,11 @@ class IndexController extends AbstractActionController
     public function authenticateAction()
     {
         $namespace = new Container('user');
+        
+        // adding global startyear - this is the earliest year in database
+        // this variable used for determining earliest year in year dropdowns
+        $namespace->startyear = 2005;
+        
         //Get POST data
         $request = $this->getRequest();
         

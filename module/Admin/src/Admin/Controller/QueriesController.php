@@ -45,7 +45,13 @@ class QueriesController extends AbstractActionController
 
    public function indexAction()
    {
-       return new ViewModel();
+      // get the session variables
+      $namespace = new Container('user');
+      $userID = $namespace->userID;
+      $role = $namespace->role;
+      $startyear = $namespace->startyear;
+      return new ViewModel(array('startyear' => $startyear,
+                                 'role' => $role));
    }
  
    // Show programs that don't have any plans for a specific year 

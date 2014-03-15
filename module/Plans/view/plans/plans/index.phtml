@@ -158,78 +158,60 @@ $(document).on('change', '#prog-menu', function () {
     // disable the submit button until all the selections are choosen
     $("#formListPlans").attr("disabled", "disabled");
     
-   // clear selectorlist before adding all the years
-   var oldSelections = $('#year-menu option');
-   for (var i = 0; i < oldSelections.length; i++){
-      oldSelections.remove();
-   }   
-   // data-hidden="true" shows title on button
-   $('#year-menu').append('<option  data-hidden="true"></option>');
-   $('#year-menu').selectpicker('refresh');
+    // clear selectorlist before adding all the years
+    var oldSelections = $('#year-menu option');
+    for (var i = 0; i < oldSelections.length; i++){
+       oldSelections.remove();
+    }   
+  
+    $('#year-menu').append('<option  data-hidden="true"></option>');
+    
+    // get the action from the page, the action is needed to restrict access for certain roles
+    var action = $('#action-menu option:selected').val();
+	     
+    // startyear for dropdowns set in session namespace variables
+    var startyear = <?php echo $startyear ?>;
+    
+    // get the role from the session namespace variable
+    var role = <?php echo $role ?>;
+	    
+    // create the list of years the user can select
+    // identify today's date and adjust to the current school year
+    // 2013 - 2014 is from July 2013 - June 2014
+    // 2012 - 2013 is from July 2012 - June 2013
+    // repeat until startyear
+	    
+    // get today's data
+    var today = new Date();
+    
+    // identify the month and year
+    var month= today.getMonth() + 1; //January is 0
+    var year = today.getFullYear(); // yyyy
    
-   // create url for redirect
-   var urlform = "<?php echo $this->url('plans', array(
-                                    'controller'=>'plans',
-                                    'action'=>'getLowYear')); ?>";
+    // if the current month is Jan - June the current year is correct
+    // if the current month is July - Dec then current year needs to be incremented by 1
+    if (month >= 7 && month <= 12) {
+	year++;
+    }
+	    
+    // set the complete number of years to display in the year selector used for the admin user
+    var yearsToDisplay = year - startyear + 1; // add one since the last entry needs to be the (year before the low year) to the (low year)
    
-   // asynchronous ajax code to populate year selector
-   $.ajax({
-        url: urlform,
-        type: "GET",
-        dataType: "json",
-        error : function(xhr, status, error) {
-          console.log("ERROR: ", xhr, xhr.status, xhr.getAllResponseHeaders());
-        },
-        success: function(programsJson){
-        
-	// get the action from the page, the action is needed to restrict access for certain roles
-	var action = $('#action-menu option:selected').val();
-	 
-	// get the low year from the database
-	var dbLowYear = programsJson.lowYear;
-	
-	// get the role from the page (session variable)
-	var role = programsJson.role;
-	
-	// create the list of years the user can select
-	// the lowest year in the database is returned
-	// identify today's date and adjust to the current school year
-	// 2013 - 2014 is from July 2013 - June 2014
-	// 2012 - 2013 is from July 2012 - June 2013
-	// repeat until the lowest year returned from the database
-	
-	// get today's data
-	var today = new Date();
-
-	// identify the month and year
-	var month= today.getMonth() + 1; //January is 0
-	var year = today.getFullYear(); // yyyy
-
-	// if the current month is Jan - June the current year is correct
-	// if the current month is July - Dec then current year needs to be incremented by 1
-	if (month >= 7 && month <= 12) {
-	    year++;
-	}
-	
-	// set the complete number of years to display in the year selector used for the admin user
-	var yearsToDisplay = year - dbLowYear + 1; // add one since the last entry needs to be the (year before the low year) to the (low year)
-
-	// restrict the years to display for:
-	// action: modify and add
-	// certain users: chair, liason, assessor
-	if ((action.toLowerCase() == "add" || action.toLowerCase() == "modify") && (role == 2 || role == 3 || role == 4)) {
-	    yearsToDisplay = 2; // current year and previous year 
-	}
-	
-	// load the year selector
-	for (var i = 0; i < yearsToDisplay; i++){	    
-           $('#year-menu').append('<option>' + (year-1) + ' - ' + year + '</option>');
-	   year--;
-        }
-        $('#year-menu').selectpicker('refresh');
-      },
-   });
+    // restrict the years to display for:
+    // action: modify and add
+    // certain users: chair, liason, assessor
+    if ((action.toLowerCase() == "add" || action.toLowerCase() == "modify") && (role == 2 || role == 3 || role == 4)) {
+	yearsToDisplay = 2; // current year and previous year 
+    }
+    
+    // load the year selector
+    for (var i = 0; i < yearsToDisplay; i++){	    
+       $('#year-menu').append('<option>' + (year-1) + ' - ' + year + '</option>');
+       year--;
+    }
+    $('#year-menu').selectpicker('refresh');
 });
+   
 
 
 /**
