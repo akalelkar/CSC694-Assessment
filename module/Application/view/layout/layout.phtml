@@ -21,7 +21,7 @@
                         ?>
 
         <!-- Scripts -->
-  <?php echo $this->headScript()
+        <?php echo $this->headScript()
             ->prependFile($this->basePath() . '/js/bootstrap-datepicker.js')
             ->prependFile($this->basePath() . '/js/bootstrap-select.js')
             ->prependFile($this->basePath() . '/js/bootstrap.js')
@@ -32,7 +32,7 @@
 
     </head>
     <body>
-        <div id="divNoPrint2"> <!-- needed so the view page print button doesn't print the header -->
+        <div class='noprint'> <!-- needed so the print button doesn't print the header -->
             <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
                 <div class="container">
                     <div class="navbar-header">

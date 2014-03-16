@@ -9,7 +9,7 @@
     }
     
     if ($adminFlag == true){
-        echo("<button class='btn btn-primary pull-right' id='addButton' type='button'>Add outcome</button><br /><br />");
+        echo("<button class='btn btn-primary pull-right noprint' id='addButton' type='button'>Add outcome</button><br /><br />");
     } else {
         echo("<br /><br />");
     }
@@ -48,14 +48,14 @@
                 echo("<td class='col-md-3'><div class='pull-right'>");
         
                 // the outcome text is the second parameter of the editHandler - it's stored and read from the button's value attribute to avoid issues with JavaScript and parenthesis
-                echo("<button type='button' id='b" . $counter . "' class='btn btn-primary btn-xs' value='" . (trim($this->escapeHtml($outcome['outcome_text']))));
+                echo("<button type='button' id='b" . $counter . "' class='btn btn-primary btn-xs noprint' value='" . (trim($this->escapeHtml($outcome['outcome_text']))));
                 echo("' onclick='editHandler(" . $this->escapeHtml($outcome['id']) . ", " . "$(this).val(), " . $counter . ");'>Modify &raquo;</button> ");
         
                 // use this jQuery to access the value of the modify button from the delete button - i.e. evaluates to $("#b1") for button one
                 $jQueryPart = "$(\"#b" . $counter . "\")";
                 
                 // second button
-                echo("<button type='button' class='btn btn-warning btn-xs' onclick='deleteHandler(");
+                echo("<button type='button' class='btn btn-warning btn-xs noprint' onclick='deleteHandler(");
                 echo($this->escapeHtml($outcome['id']) . ", " . $jQueryPart . ".val());'>Delete &raquo;</button>");
                 echo("</div></td>");
             }
@@ -70,7 +70,11 @@
             }
             ?>
         </table>
-    </div> 
+        		 
+    </div>
+    <!-- create a print button -->
+    <button type="button" class="btn btn-primary noprint" onclick="printPage()">Print &raquo;</button>  <!--window.print()-->
+	
 </div>   <!-- Table reponsive div close-->
 <script>
 $(document).ready(function() {
@@ -160,4 +164,15 @@ function deleteHandler(outcomeId, outcomeText){
     }   
 }
 
+/**
+ * Only print specific elements on the view page.  To mark elements as non printable
+ * add class noprint
+ */
+
+function printPage()
+{
+    $('.noprint').hide();
+    window.print();
+    $('.noprint').show();
+}   
 </script>

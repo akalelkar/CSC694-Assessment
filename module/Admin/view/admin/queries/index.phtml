@@ -1,9 +1,9 @@
 <?php //echo $this->partial('admin/admin/menu.phtml',array('active'=>'query')); ?>
-<center><h3>Administrator Queries</h3></center>
+<div id='topofpage'><center><h3>Administrator Queries</h3></center></div>
 <div class = "panel panel-default">
     <div class="panel-body">
     
-    <div class="col-md-4">
+    <div class='col-md-4 noprint'>
         <!-- Choose Query -->
         <dl>
             <dt>Query 1:<br />
@@ -105,7 +105,7 @@
             </table>
         </div> <!-- end of table-responsive -->
         <!-- create a print button -->
-	<button id="printbutton" type="button" class="btn btn-primary" onclick="printPage()">Print</button>&nbsp;  <!--window.print()-->
+	<button id="printbutton" type="button" class="btn btn-primary noprint" onclick="printPage()">Print &raquo;</button>&nbsp;  <!--window.print()-->
 			  
     </div> <!-- end of col-md-8--> 
   </div>
@@ -401,31 +401,21 @@ function resetDropDowns(){
     $('select[name=q8year]').val(1);
     $('#dp5').val('');
     $('#dp9').val('');
+    // scrollTop: $("#topofpage").offset().top}, 0);
+    $(window).scrollTop($("#topofpage").offset().top);
     $('.selectpicker').selectpicker('refresh');
 }
 
+/**
+ * Only print specific elements on the view page.  To mark elements as non printable
+ * add class noprint
+ */
 
 function printPage()
 {
-	/*var numDivs = 20;
-	for(i=1;i<numDivs;i++)
-	{
-            if(document.all['divNoPrint'+i])
-		{
-		document.all['divNoPrint'+i].style.display = 'none';
-		}
-	}
-        */
-	window.print();
-        /*
-	for(i=1;i<numDivs;i++)
-	{
-		if(document.all['divNoPrint'+i])
-		{
-			document.all['divNoPrint'+i].style.display = '';
-		}
-	}
-        */
+    $('.noprint').hide();
+    window.print();
+    $('.noprint').show();
 }   
 </script>
 

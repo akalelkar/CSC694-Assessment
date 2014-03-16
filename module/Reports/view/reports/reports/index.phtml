@@ -7,7 +7,7 @@
     
     <p></p>  
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-4 noprint">
         <div class="container">
              
         <p></p>
@@ -291,6 +291,21 @@ $(document).on('change', '#prog-menu', function () {
     }
 });
 
+
+/**
+ * Only print specific elements on the view page.  To mark elements as non printable
+ * add class noprint
+ */
+
+function printPage()
+{
+ $('.panel-collapse').collapse('show');
+    $('.noprint').hide();
+    window.print();
+    $('.panel-collapse').collapse('hide');
+    $('.noprint').show();
+    
+}   
 </script>
                      
                             

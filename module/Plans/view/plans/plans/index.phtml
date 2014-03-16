@@ -26,7 +26,7 @@
  * load actions based on the user privileges
  */
 $(document).ready(function() {
-
+    
     // disable the submit button until all the selections are choosen
     $("#formListPlans").attr("disabled", "disabled");
     
@@ -35,7 +35,7 @@ $(document).ready(function() {
     for (var i = 0; i < actions.length; i++){
        $('#action-menu').append('<option>' + actions[i] + '</option>');
     }
-   
+ 
     // call code to initialize the selectpicker
     // this must come after the options are initialized
     $('.selectpicker').selectpicker();
@@ -607,32 +607,16 @@ function validateAddPlan()
 
 
 /**
- * Only print specific elements on the view page.  To mark elements as non printable wrap the selements in a div tag
- * and set the if to divNoPrint# where # is a numeric value bewteen 1 and 10
- *
- * divNoPrint1 = are the view plan document elements and the print button
- * divNoPrint2 = are the headers the Application/view/layout/layout.phtml
- * divNoPrint3 = next one to use
+ * Only print specific elements on the view page.  To mark elements as non printable
+ * add class noprint
  */
+
 function printPage()
 {
-        // only print the elements with ids not set to divNoPrint# where the # is a number betwenn 1 and 10
-        var numDivs = 10;
-        for(i = 1; i < numDivs; i++)
-        {
-                if(document.all['divNoPrint' + i])
-                {
-                        document.all['divNoPrint' + i].style.display = 'none';
-                }
-        }
-
-        window.print();
-        for(i = 1; i < numDivs; i++)
-        {
-                if(document.all['divNoPrint' + i])
-                {
-                        document.all['divNoPrint' + i].style.display = '';
-                }
-        }
-}
+    $('.panel-collapse').collapse('show');
+    $('.noprint').hide();
+    window.print();
+    $('.panel-collapse').collapse('hide');
+    $('.noprint').show();
+} 
 </script>		

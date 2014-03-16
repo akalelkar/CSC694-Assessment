@@ -1,5 +1,5 @@
-<?php
 
+<?php
 if(!$results){
     echo 'There are no reports associated with this plan';
 }else{
@@ -17,7 +17,7 @@ if(!$results){
 		    <div class="controls">
 			<div class="panel-group" id="accordion">
 			    <!-- Show meta or outcomes -->
-			    <div class="panel panel-default">
+			    <div class="panel panel-success">
 				<div class="panel-heading">
 				    <h4 class="panel-title">
 					<?php
@@ -35,19 +35,17 @@ if(!$results){
 				    <div class="panel-body">
 				    
 					<?php
-					$ctr = 0;
+					$ctr = 1;
 					foreach($descriptions as $description) : 
+					    echo($ctr) . '. ' . $description . '</br>';
 					    $ctr++;
-					    echo($ctr); ?>.<?php echo $description . '</br>';
 					endforeach;
 					?>
 				   
 				    </div>
 				</div>
-			    </div>
+			    
 				<!-- Database fields -->
-
-			    <div class="panel panel-default">
 				<div class="panel-heading">
 				    <h4 class="panel-title">
 					<a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">Population Assessed</a>
@@ -58,12 +56,6 @@ if(!$results){
 					    <?php echo $report[0]['population']?>
 				    </div>
 				</div>
-			    </div>
-		
-		
-		
-		
-			    <div class="panel panel-default">
 				<div class="panel-heading">
 				    <h4 class="panel-title">
 					 <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">Results</a>
@@ -71,12 +63,9 @@ if(!$results){
 				</div>
 				<div id="collapseThree" class="panel-collapse collapse">
 				    <div class="panel-body">
-					    <?php echo $report[0]['results']?>
+					<?php echo $report[0]['results']?>
 				    </div>
 				 </div>
-			    </div>
-		
-			    <div class="panel panel-default">
 				<div class="panel-heading">
 				    <h4 class="panel-title">
 					<a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">Conclusion</a>
@@ -87,9 +76,6 @@ if(!$results){
 					    <?php echo $report[0]['conclusions']?>
 				    </div>
 				</div>
-			    </div>
-			    
-			    <div class="panel panel-default">
 				<div class="panel-heading">
 				    <h4 class="panel-title">
 					<a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">Actions</a>
@@ -100,9 +86,6 @@ if(!$results){
 					    <?php echo $report[0]['actions']?>
 				    </div>
 				</div>
-			    </div>
-			    
-			    <div class="panel panel-default">
 				<div class="panel-heading">
 				    <!-- Feedback flag -->
 				    <h4 class="panel-title">
@@ -121,30 +104,32 @@ if(!$results){
 					    <?php echo $report[0]['feedback_text']?>
 				    </div>
 				</div>
-			    </div>
 			</div>
-			    <table>
-				<!-- Show existing documents -->
-				<th>File</th><th>&nbsp&nbspDescription</th>
-				<?php
-				    if(count($documents) > 0){
-					foreach($documents as $doc){
-				?>
-				<tr><td><a href="<?php echo $this->url('id',
-					array('action'=>'download',
-				       'id' => $doc['id'],
-				       ));
-					?>"><?php echo $doc['file_name']; ?></a></td><td>
-					<?php echo '&nbsp&nbsp' . $doc['file_description']; ?>
-					</td></tr>
-					<?php
-					}
+			<table>
+			    <!-- Show existing documents -->
+			    <?php
+				if(count($documents) > 0){
+				    echo '<th>File</th><th>&nbsp&nbspDescription</th>';
+			  	    foreach($documents as $doc){
+			    ?>
+			    <tr><td><a href="<?php echo $this->url('id',
+				    array('action'=>'download',
+				   'id' => $doc['id'],
+				   ));
+				    ?>"><?php echo $doc['file_name']; ?></a></td><td>
+				    <?php echo '&nbsp&nbsp' . $doc['file_description']; ?>
+				    </td></tr>
+				    <?php
 				    }
-				?>
-			    </table>
+				}
+				else{
+				    echo 'No Documents Attached';
+				}
+			    ?>
+			</table>
 	    </br>
 	</div> <!-- controls -->
-	<button type="button" class="btn btn-primary" style="width:100px" onclick="window.print();">Print</button>&nbsp;
+	<button type="button" class="btn btn-primary noprint" style="width:100px" onclick="printPage()">Print</button>&nbsp;
     </table>
 </table>
 <?php

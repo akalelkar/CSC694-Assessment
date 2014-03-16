@@ -8,151 +8,149 @@
     $form->prepare();
 ?>
 
-	<!-- create the rigth side of the page -->
-	<p></p>
-	<center><h3>Assessment Plans - List All Plans</h3></center>
-	<div class="col-md-8">
-	    <?php
-		// dynamically set the label for view, modify
-		$label="Select a plan to modify for: ";
-		if ($action == "View"){
-		    $label="Select a plan to view for: ";
-		}
-		
-		// create a label if no plans exist for the selection
-		if (sizeof($plans) == 0) {
-		    $label="There are no plans for: ";
-		}
-	    ?>
-            
-            <!-- create a header line -->			
-	    <?php echo $this->partial('plans/plans/displayAllPrograms.phtml', array('programs' => $programs,
-									      'label' => $label,
-									      'unit' => $unit,
-									      'year' => $year,
-									      ));
-
-		// create a string out of the programs array to use as a hidden element to pass between the pages
-		$allPrograms = "";
-		if (!empty($this->programs)) {
-		    foreach ($this->programs as $program) :
-			$allPrograms = $allPrograms . $program . ", ";
-		    endforeach;
-		    
-		    // remove the last ", " added on after the last loop above
-		    $allPrograms = substr($allPrograms, 0, -2);
-		}
+<!-- create the rigth side of the page -->
+<p></p>
+<center><h3>Assessment Plans - List All Plans</h3></center>
+<div class="col-md-8">
+    <?php
+	// dynamically set the label for view, modify
+	$label="Select a plan to modify for: ";
+	if ($action == "View"){
+	    $label="Select a plan to view for: ";
+	}
+	
+	// create a label if no plans exist for the selection
+	if (sizeof($plans) == 0) {
+	    $label="There are no plans for: ";
+	}
+    ?>
     
-		// prepare hidden elements to pass data between pages	
-		$elem = $form->get('action');
-		$elem->setValue($action);					    
-		echo $this->formInput($elem);
+    <!-- create a header line -->			
+    <?php echo $this->partial('plans/plans/displayAllPrograms.phtml', array('programs' => $programs,
+								      'label' => $label,
+								      'unit' => $unit,
+								      'year' => $year,
+								      ));
 
-		$elem = $form->get('unit');
-		$elem->setValue($unit);					    
-		echo $this->formInput($elem);
-
-		$elem = $form->get('programs');
-		$elem->setValue($allPrograms);					    
-		echo $this->formInput($elem);
-		
-		$elem = $form->get('year');
-		$elem->setValue($year);					    
-		echo $this->formInput($elem);	
-	    ?>	    
+	// create a string out of the programs array to use as a hidden element to pass between the pages
+	$allPrograms = "";
+	if (!empty($this->programs)) {
+	    foreach ($this->programs as $program) :
+		$allPrograms = $allPrograms . $program . ", ";
+	    endforeach;
 	    
-	     <div class="input-group">
-		<div class="panel-group" id="accordion">
-		    <div class="panel panel-success">
-				    
-			<?php					    			
-			    // Loop through all the returned plans
-			    $planCount = 0;
-			    if (!empty($plans)) {
-				foreach ($plans as $plan) :
-				    $planCount++;
-			?>
-				    <!-- Create the plan row -->
-				    <div class="panel-heading">
-					<h4 class="title">					
-					    <a data-toggle="collapse" data-parent="#accordion"
-						   href="#collapse<?php echo $planCount; ?>">
-						    Plan # <?php echo $planCount; ?> &nbsp; </a>
-					
-					    <!-- Create a select button for each row -->
-					    <a
-						<?php
-						    $elem = $form->get('viewModifySelect');
-						    $elem->setValue($plan['planId']);					    
-						    echo $this->formButton($elem);
-						?>
-					    &raquo
-					    </a>&nbsp;
-					    
-					    <!-- Create a delete button for each row -->
-					    <!-- Assessors (role = 4) are not allowed to delete a plan -->
-					    <?php
-						if (strtolower($action) == "modify" && $role != 4) {
-					    ?>
-						    <a
-							<?php
-							    $elem = $form->get('modifyDelete');
-							    $elem->setValue($plan['planId']);					    
-							    echo $this->formButton($elem);
-							?>
-						    &raquo
-						    </a>&nbsp;
-					    <?php
-						}
-					    ?>
-					</h4>
-				    </div>
+	    // remove the last ", " added on after the last loop above
+	    $allPrograms = substr($allPrograms, 0, -2);
+	}
 
-			    <!-- Create the outcome data for each row -->
-			    <div id="collapse<?php echo $planCount; ?>" class="pane<?php echo $planCount; ?>-collapse collapse">
-				<div class="panel-body">
-				    <div class="control-group">
-					<div class="controls">
-					    <table class="table">							  
-						<?php
-						    // loop through all the outcomes
-						    $outcomeCount = 0;
-						    if (!empty($outcomes)) {
-							foreach ($outcomes as $outcome) :
+	// prepare hidden elements to pass data between pages	
+	$elem = $form->get('action');
+	$elem->setValue($action);					    
+	echo $this->formInput($elem);
 
-							    //Check to see if the outcome exists for the plan id
-							    if($plan['planId'] == $outcome->getPlanId()) {
-								$outcomeCount++;
-						?>
-								<!-- create a row in the table -->
-								<tr>
-								    <th><?php echo $outcomeCount; ?>.</th> <td> <?php echo $outcome->getOutcomeText() ?></td>
-								    <input type="hidden" name="outcomeId<?php echo $outcomeCount; ?>" value="<?php echo $outcome->getOutcomeId() ?>">
-								</tr>
-						<?php
-							    }
-							endforeach;
-						    }
-						    // If there are no outcomes then display a meta assessment plan 
-						    if ($outcomeCount == 0) {
-						?>
-							<tr>
-							    <th></th> <td>This is a meta assessment</td>
-							</tr>
-						<?php
-						    }
-						?>						
-					    </table>
-					</div>
-				    </div>
-				</div>
-			    </div>
-		<?php
-				endforeach;
-			    }
+	$elem = $form->get('unit');
+	$elem->setValue($unit);					    
+	echo $this->formInput($elem);
+
+	$elem = $form->get('programs');
+	$elem->setValue($allPrograms);					    
+	echo $this->formInput($elem);
+	
+	$elem = $form->get('year');
+	$elem->setValue($year);					    
+	echo $this->formInput($elem);	
+    ?>	    
+    
+     <div class="input-group">
+	<div class="panel-group" id="accordion">
+	    <div class="panel panel-success">
+			    
+		<?php					    			
+		    // Loop through all the returned plans
+		    $planCount = 0;
+		    if (!empty($plans)) {
+			foreach ($plans as $plan) :
+			    $planCount++;
 		?>
+		<!-- Create the plan row -->
+		<div class="panel-heading">
+		    <h4 class="title">					
+			<a data-toggle="collapse" data-parent="#accordion"
+			       href="#collapse<?php echo $planCount; ?>">
+				Plan # <?php echo $planCount; ?> &nbsp; </a>
+		    
+			<!-- Create a select button for each row -->
+			<a
+			    <?php
+				$elem = $form->get('viewModifySelect');
+				$elem->setValue($plan['planId']);					    
+				echo $this->formButton($elem);
+			    ?>
+			&raquo
+			</a>&nbsp;
+			
+			<!-- Create a delete button for each row -->
+			<!-- Assessors (role = 4) are not allowed to delete a plan -->
+			<?php
+			    if (strtolower($action) == "modify" && $role != 4) {
+			?>
+				<a
+				    <?php
+					$elem = $form->get('modifyDelete');
+					$elem->setValue($plan['planId']);					    
+					echo $this->formButton($elem);
+				    ?>
+				&raquo
+				</a>&nbsp;
+			<?php
+			    }
+			?>
+		    </h4>
+		</div>
+
+		<!-- Create the outcome data for each row -->
+		<div id="collapse<?php echo $planCount; ?>" class="pane<?php echo $planCount; ?>-collapse collapse">
+		    <div class="panel-body">
+			<div class="control-group">
+			    <div class="controls">
+				<table class="table">							  
+				    <?php
+					// loop through all the outcomes
+					$outcomeCount = 0;
+					if (!empty($outcomes)) {
+					    foreach ($outcomes as $outcome) :
+
+						//Check to see if the outcome exists for the plan id
+						if($plan['planId'] == $outcome->getPlanId()) {
+						    $outcomeCount++;
+				    ?>
+						    <!-- create a row in the table -->
+						    <tr>
+							<th><?php echo $outcomeCount; ?>.</th> <td> <?php echo $outcome->getOutcomeText() ?></td>
+							<input type="hidden" name="outcomeId<?php echo $outcomeCount; ?>" value="<?php echo $outcome->getOutcomeId() ?>">
+						    </tr>
+				    <?php
+						}
+					    endforeach;
+					}
+					// If there are no outcomes then display a meta assessment plan 
+					if ($outcomeCount == 0) {
+				    ?>
+					    <tr>
+						<th></th> <td>This is a meta assessment</td>
+					    </tr>
+				    <?php
+					}
+				    ?>						
+				</table>
+			    </div>
+			</div>
 		    </div>
 		</div>
+		<?php
+			endforeach;
+		    }
+		?>
 	    </div>
 	</div>
     </div>

@@ -32,7 +32,7 @@ if(!$results){
 		    <h4><?php echo $report[0]['unit_id'] . ' - ' . $report[0]['name'] . ' - ' . $report[0]['year'];?></h4>
 		    <div class="controls">
 			<div class="panel-group" id="accordion">
-			    <div class="panel panel-default">
+			    <div class="panel panel-success">
 				<div class="panel-heading">
 				    <h4 class="panel-title">
 					<a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
@@ -52,119 +52,113 @@ if(!$results){
 					<?php endforeach; ?>
 				  </div>
 				</div>
-			    </div>
-			    </br>
-			</div>
-		    </div>
-		    <!-- Other database fields -->
-		    <div class="panel panel-default">
-			<div class="panel-heading">
-			  <h4 class="panel-title">
-			    <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
-			       Population assessed
-			    </a>
-			  </h4>
-			</div>
-			<div id="collapseThree" class="panel-collapse collapse">
-			  <div class="panel-body">
-				      <?php echo $this->formRow($form->get('population')->setAttribute('value', $report[0]['population']))?>      </div>
-			</div>
-		      </div>
-  
-			<div class="panel panel-default">
-			  <div class="panel-heading">
-			    <h4 class="panel-title">
-			      <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
-				 Results
-			      </a>
-			    </h4>
-			  </div>
-			  <div id="collapseFour" class="panel-collapse collapse">
-			    <div class="panel-body">
-					<?php echo $this->formRow($form->get('results')->setAttribute('value', $report[0]['results']))?>      </div>
-			  </div>
-			</div>
-			
-			<div class="panel panel-default">
-			  <div class="panel-heading">
-			    <h4 class="panel-title">
-			      <a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">
-				 Conclusions
-			      </a>
-			    </h4>
-			  </div>
-			  <div id="collapseFive" class="panel-collapse collapse">
-			    <div class="panel-body">
-		      <?php echo $this->formRow($form->get('conclusions')->setAttribute('value', $report[0]['conclusions']))?>     </div>
-			  </div>
-			</div>
-			
-			<div class="panel panel-default">
-			  <div class="panel-heading">
-			    <h4 class="panel-title">
-			      <a data-toggle="collapse" data-parent="#accordion" href="#collapseSix">
-				 Actions
-			      </a>
-			    </h4>
-			  </div>
-			  <div id="collapseSix" class="panel-collapse collapse">
-			    <div class="panel-body">
-		      <?php echo $this->formRow($form->get('actions')->setAttribute('value', $report[0]['actions']))?>    </div>
-			  </div>
-			</div>
-			
-			<div class="panel panel-default">
-			  <div class="panel-heading">
-			    <h4 class="panel-title">
-			      <a data-toggle="collapse" data-parent="#accordion" href="#collapseSeven">
-				<!-- Show feedback status and text -->
-				  <?php
-				      if($report[0]['feedback'] == 2){
-					  $flag = 2;
-				      }else{
-					  $flag = 1;
-				      }
-				  ?>
-				 Feedback - &nbsp
-				 <?php
-			      if($role < 4){
-				  $read = '';		      
-			      }else{
-				  $read = 'readonly';
-				  if($report[0]['feedback'] == 2){
-				      $feedback = 'Approved';
-				  }else{
-				      $feedback = 'In need of revision';
-				  }
-				  echo $feedback; 
-			      }
-			      
-			      ?>
-			      </a>
-			      <?php
-			      if($role < 4){
-				  $read = '';
-				  echo $this->formRow($form->get('feedbackFlag')->setAttribute('value', $flag));
-		      
-			      }
-			      ?>
-			    </h4>
 			    
-			  </div>
-			  <div id="collapseSeven" class="panel-collapse collapse">
-			    <div class="panel-body">
-			  <?php
-			      
-			      $row = $form->get('actions');
-			      $row->setAttribute('value', $report[0]['feedback_text']);
-			      $row->setAttribute('readonly', $read);
-			      echo $this->formRow($row);
-					       
-			      
-			      ?>    </div>
-			  </div>
+			<!-- Other database fields -->
+			<div class="panel panel-success">
+			    <div class="panel-heading">
+			      <h4 class="panel-title">
+				<a data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+				   Population assessed
+				</a>
+			      </h4>
+			    </div>
+			    <div id="collapseThree" class="panel-collapse collapse">
+			      <div class="panel-body">
+					  <?php echo $this->formRow($form->get('population')->setAttribute('value', $report[0]['population']))?>     
+			      </div>
+			    </div>
+      
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				  <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour">
+				     Results
+				  </a>
+				</h4>
+			     </div>
+			    <div id="collapseFour" class="panel-collapse collapse">
+				<div class="panel-body">
+					    <?php echo $this->formRow($form->get('results')->setAttribute('value', $report[0]['results']))?>
+				</div>
+			    </div>
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				  <a data-toggle="collapse" data-parent="#accordion" href="#collapseFive">
+				     Conclusions
+				  </a>
+				</h4>
+			    </div>
+			    <div id="collapseFive" class="panel-collapse collapse">
+			       <div class="panel-body">
+			  <?php echo $this->formRow($form->get('conclusions')->setAttribute('value', $report[0]['conclusions']))?>    
+			       </div>
+			    </div>
+			    
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				  <a data-toggle="collapse" data-parent="#accordion" href="#collapseSix">
+				     Actions
+				  </a>
+				</h4>
+			    </div>
+			    <div id="collapseSix" class="panel-collapse collapse">
+			       <div class="panel-body">
+			  <?php echo $this->formRow($form->get('actions')->setAttribute('value', $report[0]['actions']))?>    
+			       </div>
+			    </div>
+			    
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				  <a data-toggle="collapse" data-parent="#accordion" href="#collapseSeven">
+				    <!-- Show feedback status and text -->
+				      <?php
+					  if($report[0]['feedback'] == 2){
+					      $flag = 2;
+					  }else{
+					      $flag = 1;
+					  }
+				      ?>
+				     Feedback - &nbsp
+				     <?php
+				  if($role < 4){
+				      $read = '';		      
+				  }else{
+				      $read = 'readonly';
+				      if($report[0]['feedback'] == 2){
+					  $feedback = 'Approved';
+				      }else{
+					  $feedback = 'In need of revision';
+				      }
+				      echo $feedback; 
+				  }
+				  
+				  ?>
+				  </a>
+				  <?php
+				  if($role < 4){
+				      $read = '';
+				      echo $this->formRow($form->get('feedbackFlag')->setAttribute('value', $flag));
+			  
+				  }
+				  ?>
+				</h4>
+				
+			     </div>
+			     <div id="collapseSeven" class="panel-collapse collapse">
+				<div class="panel-body">
+			      <?php
+				  
+				  $row = $form->get('actions');
+				  $row->setAttribute('value', $report[0]['feedback_text']);
+				  $row->setAttribute('readonly', $read);
+				  echo $this->formRow($row);
+						   
+				  
+				  ?>   
+				</div>
+			    </div>
 			</div>
 		    </div>
+		</div>
 		    <table>
 			<!-- Show existing documents -->
 			<?php
@@ -202,8 +196,8 @@ if(!$results){
 			</td>
 		
 			<td>
-			    <input type="button" value="Clear" onclick="$('#fileUpload').replaceWith($('#fileUpload').clone());document.getElementById('fileDescription0').value = '';"></input>
-			</td>
+			  <a href="#" id="removeFile0" name="removeFile0"  onclick="$('#fileUpload').replaceWith($('#fileUpload').clone());document.getElementById('fileDescription0').value = '';">Remove File</a>
+		        </td>
 		    </tr>
 		    <tr>
 			<td>
@@ -214,9 +208,8 @@ if(!$results){
 			</td>
 		
 			<td>
-			    <input type="button" value="Clear" onclick="$('#fileUpload1').replaceWith($('#fileUpload1').clone());document.getElementById('fileDescription1').value = '';"></input>
-			</td>
-		    </tr>
+			  <a href="#" id="removeFile1" name="removeFile1"  onclick="$('#fileUpload1').replaceWith($('#fileUpload1').clone());document.getElementById('fileDescription1').value = '';">Remove File</a>
+	 	        </td>
 		</table>
 		</br>
 	    </div> <!-- controls -->
