@@ -30,10 +30,7 @@
             <label class="control-label head-label">Roles</label>
             <div class="user-roles-container">
                 <?php 
-                     for($i=0; $i<$this->count; $i++)
-                    {
-                         echo $this->formSelect($form->get('role_'.$i)->setLabelAttributes(array('class'=>'control-label ')));
-                    }
+                     echo $this->formSelect($form->get('role_'.$i)->setLabelAttributes(array('class'=>'control-label ')));
                 ?>
             </div>
         </div>

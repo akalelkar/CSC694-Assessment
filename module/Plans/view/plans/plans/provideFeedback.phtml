@@ -1,0 +1,190 @@
+<?php
+    // Init Form
+    $form = $this->form;
+    $form->setAttribute('enctype', 'multipart/form-data');
+    $form->setAttribute('class', 'form-horizontal');
+    $form->setAttribute('action', $this->url('plans',array('action'=>'updateplan')));
+    $form->prepare();
+?>
+
+<!-- create the right side of the page -->
+<div class="container">
+    <div class="row">
+	<p></p>
+
+	<!-- Begin creating the form -->
+	<?php echo $this->form()->openTag($form); ?>
+	    
+	<div class="col-md-8">
+	    <div class="bs-example">
+		<!-- create header line -->
+		<?php
+		        
+		    // prepare hidden elements to pass data between pages		
+		    $elem = $form->get('planId');
+		    $elem->setValue($planId);					    
+		    echo $this->formInput($elem);
+		    
+		    $elem = $form->get('unit');
+		    $elem->setValue($unit);					    
+		    echo $this->formInput($elem);
+    
+		    $elem = $form->get('programs');
+		    $elem->setValue($programs);					    
+		    echo $this->formInput($elem);
+		    
+		    $elem = $form->get('year');
+		    $elem->setValue($year);					    
+		    echo $this->formInput($elem);
+		    
+		    $elem = $form->get('dbDraftFlag');
+		    $elem->setValue($plan['draft_flag']);					    
+		    echo $this->formInput($elem);
+		?>
+		<div class="controls">
+                    <dl>
+                        <dt><h3>Enter Feedback For Plan Shown Below</h3>
+                            Choose Feedback Option    
+                        </dt>
+                        <dd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                           <?php
+                                $feedbackFlag = $plan['feedback'];
+                                $elem = $form->get('feedbackFlag');
+                                $elem->setValue($feedbackFlag);
+                                $this->formRadio()->setSeparator('</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+                                echo $this->formRadio($elem);
+                             ?>
+                        </dd>
+                        </br>
+                        <dt>Enter Feedback Message</dt>
+                        <dd>
+                            <?php
+                                $elem = $form->get('textFeedback');
+                                $elem->setValue($plan['feedback_text']);
+                                echo $this->formTextarea($elem);
+                            ?>						
+                        </dd>
+                    </dl>
+                    <?php
+                        $elem = $form->get('formSubmitPlan');
+                        echo $this->formButton($elem);
+                    ?>
+                    </br>
+                    </br>	
+		    <!-- if there are outcomes present display the array of outcomes -->
+		    <?php
+                        echo "<h4>" . $unit . ", " . $programs . ", " . $year . "</h4>";
+		
+			if (!empty($outcomes))
+			{
+                            echo "<dl><dt>Outcomes</dt>";
+                            $outcomeCount = 0;
+                            foreach ($outcomes as $outcome) :
+                                $outcomeCount++;								
+                        ?>
+                        <!-- display the counter with the outcome text -->
+                                <dd><?php echo $outcomeCount; ?>. <?php echo $outcome->getOutcomeText() ?></dd>
+                            <?php
+                            endforeach;
+                            ?>
+
+                            </br>
+                            <dt>Assessment Method</dt>
+                            <dd>
+                                <?php
+                                    echo $plan['assessment_method'];
+                                ?>
+                            </dd>
+                            </br>
+                            <dt>Population Assessed</dt>
+                            <dd>
+                                <?php
+                                    echo $plan['population'];
+                                ?>
+                            </dd>
+                            </br>
+                            <dt>Sample Size Assessed</dt>
+                            <dd>
+                                <?php
+                                    echo $plan['sample_size'];
+                                ?>
+                            </dd>
+                            </br>
+                            <dt>Assessment Date</dt>
+                            <dd>
+                                <?php
+                                    echo $plan['assessment_date'];
+                                ?>
+                            </dd>
+                            </br>
+                            <dt>Assessment Cost</dt>
+                            <dd>
+                                <?php
+                                    echo $plan['cost'];
+                                ?>
+                            </dd>
+                            </br>
+                            <dt>Funding Requested</dt>
+                            <dd>
+                                <?php
+                                    echo $plan['funding_flag'];
+                                ?>
+                            </dd>
+                            </br>
+                            <dt>Type of Analysis</dt>
+                            <dd>
+                                <?php
+                                    echo $plan['analysis_type'];
+                                ?>
+                            </dd>
+                            </br>
+                            <dt>Administrator</dt>
+                            <dd>
+                                <?php
+                                    echo $plan['administrator'];
+                                ?>
+                            </dd>
+                            </br>
+                            <dt>Analysis Method</dt>
+                            <dd>
+                                <?php
+                                    echo $plan['analysis_method'];
+                                ?>
+                            </dd>
+                            </br>
+                            <dt>Scope of Assessment</dt>
+                            <dd>
+                                <?php
+                                    echo $plan['scope'];
+                                ?>
+                            </dd>
+                        </dl>		
+				    	    
+		    <?php
+			}
+			else
+			{
+		    ?>
+                            <!-- If there are no outcomes then display all the meta database attributes -->
+                             <dl>
+                                <dt>Meta Description</dt>
+                                <dd>
+                                    <?php
+                                        echo $plan['meta_description'];
+                                    ?>
+                                </dd>
+                             </dl>
+                             
+			
+		    <?php
+			}
+		    ?>
+                    
+		</div> <!-- controls -->    
+
+		
+	    </div>
+	</div>
+        <?php echo $this->form()->closeTag($form); ?>
+    </div>
+</div>

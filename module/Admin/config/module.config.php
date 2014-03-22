@@ -35,6 +35,17 @@
                      ),
                  ),
              ),
+             'update' => array(
+                 'type'    => 'literal',
+                 'options' => array(
+                     'route'    => '/admin/user',
+                     'defaults' => array(
+                         '__NAMESPACE__' => 'Admin\Controller',
+                         'controller' => 'User',
+                         'action'     => 'update',
+                     ),
+                 ),
+             ),
              'user' => array(
                  'type'    => 'segment',
                  'options' => array(

@@ -279,6 +279,12 @@
 				    <?php
 					}
 				    ?>
+		   	            <?php
+					// general users may not see feedback
+					if ($role != 0)
+					{
+				    ?>
+		
 					    <!-- display all the feedback attributes -->
 					    <div class="panel-heading">
 						<h4 class="panel-title">
@@ -323,6 +329,9 @@
 						    ?>						
 						</div>
 					    </div>
+					<?php
+					}
+					?>
 					</div>
 				    </div>
 			    </div> <!-- controls -->

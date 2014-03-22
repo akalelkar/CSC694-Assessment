@@ -6,19 +6,7 @@ $this->headTitle($title);
 <?php echo $this->partial('admin/admin/menu.phtml',array('active'=>'user')); ?>
 <div class="row user-content">
     <div class="title col-md-12">
-        <h1><?php echo $this->escapeHtml($title); ?></h1>
-    </div>
-
-    <div class="user-form-wrapper col-md-12">
-        <div class="user-form" style="overflow:hidden;">
-            <?php echo $this->partial('admin/user/form.phtml', array(
-                            'form' => $this->form, 
-                            'action' => 'add',
-                            'submitVal' =>'Add User', 
-                            'id' => $this->id,
-                            'count'=>1,
-                            'disabledPrivs'=>$this->disabledPrivs)); ?>
-        </div>    
+        <center><h2><?php echo $this->escapeHtml($title); ?></h2></center>
     </div>
 
     <div class="user-table-wrapper col-md-12">

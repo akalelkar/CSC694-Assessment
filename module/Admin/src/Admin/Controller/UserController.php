@@ -7,6 +7,7 @@ use Admin\Entity\UserObj;
 use Admin\Entity\Role;
 use Admin\Entity\UnitPriv;
 use Admin\Form\UserForm;
+use Admin\Form\EditForm;
 use Admin\Form\CreateUserObj;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
@@ -71,10 +72,9 @@ class UserController extends AbstractActionController {
         $args['unit_privs'] = $this->getUnitQueries()->getUnitsForSelectAssessors();//two assessors
         $form = new UserForm(null, $args);
         $form->get('submit')->setValue('Add');
-
-
         $disabledPrivs = $this->getUnitQueries()->getDisablePrivUnits();
-        //send paginator,and form to page
+
+        //send paginator and form to page
         return new ViewModel(array(
             'page' => $page,
             'paginator' => $paginator,
@@ -84,60 +84,13 @@ class UserController extends AbstractActionController {
     }
 
     /*
-     * User Add Action
-     */
-
-    public function addAction() {
-        //get role terms for form and build form
-        $args['count'] = 4;
-        $args['liaison_privs'] = $this->getUnitQueries()->getUnitsForSelect();//unlimited liaisons
-        $args['unit_privs'] = $this->getUnitQueries()->getUnitsForSelectAssessors();//two assessors
-        $args['roles'] = $this->getGenericQueries()->getRoleTerms(false);
-        $disabledPrivs = $this->getUnitQueries()->getDisablePrivUnits();
-        $form = new UserForm(null, $args);
-        $form->get('submit')->setValue('Add');
-
-        //post request, otherwise return form (only accepting post)
-        $request = $this->getRequest();
-        if ($request->isPost()) {
-            $user = new User();
-            $form->setInputFilter($user->getInputFilter());
-            $form->setData($request->getPost());
-
-            if ($form->isValid()) {
-
-                $user->exchangeArray($form->getData());
-
-                //TODO: something to check it email exists
-                //need to handle error of adding users of same email
-                //save the user
-                $this->getUserQueries()->saveUser($user);
-
-                // Redirect to list of users
-                return $this->redirect()->toRoute('user');
-            }else{
-              #Debug::dump($form->getMessages());
-            }
-        }
-        return array(
-            'form' => $form,
-            'count' => 4,
-            'disabledPrivs' =>$disabledPrivs);
-    }
-
-    /*
      * User Edit Action
      */
 
     public function editAction() {
         //the user id from route
         $id = (int) $this->params()->fromRoute('id');
-        if (!$id) {
-            return $this->redirect()->toRoute('user', array(
-                        'action' => 'add'
-            ));
-        }
-
+       
         //get the user object from the database
         $user = $this->getUserQueries()->getUser($id);
 
@@ -154,16 +107,17 @@ class UserController extends AbstractActionController {
         $user->liaison_privs = $this->getUserQueries()->getUserUnitPrivs($id,'liaison_privs');
 
         //build form
+        $args['full_name'] = $user->first_name . ' ' . $user->middle_init . ' ' . $user->last_name;
         $args['count'] = 4;
         $args['roles'] = $this->getGenericQueries()->getRoleTerms(false);
-        $args['action'] = 'edit';
         $args['user_id'] = $id;
         $args['liaison_privs'] = $this->getUnitQueries()->getUnitsForSelect();//unlimited liaisons
+    var_dump($args['liaison_privs']);
         $args['unit_privs'] = $this->getUnitQueries()->getUnitsForSelectAssessors();//two assessors
         $disabledPrivs = $this->getUnitQueries()->getDisablePrivUnits();
-        $form = new UserForm(null, $args);
-        $form->bind($user);
-        $form->get('submit')->setAttribute('value', 'Save');
+        $form = new EditForm($this->url()->fromRoute('user'), $args);
+        //$form->bind($user);
+        //$form->get('submit')->setAttribute('value', 'Save');
 
         $request = $this->getRequest();
         if ($request->isPost()) {
@@ -178,14 +132,18 @@ class UserController extends AbstractActionController {
                 return $this->redirect()->toRoute('user');
             }
         }
-        return array(
+        var_dump("here");
+        return new ViewModel(array(
             'id' => $id,
             'form' => $form,
             'count' => 4,
-            'disabledPrivs' =>$disabledPrivs
-        );
+            'disabledPrivs' =>$disabledPrivs,
+        ));
     }
-
+    
+    public function updateAction() {
+        var_dump('updateaction');
+    }
     /*
      * Delete user action
      */

@@ -29,7 +29,9 @@ class UserTable extends AbstractTableGateway
     {
         $sql = new Sql($this->adapter);
         $select = $sql->select()
-                      ->from($this->table);
+                      ->from($this->table)
+                      ->where(array('active_flag' => 1)) 
+        ;
                       
         $statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
@@ -60,16 +62,17 @@ class UserTable extends AbstractTableGateway
                       ->columns(array('id','first_name','last_name'))
                       ->from(array('u' =>$this->table))
                       ->join(array('ur' =>'user_roles'), 'u.id = ur.user_id')
-                      ->where(array('role'=>$roles));
+                      ->where(array('role'=>$roles))
+                      ->where(array('users.active_flag' => 1))
+                      ->where(array('user_roles.active_flag' => 1))
+        ;
                       
         $statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
         $results = array();
         foreach($result as $key => $value){
-
-        $results[$value['user_id']] = $value['first_name'] .' '.$value['last_name'];
+            $results[$value['full_name']] = $value['first_name'] .' '.$value['last_name'];
         }
-
         return $results;
     }
     

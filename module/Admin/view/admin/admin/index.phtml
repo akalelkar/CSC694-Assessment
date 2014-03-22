@@ -1,37 +1,21 @@
 <?php echo $this->partial('admin/admin/menu.phtml',array('active'=>'admin')); ?>
 <?php
-$title = 'Administration';
+$title = 'Administration Menu';
 $this->headTitle($title);
 ?>
 <div class="row admin-home">
     <div class="title col-md-12">
-        <h1><?php echo $this->escapeHtml($title); ?></h1>
-    </div>
-
-    <div class="admin-home-users col-md-10" style="overflow:hidden;">
-        <div class="admin-home-users col-md-12" tyle="overflow:hidden;">
-            <div class=" col-md-6">
-               <h2>Manage Users</h2>
-            </div>
-            <div class="col-md-6">
-                <a role="button" class="btn btn-primary btn-lg" href="<?php echo $this->url('user');?>">Go</a>
-            </div>
-        </div>
-        <div class="admin-home-programs  col-md-12" style="overflow:hidden;">
-           <div class=" col-md-6">
-               <h2>Manage Programs</h2>
-            </div>
-            <div class=" col-md-6">
-                <a role="button" class="btn btn-primary btn-lg" href="<?php echo $this->url('program');?>">Go</a>
-            </div>
-        </div>
-        <div class="admin-home-queries col-md-12" style="overflow:hidden;">
-            <div class=" col-md-6">
-                <h2>Run Queries</h2>
-            </div>
-            <div class=" col-md-6">
-                <a role="button" class="btn btn-primary btn-lg" href="<?php echo $this->url('query');?>">Go</a>
-            </div>
-        </div>
+        <center><h2><?php echo $this->escapeHtml($title); ?></h2></center>
+        <center>
+            <h3>Manage Users
+              <a role="button" class="btn btn-primary btn-md" href="<?php echo $this->url('user');?>">Go</a>
+            </h3>
+            <h3>Manage Programs
+              <a role="button" class="btn btn-primary btn-md" href="<?php echo $this->url('program');?>">Go</a>
+            </h3>
+            <h3>Run Queries
+              <a role="button" class="btn btn-primary btn-md" href="<?php echo $this->url('query');?>">Go</a>
+            </h3>
+        </center>
     </div>
 </div>

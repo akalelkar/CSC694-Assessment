@@ -1,6 +1,6 @@
 <?php
 /*
- *  User Form
+ *  Edit Form
  */
 
 namespace Admin\Form;
@@ -10,18 +10,19 @@ use Admin\Model\UserTable;
 use Zend\Db\Adapter\Adapter;
 use Zend\session\container;
 
-class UserForm extends Form
+class EditForm extends Form
 {
     protected $sm;
     
-    public function __construct($name = null,$args)
+    public function __construct($url,$args)
     {
         $namespace = new Container('user');
         
         // we want to ignore the name passed
-        parent::__construct('user');        
+        parent::__construct('edit');        
  
         $this->setAttribute('method', 'post');
+        $this->setAttribute('action', $url);
         
         $this->add(array(
             'name' => 'id',
@@ -32,57 +33,20 @@ class UserForm extends Form
             ),
         ));
         $this->add(array(
-            'name' => 'first_name',
+            'name' => 'full_name',
             'type' => 'Zend\Form\Element\Text',
             'attributes' => array(
                 'class'=> 'form-control',
-                'id' => 'first_name',
+                'id' => 'full_name',
                 'readonly' => TRUE,
+                'value' => $args['full_name'],
             ),
             'options' => array(
-                'label' => 'First Name',
+                'label' => 'Name',
             ),
         ));
-        $this->add(array(
-            'name' => 'middle_init',          
-            'type' => 'Zend\Form\Element\Text',
-            'attributes' => array(
-                'class'=> 'form-control',
-                'id' => 'middle_init',
-                'maxlength' => 1,
-                'size' => 1,
-                'style' => 'width:60px;',
-                'readonly' => TRUE,
-            ),
-            'options' => array(
-                'label' => 'M.I.',
-            ),
-        ));
-        $this->add(array(
-            'name' => 'email',          
-            'type' => 'Zend\Form\Element\Text',
-            'attributes' => array(
-                'class'=> 'form-control',
-                'id' => 'email',
-                'readonly' => TRUE,
-            ),
-            'options' => array(
-                'label' => 'Email',
-            ),
-        ));
-        $this->add(array(
-            'name' => 'last_name',
-            'type' => 'Zend\Form\Element\Text',
-            'attributes' => array(
-                'class'=> 'form-control',
-                'id' => 'last_name',
-                'readonly' => TRUE,
-            ),
-            'options' => array(
-                'label' => 'Last Name',
-            ),
-        ));
-     
+        
+        
      $count = $args['count'];   
      for($i=0; $i< $count; $i++)
      {

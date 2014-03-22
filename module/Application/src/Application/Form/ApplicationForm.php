@@ -6,12 +6,12 @@ use Zend\Form\Form;
 
 class ApplicationForm extends Form
 {
-    public function __construct($name = null)
+    public function __construct($url, $name = null)
     {
         // we want to ignore the name passed
         parent::__construct('application');
         $this->setAttribute('method', 'post');
-        $this->setAttribute('action', 'application\choose');
+        $this->setAttribute('action', $url);
 
         $this->add(array(
             'name' => 'module',

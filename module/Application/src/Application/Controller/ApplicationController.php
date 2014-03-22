@@ -30,11 +30,11 @@ class ApplicationController extends AbstractActionController
     //the indexAction just renders the main screen giving the options of modules to choose from
     public function indexAction()
     {
-        $form = new ApplicationForm();
+        $form = new ApplicationForm($this->url()->fromRoute('choose'));
         return array('form' => $form);
     }
 
-    //this method determines the choise the user made and directs them to the appropriate module
+    //this method determines the choice the user made and directs them to the appropriate module
     public function chooseAction()
     {
         $request = $this->getRequest();

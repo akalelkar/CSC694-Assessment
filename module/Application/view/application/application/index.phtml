@@ -2,18 +2,16 @@
 
 $title = 'Academic Assessment Portal';
 $this->headTitle($title);
-
-
 $form = $this->form;
 $form->prepare();
 ?>
 <br>
 <br><br><br>
 <center>
-<h3>Please make a selection</h3><br>
-<?php
-echo $this->form()->openTag($form);
-echo $this->formCollection($form);
-echo $this->form()->closeTag($form);
-?>
+    <h3>Please make a selection</h3><br>
+    <?php
+        echo $this->form()->openTag($form);
+        echo $this->formCollection($form);
+        echo $this->form()->closeTag($form);
+    ?>
 </center>

@@ -13,15 +13,18 @@
 <center><h3>Assessment Plans - List All Plans</h3></center>
 <div class="col-md-8">
     <?php
-	// dynamically set the label for view, modify
-	$label="Select a plan to modify for: ";
-	if ($action == "View"){
-	    $label="Select a plan to view for: ";
-	}
-	
-	// create a label if no plans exist for the selection
+	// set the label accordingly
 	if (sizeof($plans) == 0) {
 	    $label="There are no plans for: ";
+	}
+	else{
+	    $label="Select a plan to modify for: ";
+	    if ($action == "View"){
+		$label="Select a plan to view for: ";
+	    }
+	    else if ($action == "Provide Feedback"){
+		$label="Select a plan to provide feedback for: ";
+	    }
 	}
     ?>
     
@@ -92,7 +95,7 @@
 			<!-- Create a delete button for each row -->
 			<!-- Assessors (role = 4) are not allowed to delete a plan -->
 			<?php
-			    if (strtolower($action) == "modify" && $role != 4) {
+			    if ($action == "Modify" && $role != 4) {
 			?>
 				<a
 				    <?php

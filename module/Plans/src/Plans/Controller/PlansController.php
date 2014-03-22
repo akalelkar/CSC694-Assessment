@@ -290,18 +290,27 @@ class PlansController extends AbstractActionController
       
       // if general user - only view
       // get all units, since only view option is displayed
-      if ($role == null){
-                   
+      // user in table with role - show actions
+         // wait to populate units until action chosen
+         
+      if ($role == NULL)
+      {        
          return new ViewModel(array(
             'useractions' => array('View'),
             'startyear' => $startyear,
             'role' => $role,
          ));
       }
-      else{
-            
-         // user in table with role - show actions
-         // wait to populate units until action chosen
+      else if ($role == 1 or $role == 2) // liaison or admin
+      {
+         return new ViewModel(array(
+            'useractions' => array('View', 'Add', 'Modify', 'Provide Feedback'),
+            'startyear' => $startyear,
+            'role' => $role,
+         ));
+      }
+      else // chair or assessor
+      {
          return new ViewModel(array(
             'useractions' => array('View', 'Add', 'Modify'),
             'startyear' => $startyear,
@@ -375,6 +384,10 @@ class PlansController extends AbstractActionController
       // form for view only page
       $form = new Plan('viewPlan');
         
+       // get the session variables
+      $namespace = new Container('user');
+      $role = $namespace->role;
+     
       // get the data from the request using json      
       $action = $_POST['action'];
       $planId = $_POST['planId'];
@@ -395,6 +408,7 @@ class PlansController extends AbstractActionController
          'plan' => $this->getDatabaseData()->getPlanByPlanId($planId),
          'planDocuments' => $this->getDatabaseData()->getPlanDocumentsByPlanId($planId),
          'form' => $form,
+         'role' => $role,
       ));
       
       $partialView->setTerminal(true);
@@ -650,7 +664,7 @@ class PlansController extends AbstractActionController
     */
    public function modifyPlanAction()
    {
-            // get the session variables
+      // get the session variables
       $namespace = new Container('user');
       $role = $namespace->role;
       
@@ -683,6 +697,45 @@ class PlansController extends AbstractActionController
       return $partialView;    
    }
    
+   /**
+    * Used for the provide feedback page
+    *
+    * Returns a partial view
+    */
+   public function provideFeedbackAction()
+   {
+      // get the session variables
+      $namespace = new Container('user');
+      $role = $namespace->role;
+      
+      // form for modifly page
+      $form = new Plan('provideFeedback');
+        
+      // get the data from the request using json            
+      $planId = $_POST['planId'];
+      $unit = $_POST['unit'];
+      $programs = $_POST['programs'];
+      $year = $_POST['year'];
+      
+      // change the program string into an array for DB select
+      $programsArray = $this->createProgramArray($programs);
+         
+      // create a partial view to send back to the caller
+      $partialView = new ViewModel(array(
+         'planId' => $planId,
+         'unit' => $unit,
+         'programs' => $programs,
+         'year' => $year,
+         'outcomes' => $this->getDatabaseData()->getOutcomesByPlanId($planId, $programsArray),
+         'plan' => $this->getDatabaseData()->getPlanByPlanId($planId),
+         'planDocuments' => $this->getDatabaseData()->getPlanDocumentsByPlanId($planId),
+         'role' => $role,
+         'form' => $form,
+      ));
+   
+      $partialView->setTerminal(true);
+      return $partialView;    
+   }
    
    /**
     * Used to update the plan in the database and upload the files to the server

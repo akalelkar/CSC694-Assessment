@@ -105,12 +105,12 @@ class ReportForm extends Form
         
         // File input for attachments
         $this->add(array(
-            'name' => 'fileUpload',
+            'name' => 'fileUpload0',
             'attributes' => array(
                 'type'  => 'file',
                 'accept' => '.pdf',
-                'id' => 'fileUpload',
-                'name' => 'fileUpload',
+                'id' => 'fileUpload0',
+                'name' => 'fileUpload0',
 
             ),
             'options' => array(
@@ -163,6 +163,24 @@ class ReportForm extends Form
                 'cols' => '100',
             ),
         ));
+        
+        
+        /********** Textbox used for the file description **********/
+        $this->add(array(
+            'name' => 'textFileDescription0',
+            'attributes' => array(
+                'type'  => 'input',
+                'id' => 'textFileDescription0',
+            ),
+        ));
+        
+        $this->add(array(
+            'name' => 'textFileDescription1',
+            'attributes' => array(
+                'type'  => 'input',
+                'id' => 'textFileDescription1',
+            ),
+        ));   
     }
 }
 ?>

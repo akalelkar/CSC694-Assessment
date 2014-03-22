@@ -30,8 +30,7 @@ class AdminController extends AbstractActionController
    
    public function indexAction()
    {
-      
-      
+         
       
    }
 

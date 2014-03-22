@@ -14,13 +14,12 @@ class Plan extends Form
     public $cols = 100;
     public $numFileElements = 5;
     
-    public function __construct($name = null)
+    public function __construct($name)
     {
         // we want to ignore the name passed
         parent::__construct('plans');
         $this->setAttribute('method', 'post');
         $this->addElements();
-//        $this->setInputFilter($this->createInputFilter());
     }
     
     public function addElements()
@@ -82,7 +81,7 @@ class Plan extends Form
             ),
         ));
         
-        /********** Button used to select the plan to view or modify **********/
+        /********** Button used to select the plan to view, modify or provide feedback **********/
         $this->add(array(
             'name' => 'viewModifySelect',
             'attributes' => array(

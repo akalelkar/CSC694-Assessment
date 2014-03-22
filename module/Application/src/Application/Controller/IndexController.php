@@ -29,19 +29,21 @@ class IndexController extends AbstractActionController
     public function indexAction()
     {
         $namespace = new Container('user');
-        //Render LoginForm        
-        $form = new LoginForm();
-        return array('form' => $form,
-                     'message' => $namespace->message);
+        //Render LoginForm 
+        // upon submit, go to authenticate route
+        $form = new LoginForm($this->url()->fromRoute('authenticate'));
+        return new ViewModel(array('form' => $form,
+                                   ));
     }
     
-    public function authenticateAction()
+     public function authenticateAction()
     {
         $namespace = new Container('user');
         
-        // adding global startyear - this is the earliest year in database
+        // adding global startyear
         // this variable used for determining earliest year in year dropdowns
-        $namespace->startyear = 2005;
+        // currently 2006 earliest year in database
+        $namespace->startyear = 2006;
         
         //Get POST data
         $request = $this->getRequest();
@@ -51,21 +53,21 @@ class IndexController extends AbstractActionController
             $password = $request->getPost('password', null);
         }
         if ($password == NULL || $userName == NULL) {
-            $namespace->message = 'Invalid login: missing user ID or password';
-            return $this->redirect()->toRoute('home');
+            $message = 'Invalid login: missing user ID or password';
+            $form = new LoginForm($this->url()->fromRoute('authenticate'));
+            return new ViewModel(array(
+                            'form' => $form,
+                            'message' => $message,
+                            ));    
         }
-        
-        //THIS IS THE DEMO LOGIN  ACTION
-        if ($userName == 'student') {
-            $namespace->message = 'Assessment Portal accessible to Faculty and Administration only';
-            return $this->redirect()->toRoute('home');
-        }
-        else if ($userName == 'role1') {
+
+
+// demo login
+        if ($userName == 'role1') {
             $namespace->userID = 135;
             $namespace->role = 1;
             $namespace->userEmail = NULL;   
             $namespace->datatelID = $userName;
-            $namespace->message = NULL;
             return $this->redirect()->toRoute('application');
         }
         else if ($userName == 'role2') {
@@ -73,7 +75,6 @@ class IndexController extends AbstractActionController
             $namespace->role = 2;
             $namespace->userEmail = NULL;   
             $namespace->datatelID = $userName;
-            $namespace->message = NULL;
             return $this->redirect()->toRoute('application');
         }
         else if ($userName == 'role3') {
@@ -81,7 +82,6 @@ class IndexController extends AbstractActionController
             $namespace->role = 3;
             $namespace->userEmail = NULL;   
             $namespace->datatelID = $userName;
-            $namespace->message = NULL;
             return $this->redirect()->toRoute('application');
         }
         else if ($userName == 'role4') {
@@ -89,20 +89,22 @@ class IndexController extends AbstractActionController
             $namespace->role = 4;
             $namespace->userEmail = NULL;   
             $namespace->datatelID = $userName;
-            $namespace->message = NULL;
             return $this->redirect()->toRoute('application');
         }
         else if ($userName == 'user') {
             $namespace->userID = NULL;
-            $namespace->role = NULL;
+            $namespace->role = 0;
             $namespace->userEmail = NULL;   
             $namespace->datatelID = $userName;
-            $namespace->message = NULL;
             return $this->redirect()->toRoute('application');
         }
         else {
-            $namespace->message = 'Invalid login: incorrect user ID or password';
-            return $this->redirect()->toRoute('home');
+            $message = 'Invalid login: missing user ID or password';
+            $form = new LoginForm($this->url()->fromRoute('authenticate'));
+            return new ViewModel(array(
+                            'form' => $form,
+                            'message' => $message,
+                            ));    
         }
         
         
@@ -147,8 +149,13 @@ class IndexController extends AbstractActionController
             
             //if it was a student logging in, send them back otherwise continue
             if (strpos($messages2[3], 'stdnts') == TRUE) {
-                $namespace->message = 'Assessment Portal accessible to Faculty and Administration only';
-                return $this->redirect()->toRoute('home');
+                $message = 'Invalid login: missing user ID or password';
+                $form = new LoginForm($this->url()->fromRoute('authenticate'));
+                return new ViewModel(array(
+                            'form' => $form,
+                            'message' => $message,
+                            ));    
+
             }
             
             //Now we retrieve application specific information about the user using DB queries
@@ -170,13 +177,16 @@ class IndexController extends AbstractActionController
             //$namespace->role = $userRole;
             //$namespace->userEmail = $userEmail;   
             $namespace->datatelID = $userName;
-            $namespace->message = NULL;
-            
-            return $this->redirect()->toRoute('application');        
-        }
+            return $this->redirect()->toRoute('application');
+}
         else {            
-            $namespace->message = 'Invalid login: incorrect user ID or password';
-            return $this->redirect()->toRoute('home');
+            $message = 'Invalid login: missing user ID or password';
+            $form = new LoginForm($this->url()->fromRoute('authenticate'));
+            return new ViewModel(array(
+                            'form' => $form,
+                            'message' => $message,
+                            ));    
+
         }
         */
     }

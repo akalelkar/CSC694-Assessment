@@ -104,35 +104,42 @@
 		
 	      </div>
 	      <table>
-		  <th>Add Files</th>
-	      
-		  <tr><td>File Description</td></tr>
-		  
-		  <tr>
-		      <td>
-			  <?php echo $this->formInput($form->get('fileDescription0')); ?>
-		      </td>
-		      <td>
-			  <?php echo $this->formFile($form->get('fileUpload')); ?>
-		      </td>
-	      
-		      <td>
-			  <a href="#" id="removeFile0" name="removeFile0"  onclick="$('#fileUpload').replaceWith($('#fileUpload').clone());document.getElementById('fileDescription0').value = '';">Remove File</a>
-		      </td>
-		  </tr>
-		  <tr>
-		      <td>
-			  <?php echo $this->formInput($form->get('fileDescription1')); ?>
-		      </td>
-		      <td>
-			  <?php echo $this->formFile($form->get('fileUpload1')); ?>
-		      </td>
-	      
-		      <td>
-			  <a href="#" id="removeFile1" name="removeFile1"  onclick="$('#fileUpload1').replaceWith($('#fileUpload1').clone());document.getElementById('fileDescription1').value = '';">Remove File</a>
-		      </td>
-		  </tr>
-	      </table>
+		<tr><th>File Description</th></tr>
+		
+		<!-- enter the first upload row -->
+		<tr>
+		    <td>
+			<?php $elem = $form->get('textFileDescription0'); ?>
+			<?php echo $this->formInput($elem); ?>
+		    </td>
+		    <td>
+			<?php $elem = $form->get('fileUpload0'); ?>
+			<?php echo $this->formFile($elem); ?>
+			<?php echo $this->formElementErrors($elem); ?>
+		    </td>
+	    
+		    <td>
+			<a href="#" id="removeFile0" name="removeFile0">Remove File</a>
+		    </td>
+		</tr>
+		
+		<!-- enter the second upload row -->
+		<tr>
+		    <td>
+			<?php $elem = $form->get('textFileDescription1'); ?>
+			<?php echo $this->formInput($elem); ?>
+		    </td>
+		    <td>
+			<?php $elem = $form->get('fileUpload1'); ?>
+			<?php echo $this->formFile($elem); ?>
+			<?php echo $this->formElementErrors($elem); ?>
+		    </td>
+	    
+		    <td>
+			<a href="#" id="removeFile1" name="removeFile1">Remove File</a>
+		    </td>
+		</tr>
+	    </table>
 	      </br>
 		      
 		      </div> <!-- controls -->

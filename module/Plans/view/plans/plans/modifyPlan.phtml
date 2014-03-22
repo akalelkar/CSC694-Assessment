@@ -22,391 +22,344 @@
 	<!-- Begin creating the form -->
 	<?php echo $this->form()->openTag($form); ?>
 	    
-	    <div class="col-md-8">
-		    <div class="bs-example">
-			    <!-- create header line -->
-			    <?php
-				$label="";
-				echo "<h4>" . $label . $unit . ", " . $programs . ", " . $year . "</h4>";
-					
-				// prepare hidden elements to pass data between pages		
-				$elem = $form->get('planId');
-				$elem->setValue($planId);					    
-				echo $this->formInput($elem);
-				
-				$elem = $form->get('unit');
-				$elem->setValue($unit);					    
-				echo $this->formInput($elem);
-		
-				$elem = $form->get('programs');
-				$elem->setValue($programs);					    
-				echo $this->formInput($elem);
-				
-				$elem = $form->get('year');
-				$elem->setValue($year);					    
-				echo $this->formInput($elem);
-				
-				$elem = $form->get('dbDraftFlag');
-				$elem->setValue($plan['draft_flag']);					    
-				echo $this->formInput($elem);
-			    ?>
-				<div class="controls">
-				    <div class="panel-group" id="accordion">
-
-				    <!-- if there are outcomes present display the array of outcomes -->
-				    <?php
-					if (!empty($outcomes))
-					{
-				    ?>
-						<div class="panel panel-success">
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOutcome">Outcomes</a>
-							</h4>
-						    </div>
-		
-						    <div id="collapseOutcome" class="panel-collapse collapse in">
-							<div class="panel-body">
-							    <?php							    
-        							    // loop through all the outcomes
-								    $outcomeCount = 0;
-								    foreach ($outcomes as $outcome) :
-									$outcomeCount++;								
-							    ?>
-								<!-- display the counter with the outcome text -->
-								<p><?php echo $outcomeCount; ?>. <?php echo $outcome->getOutcomeText() ?></td></p>
-							    <?php
-								    endforeach;
-							    ?>
-							</div>
-						    </div>
-						</div>
-	
-						<!-- listing of all the database attributes that can be updated -->
-						<div class="panel panel-success">
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAssessmentMethod">
-								Describe assessment method.
-							    </a>
-							</h4>
-						    </div>
+	<div class="col-md-8">
+	    <div class="bs-example">
+		<!-- create header line -->
+		<?php
+		    $label="";
+		    echo "<h4>" . $label . $unit . ", " . $programs . ", " . $year . "</h4>";
+			    
+		    // prepare hidden elements to pass data between pages		
+		    $elem = $form->get('planId');
+		    $elem->setValue($planId);					    
+		    echo $this->formInput($elem);
 		    
-						    <div id="collapseAssessmentMethod" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$elem = $form->get('textAssessmentMethod');
-								$elem->setValue($plan['assessment_method']);
-								echo $this->formTextarea($elem);
-							    ?>
-							</div>
-						    </div>
-		    
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapsePopulation">
-								Describe population assessed.
-							    </a>
-							</h4>
-						    </div>
-		    
-						    <div id="collapsePopulation" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$elem = $form->get('textPopulation');
-								$elem->setValue($plan['population']);
-								echo $this->formTextarea($elem);
-							    ?>						
-							</div>
-						    </div>
-		    
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseSampleSize">
-								Describe sample size assessed.
-							    </a>
-							</h4>
-						    </div>
-		    
-						    <div id="collapseSampleSize" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$elem = $form->get('textSamplesize');
-								$elem->setValue($plan['sample_size']);
-								echo $this->formTextarea($elem);
-							    ?>						
-							</div>
-						    </div>
-		    
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAssessmentDate">
-								Describe assessment date assessed.
-							    </a>
-							</h4>
-						    </div>
-		    
-						    <div id="collapseAssessmentDate" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$elem = $form->get('textAssessmentDate');
-								$elem->setValue($plan['assessment_date']);
-								echo $this->formTextarea($elem);
-							    ?>						
-							</div>
-						    </div>
-		    
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseCost">
-								Describe cost assessed.
-							    </a>
-							</h4>
-						    </div>
-		    
-						    <div id="collapseCost" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$elem = $form->get('textCost');
-								$elem->setValue($plan['cost']);
-								echo $this->formTextarea($elem);
-							    ?>						
-							</div>
-						    </div>
-						    
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseFundingFlag">
-								Are you requesting funding?
-							    </a>
-							</h4>
-						    </div>
-		    
-						    <div id="collapseFundingFlag" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$fundingFlag = $plan['funding_flag'];
-								$elem = $form->get('fundingFlag');
-								$elem->setValue($fundingFlag);
-								echo $this->formRow($form->get('fundingFlag'));
+		    $elem = $form->get('unit');
+		    $elem->setValue($unit);					    
+		    echo $this->formInput($elem);
     
-								echo "<br>";
-								echo "<a href=\"http://northcentralcollege.edu/home/\" target=\"_blank\" >Funding Form</a>";
-							    ?>						
-							</div>
-						    </div>		
+		    $elem = $form->get('programs');
+		    $elem->setValue($programs);					    
+		    echo $this->formInput($elem);
 		    
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAnalysisType">
-								Describe analysis type assessed.
-							    </a>
-							</h4>
-						    </div>
+		    $elem = $form->get('year');
+		    $elem->setValue($year);					    
+		    echo $this->formInput($elem);
 		    
-						    <div id="collapseAnalysisType" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$elem = $form->get('textAnalysisType');
-								$elem->setValue($plan['analysis_type']);
-								echo $this->formTextarea($elem);
-							    ?>						
-							</div>
-						    </div>
-		    
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAdministrator">
-								Describe administrator assessed.
-							    </a>
-							</h4>
-						    </div>
-		    
-						    <div id="collapseAdministrator" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$elem = $form->get('textAdministrator');
-								$elem->setValue($plan['administrator']);
-								echo $this->formTextarea($elem);
-							    ?>						
-							</div>
-						    </div>
-		    
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAnalysisMethod">
-								Describe analysis method assessed.
-							    </a>
-							</h4>
-						    </div>
-		    
-						    <div id="collapseAnalysisMethod" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$elem = $form->get('textAnalysisMethod');
-								$elem->setValue($plan['analysis_method']);
-								echo $this->formTextarea($elem);
-							    ?>						
-							</div>
-						    </div>
-		    
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseScope">
-								Describe scope assessed.
-							    </a>
-							</h4>
-						    </div>
-		    
-						    <div id="collapseScope" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$elem = $form->get('textScope');
-								$elem->setValue($plan['scope']);
-								echo $this->formTextarea($elem);
-							    ?>						
-							</div>
-						    </div>					    
-							
-						</div>
-				    <?php
-					}
-					else
-					{
-				    ?>
-						<!-- If there are no outcomes then display all the meta database attributes -->
-						<div class="panel panel-success">
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseMetaDescription">
-								Meta Description.
-							    </a>
-							</h4>
-						    </div>
-		
-						    <div id="collapseMetaDescription" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$elem = $form->get('textMetaDescription');
-								$elem->setValue($plan['meta_description']);
-								echo $this->formTextarea($elem);
-							    ?>	
-							</div>
-						    </div>
-						</div>
-				    <?php
-				        }
-				    ?>
-				    
-				    <?php
-					// is the role an admin or liaison?  Feedback can only be updated by the admin or liaison.
-					if ($role ==1 || $role == 2)
-					{
-				    ?>
-						<div class="panel panel-success">
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseFeedback">
-								Describe feedback assessed.
-							    </a>
-							</h4>
-						    </div>
-		    
-						    <div id="collapseFeedback" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$elem = $form->get('textFeedback');
-								$elem->setValue($plan['feedback_text']);
-								echo $this->formTextarea($elem);
-							    ?>						
-							</div>
-						    </div>
-		    
-						    <div class="panel-heading">
-							<h4 class="panel-title">
-							    <a data-toggle="collapse" data-parent="#accordion" href="#collapseFeedbackFlag">
-								Describe feedback flag assessed.
-							    </a>
-							</h4>
-						    </div>
-		    
-						    <div id="collapseFeedbackFlag" class="panel-collapse collapse">
-							<div class="panel-body">
-							    <?php
-								$feedbackFlag = $plan['feedback'];
-								$elem = $form->get('feedbackFlag');
-								$elem->setValue($feedbackFlag);
-								echo $this->formRow($form->get('feedbackFlag'));
-							    ?>						
-							</div>
-						    </div>
-						</div>				    
-				    <?php
-					    
-					}
-				    ?>
-					    </div>
-				</div> <!-- controls -->    
-	
-				<!-- display all the plan document information -->
-				<div id="contentModify">
-				    <div>
-					<?php
-					    // loop through all the plan documents
-					    $planDocumentsCount = 0;
-					    if (!empty($planDocuments)) {
-						foreach ($planDocuments as $planDocument) :
-						    $planDocumentsCount++;
-						    
-						    // combine the file name and file ext
-						    $filename = $planDocument['file_name'] . "." . $planDocument['file_ext'];
-					?>						    					
-						<p>
-						    <!-- Create a delete button for each row -->
-						    <a class="btn btn-warning btn-xs" id="deleteDocument" name="deleteDocument" value="<?php echo $planDocument['id'];?>"> 
-							Delete &raquo;
-						    </a>
-						    &nbsp;
-						    &nbsp;
-						    
-						    <!-- display the plan document information -->
-						    <?php echo $planDocumentsCount;?>.
-						    
-						    <!-- create a hyperlink and url to display the document in another pgae -->
-						    <a  href="<?php echo $this->url('plans',
-									 array('action'=>'downloadFile',
-									       'id' => $planDocument['id'],
-									       ));
-							  ?>"
-						    >
-							<?php echo $filename?>
-						    </a>
-						    <?php echo " Description: ". $planDocument['file_description']?>
-						</p>
-					<?php
-						endforeach;
-					    }
-					?>
-				    </div>
-				</div>		
-	
-				<!-- use partials to load the upload buttons -->
-				<?php echo $this->partial('plans/plans/plansUploadButtonPartial.phtml', array('form' => $form,)); ?>
-				
-				<!-- display the save draft and submit buttons -->
-				<?php
-				    // Only display the save draft button if the plan is currenlty set as a draft in the database once the plan is submitted it can no longer be modified as a draft
-				    if($plan['draft_flag'] == "1"){
-					$elem = $form->get('formSavePlan');
-					$elem->setName('formSubmitPlan');
-					echo $this->formButton($elem);
-				    }
+		    $elem = $form->get('dbDraftFlag');
+		    $elem->setValue($plan['draft_flag']);					    
+		    echo $this->formInput($elem);
+		?>
+		<div class="controls">
+		    <div class="panel-group" id="accordion">
 
-				    $elem = $form->get('formSubmitPlan');
-				    echo $this->formButton($elem);
-				?>
+		    <!-- if there are outcomes present display the array of outcomes -->
+		    <?php
+			if (!empty($outcomes))
+			{
+		    ?>
+			<div class="panel panel-success">
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOutcome">Outcomes</a>
+				</h4>
+			    </div>
+    
+			    <div id="collapseOutcome" class="panel-collapse collapse in">
+				<div class="panel-body">
+				    <?php							    
+					    // loop through all the outcomes
+					    $outcomeCount = 0;
+					    foreach ($outcomes as $outcome) :
+						$outcomeCount++;								
+				    ?>
+					<!-- display the counter with the outcome text -->
+					<p><?php echo $outcomeCount; ?>. <?php echo $outcome->getOutcomeText() ?></td></p>
+				    <?php
+					    endforeach;
+				    ?>
+				</div>
+			    </div>
+			</div>
+    
+			<!-- listing of all the database attributes that can be updated -->
+			<div class="panel panel-success">
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAssessmentMethod">
+					Describe assessment method.
+				    </a>
+				</h4>
+			    </div>
+    
+			    <div id="collapseAssessmentMethod" class="panel-collapse collapse">
+				<div class="panel-body">
+				    <?php
+					$elem = $form->get('textAssessmentMethod');
+					$elem->setValue($plan['assessment_method']);
+					echo $this->formTextarea($elem);
+				    ?>
+				</div>
+			    </div>
+    
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				    <a data-toggle="collapse" data-parent="#accordion" href="#collapsePopulation">
+					Describe population assessed.
+				    </a>
+				</h4>
+			    </div>
+    
+			    <div id="collapsePopulation" class="panel-collapse collapse">
+				<div class="panel-body">
+				    <?php
+					$elem = $form->get('textPopulation');
+					$elem->setValue($plan['population']);
+					echo $this->formTextarea($elem);
+				    ?>						
+				</div>
+			    </div>
+    
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseSampleSize">
+					Describe sample size assessed.
+				    </a>
+				</h4>
+			    </div>
+    
+			    <div id="collapseSampleSize" class="panel-collapse collapse">
+				<div class="panel-body">
+				    <?php
+					$elem = $form->get('textSamplesize');
+					$elem->setValue($plan['sample_size']);
+					echo $this->formTextarea($elem);
+				    ?>						
+				</div>
+			    </div>
+    
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAssessmentDate">
+					Describe assessment date assessed.
+				    </a>
+				</h4>
+			    </div>
+    
+			    <div id="collapseAssessmentDate" class="panel-collapse collapse">
+				<div class="panel-body">
+				    <?php
+					$elem = $form->get('textAssessmentDate');
+					$elem->setValue($plan['assessment_date']);
+					echo $this->formTextarea($elem);
+				    ?>						
+				</div>
+			    </div>
+    
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseCost">
+					Describe cost assessed.
+				    </a>
+				</h4>
+			    </div>
+    
+			    <div id="collapseCost" class="panel-collapse collapse">
+				<div class="panel-body">
+				    <?php
+					$elem = $form->get('textCost');
+					$elem->setValue($plan['cost']);
+					echo $this->formTextarea($elem);
+				    ?>						
+				</div>
+			    </div>
+			    
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseFundingFlag">
+					Are you requesting funding?
+				    </a>
+				</h4>
+			    </div>
+    
+			    <div id="collapseFundingFlag" class="panel-collapse collapse">
+				<div class="panel-body">
+				    <?php
+					$fundingFlag = $plan['funding_flag'];
+					$elem = $form->get('fundingFlag');
+					$elem->setValue($fundingFlag);
+					echo $this->formRow($form->get('fundingFlag'));
+    
+					echo "<br>";
+					echo "<a href=\"http://northcentralcollege.edu/home/\" target=\"_blank\" >Funding Form</a>";
+				    ?>						
+				</div>
+			    </div>		
+    
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAnalysisType">
+					Describe analysis type assessed.
+				    </a>
+				</h4>
+			    </div>
+    
+			    <div id="collapseAnalysisType" class="panel-collapse collapse">
+				<div class="panel-body">
+				    <?php
+					$elem = $form->get('textAnalysisType');
+					$elem->setValue($plan['analysis_type']);
+					echo $this->formTextarea($elem);
+				    ?>						
+				</div>
+			    </div>
+    
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAdministrator">
+					Describe administrator assessed.
+				    </a>
+				</h4>
+			    </div>
+    
+			    <div id="collapseAdministrator" class="panel-collapse collapse">
+				<div class="panel-body">
+				    <?php
+					$elem = $form->get('textAdministrator');
+					$elem->setValue($plan['administrator']);
+					echo $this->formTextarea($elem);
+				    ?>						
+				</div>
+			    </div>
+    
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAnalysisMethod">
+					Describe analysis method assessed.
+				    </a>
+				</h4>
+			    </div>
+    
+			    <div id="collapseAnalysisMethod" class="panel-collapse collapse">
+				<div class="panel-body">
+				    <?php
+					$elem = $form->get('textAnalysisMethod');
+					$elem->setValue($plan['analysis_method']);
+					echo $this->formTextarea($elem);
+				    ?>						
+				</div>
+			    </div>
+    
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseScope">
+					Describe scope assessed.
+				    </a>
+				</h4>
+			    </div>
+    
+			    <div id="collapseScope" class="panel-collapse collapse">
+				<div class="panel-body">
+				    <?php
+					$elem = $form->get('textScope');
+					$elem->setValue($plan['scope']);
+					echo $this->formTextarea($elem);
+				    ?>						
+				</div>
+			    </div>					    
+				
+			</div>
+		    <?php
+			}
+			else
+			{
+		    ?>
+			<!-- If there are no outcomes then display all the meta database attributes -->
+			<div class="panel panel-success">
+			    <div class="panel-heading">
+				<h4 class="panel-title">
+				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseMetaDescription">
+					Meta Description.
+				    </a>
+				</h4>
+			    </div>
+
+			    <div id="collapseMetaDescription" class="panel-collapse collapse">
+				<div class="panel-body">
+				    <?php
+					$elem = $form->get('textMetaDescription');
+					$elem->setValue($plan['meta_description']);
+					echo $this->formTextarea($elem);
+				    ?>	
+				</div>
+			    </div>
+			</div>
+		    <?php
+			}
+		    ?>
+		    
 		    </div>
+		</div> <!-- controls -->    
+
+		<!-- display all the plan document information -->
+		<div id="contentModify">
+		    <div>
+			<?php
+			    // loop through all the plan documents
+			    $planDocumentsCount = 0;
+			    if (!empty($planDocuments)) {
+				foreach ($planDocuments as $planDocument) :
+				    $planDocumentsCount++;
+				    
+				    // combine the file name and file ext
+				    $filename = $planDocument['file_name'] . "." . $planDocument['file_ext'];
+			?>						    					
+				<p>
+				    <!-- Create a delete button for each row -->
+				    <a class="btn btn-warning btn-xs" id="deleteDocument" name="deleteDocument" value="<?php echo $planDocument['id'];?>"> 
+					Delete &raquo;
+				    </a>
+				    &nbsp;
+				    &nbsp;
+				    
+				    <!-- display the plan document information -->
+				    <?php echo $planDocumentsCount;?>.
+				    
+				    <!-- create a hyperlink and url to display the document in another pgae -->
+				    <a  href="<?php echo $this->url('plans',
+							 array('action'=>'downloadFile',
+							       'id' => $planDocument['id'],
+							       ));
+					  ?>"
+				    >
+					<?php echo $filename?>
+				    </a>
+				    <?php echo " Description: ". $planDocument['file_description']?>
+				</p>
+			<?php
+				endforeach;
+			    }
+			?>
+		    </div>
+		</div>		
+
+		<!-- use partials to load the upload buttons -->
+		<?php echo $this->partial('plans/plans/plansUploadButtonPartial.phtml', array('form' => $form,)); ?>
+		
+		<!-- display the save draft and submit buttons -->
+		<?php
+		    // Only display the save draft button if the plan is currently set as a draft in the database once the plan is submitted it can no longer be modified as a draft
+		    if($plan['draft_flag'] == "1"){
+			$elem = $form->get('formSavePlan');
+			$elem->setName('formSubmitPlan');
+			echo $this->formButton($elem);
+		    }
+
+		    $elem = $form->get('formSubmitPlan');
+		    echo $this->formButton($elem);
+		?>
 	    </div>
+	</div>
         <?php echo $this->form()->closeTag($form); ?>
     </div>
 </div>

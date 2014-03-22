@@ -1,21 +1,50 @@
-<?php echo $this->partial('admin/admin/menu.phtml',array('active'=>'user')); ?>
 <?php
-    $title = 'Modify User';
-    $this->headTitle($title);
+// module/Admin/view/admin/user/index.phtml:
+$title = 'Modify User';
+$this->headTitle($title);
 ?>
+<?php echo $this->partial('admin/admin/menu.phtml',array('active'=>'user')); ?>
+
+
+<?php
+    // get form ready to be used
+    $form = $this->form;
+    $form->prepare();
+    echo $this->form()->openTag($form);
+?>
+    
 <div class="row user-content">
     <div class="title col-md-12">
-        <h1><?php echo $this->escapeHtml($title); ?></h1>
+        <center><h2><?php echo $this->escapeHtml($title); ?></h2></center>
     </div>
+
+
+<div class="row user-content">
+  
     <div class="user-form-wrapper col-md-12" style="overflow:hidden;">
        <div class="user-form" style="overflow:hidden;">
-            <?php echo $this->partial('admin/user/form.phtml', array(
-                'form' => $this->form,
-                'action' => 'edit',
-                'submitVal' =>'Modify User',
-                'id' => $this->id,
-                'count'=>$this->count,
-                'disabledPrivs'=>$this->disabledPrivs)); ?>
-       </div>
+        <div class="col-md-3">  
+            <?php echo $this->formLabel($form->get('full_name')->setLabelAttributes(array('class'=>'control-label'))); ?>
+            <?php echo $this->formInput($form->get('full_name')); ?>
+        </div>
+        <div class="col-md-3">  
+        <div class="form-group col-md-12 user-roles-wrapper">
+            <label class="control-label head-label">Roles</label>
+            <div class="user-roles-container">
+                <?php 
+                     for($i=0; $i<$this->count; $i++)
+                    {
+                         echo $this->formSelect($form->get('role_'.$i)->setLabelAttributes(array('class'=>'control-label ')));
+                    }
+                ?>
+                 <div class="form-group col-md-12 user-role-options-placeholder">
+            <?php  echo $this->formSelect($form->get('liaison_privs'));
+                 echo $this->formSelect($form->get('unit_privs')); 
+              ?>
+        </div>
+            </div>
+        </div>
+        </div>
     </div>
+    <?php echo $this->form()->closeTag($form); ?>
 </div>

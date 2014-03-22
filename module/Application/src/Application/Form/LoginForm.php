@@ -6,11 +6,12 @@ use Zend\Form\Form;
 
 class LoginForm extends Form
 {
-    public function __construct($name = null)
+    public function __construct($url)
     {
         // we want to ignore the name passed
         parent::__construct('login');
         $this->setAttribute('method', 'post');
+        $this->setAttribute('action', $url);
         
         $this->add(array(
             'name' => 'userName',
@@ -44,5 +45,6 @@ class LoginForm extends Form
                 'class' => 'btn btn-primary',
             ),
         ));
+      
     }
 }
