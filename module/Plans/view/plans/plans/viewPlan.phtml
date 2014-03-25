@@ -42,24 +42,22 @@
 					    <div class="panel panel-success">
 						<div class="panel-heading">
 						    <h4 class="panel-title">
-							<a data-toggle="collapse" data-parent="#accordion" href="#collapseOutcomes">Outcomes</a>
+							Outcomes
 						    </h4>
 						</div>
 	
-						<div id="collapseOutcomes" class="panel-collapse collapse in">
-						    <div class="panel-body">
-							<?php
-							    // loop through all the outcomes
-							    $outcomeCount = 0;
-								    foreach ($outcomes as $outcome) :
-									$outcomeCount++;
-							?>
-									<!-- display the outcome information -->
-									<p><?php echo $outcomeCount;?>. <?php echo $outcome->getOutcomeText() ?></p>
-							<?php
-								    endforeach;
-							?>
-						    </div>
+						<div class="panel-body">
+						    <?php
+							// loop through all the outcomes
+							$outcomeCount = 0;
+								foreach ($outcomes as $outcome) :
+								    $outcomeCount++;
+						    ?>
+								    <!-- display the outcome information -->
+								    <p><?php echo $outcomeCount;?>. <?php echo $outcome->getOutcomeText() ?></p>
+						    <?php
+								endforeach;
+						    ?>
 						</div>
 					    </div>
     
@@ -67,50 +65,42 @@
 					    <div class="panel panel-success">
 						<div class="panel-heading">
 						    <h4 class="panel-title">
-							<a data-toggle="collapse" data-parent="#accordion" href="#collapseAssessmentMethod">
-							    Describe assessment method.
-							</a>
+						        Assessment Method
 						    </h4>
 						</div>
 	    
-						<div id="collapseAssessmentMethod" class="panel-collapse collapse">
-						    <div class="panel-body">
-							<?php
-							    $elem = $form->get('textAreaViewOnly');
-							    $elem->setValue($plan['assessment_method']);
-							    echo $this->formTextarea($elem);
-							?>
-						    </div>
+						<div class="panel-body">
+						    <?php
+							$elem = $form->get('textAreaViewOnly');
+							$elem->setValue($plan['assessment_method']);
+							echo $this->formTextarea($elem);
+						    ?>
 						</div>
+					    </div>
 	    
+					    <div class="panel panel-success">
 						<div class="panel-heading">
 						    <h4 class="panel-title">
-							<a data-toggle="collapse" data-parent="#accordion" href="#collapsePopulation">
-							    Describe population assessed.
-							</a>
+						    Population Assessed
 						    </h4>
 						</div>
-	    
-						<div id="collapsePopulation" class="panel-collapse collapse">
-						    <div class="panel-body">
-							<?php
-							    $elem = $form->get('textAreaViewOnly');
-							    $elem->setValue($plan['population']);
-							    echo $this->formTextarea($elem);
-							?>
-						    </div>
+	
+						<div class="panel-body">
+						    <?php
+							$elem = $form->get('textAreaViewOnly');
+							$elem->setValue($plan['population']);
+							echo $this->formTextarea($elem);
+						    ?>
 						</div>
-	    
+					    </div>    
+					
+					    <div class="panel panel-success">
 						<div class="panel-heading">
 						    <h4 class="panel-title">
-							<a data-toggle="collapse" data-parent="#accordion" href="#collapseSampleSize">
-							    Describe sample size assessed.
-							</a>
+						    Sample Size Assessed
 						    </h4>
 						</div>
-	    
-						<div id="collapseSampleSize" class="panel-collapse collapse">
-						    <div class="panel-body">
+						<div class="panel-body">
 							<?php
 							    $elem = $form->get('textAreaViewOnly');
 							    $elem->setValue($plan['sample_size']);
@@ -118,139 +108,114 @@
 							?>
 						    </div>
 						</div>
-	    
+					    </div>
+					    <div class="panel panel-success">
 						<div class="panel-heading">
 						    <h4 class="panel-title">
-							<a data-toggle="collapse" data-parent="#accordion" href="#collapseAssessmentDate">
-							    Describe assessment date assessed.
-							</a>
+							    Assessment Date
 						    </h4>
 						</div>
 	    
-						<div id="collapseAssessmentDate" class="panel-collapse collapse">
-						    <div class="panel-body">
-							<?php
-							    $elem = $form->get('textAreaViewOnly');
-							    $elem->setValue($plan['assessment_date']);
-							    echo $this->formTextarea($elem);
-							?>
-						    </div>
+						<div class="panel-body">
+						    <?php
+							$elem = $form->get('textAreaViewOnly');
+							$elem->setValue($plan['assessment_date']);
+							echo $this->formTextarea($elem);
+						    ?>
 						</div>
-	    
+					    </div>
+					    <div class="panel panel-success">
 						<div class="panel-heading">
 						    <h4 class="panel-title">
-							<a data-toggle="collapse" data-parent="#accordion" href="#collapseCost">
-							    Describe cost assessed.
-							</a>
+							    Cost of Assessment 
+						    </h4>
+						</div>
+					        <div class="panel-body">
+						    <?php
+							$elem = $form->get('textAreaViewOnly');
+							$elem->setValue($plan['cost']);
+							echo $this->formTextarea($elem);
+						    ?>
+					        </div>
+					    </div>
+					    <div class="panel panel-success">	
+						<div class="panel-heading">
+						    <h4 class="panel-title">
+						    Funding Requested
 						    </h4>
 						</div>
 	    
-						<div id="collapseCost" class="panel-collapse collapse">
-						    <div class="panel-body">
-							<?php
-							    $elem = $form->get('textAreaViewOnly');
-							    $elem->setValue($plan['cost']);
-							    echo $this->formTextarea($elem);
-							?>
-						    </div>
+						<div class="panel-body">
+						    <?php
+							$fundingFlag = $plan['funding_flag'];
+							$label = "No";
+							if ($fundingFlag == 1) {
+							    $label = "Yes";
+							}
+							
+							$elem = $form->get('textAreaViewOnly');
+							$elem->setValue($label);
+							echo $this->formTextarea($elem);
+						    ?>
 						</div>
-						
+					    </div>
+					    <div class="panel panel-success"> 
 						<div class="panel-heading">
 						    <h4 class="panel-title">
-							<a data-toggle="collapse" data-parent="#accordion" href="#collapseFundingFlag">
-							    Are you requesting funding?
-							</a>
+						    Type of Analysis
 						    </h4>
 						</div>
 	    
-						<div id="collapseFundingFlag" class="panel-collapse collapse">
-						    <div class="panel-body">
-							<?php
-							    $fundingFlag = $plan['funding_flag'];
-							    $label = "No";
-							    if ($fundingFlag == 1) {
-								$label = "Yes";
-							    }
-							    
-							    $elem = $form->get('textAreaViewOnly');
-							    $elem->setValue($label);
-							    echo $this->formTextarea($elem);
-							?>
-						    </div>
+						<div class="panel-body">
+						    <?php
+							$elem = $form->get('textAreaViewOnly');
+							$elem->setValue($plan['analysis_type']);
+							echo $this->formTextarea($elem);
+						    ?>
 						</div>
-						
-	    
+					    </div>
+					    <div class="panel panel-success">	
 						<div class="panel-heading">
 						    <h4 class="panel-title">
-							<a data-toggle="collapse" data-parent="#accordion" href="#collapseAnalysisType">
-							    Describe analysis type assessed.
-							</a>
+						    Administrator
 						    </h4>
 						</div>
-	    
-						<div id="collapseAnalysisType" class="panel-collapse collapse">
-						    <div class="panel-body">
-							<?php
-							    $elem = $form->get('textAreaViewOnly');
-							    $elem->setValue($plan['analysis_type']);
-							    echo $this->formTextarea($elem);
-							?>
-						    </div>
+						<div class="panel-body">
+						    <?php
+							$elem = $form->get('textAreaViewOnly');
+							$elem->setValue($plan['administrator']);
+							echo $this->formTextarea($elem);
+						    ?>
 						</div>
-	    
+					    </div>
+					    <div class="panel panel-success">	    
 						<div class="panel-heading">
 						    <h4 class="panel-title">
-							<a data-toggle="collapse" data-parent="#accordion" href="#collapseAdministrator">
-							    Describe administrator assessed.
-							</a>
+						    Analysis Method
 						    </h4>
 						</div>
-	    
-						<div id="collapseAdministrator" class="panel-collapse collapse">
-						    <div class="panel-body">
-							<?php
-							    $elem = $form->get('textAreaViewOnly');
-							    $elem->setValue($plan['administrator']);
-							    echo $this->formTextarea($elem);
-							?>
-						    </div>
+						<div class="panel-body">
+						    <?php
+							$elem = $form->get('textAreaViewOnly');
+							$elem->setValue($plan['analysis_method']);
+							echo $this->formTextarea($elem);
+						    ?>
 						</div>
-	    
+					    </div>
+					    <div class="panel panel-success">	    
 						<div class="panel-heading">
 						    <h4 class="panel-title">
-							<a data-toggle="collapse" data-parent="#accordion" href="#collapseAnalysisMethod">
-							    Describe analysis method assessed.
-							</a>
+							Scope of Assessment
 						    </h4>
 						</div>
-	    
-						<div id="collapseAnalysisMethod" class="panel-collapse collapse">
-						    <div class="panel-body">
-							<?php
-							    $elem = $form->get('textAreaViewOnly');
-							    $elem->setValue($plan['analysis_method']);
-							    echo $this->formTextarea($elem);
-							?>
-						    </div>
+						<div class="panel-body">
+						    <?php
+							$elem = $form->get('textAreaViewOnly');
+							$elem->setValue($plan['scope']);
+							echo $this->formTextarea($elem);
+						    ?>
 						</div>
-	    
-						<div class="panel-heading">
-						    <h4 class="panel-title">
-							<a data-toggle="collapse" data-parent="#accordion" href="#collapseScope">
-							    Describe scope assessed.
-							</a>
-						    </h4>
-						</div>
-	    
-						<div id="collapseScope" class="panel-collapse collapse">
-						    <div class="panel-body">
-							<?php
-							    $elem = $form->get('textAreaViewOnly');
-							    $elem->setValue($plan['scope']);
-							    echo $this->formTextarea($elem);
-							?>
-						    </div>
-						</div>					    
+					    </div>					    
 							
 				    <?php
 					}
@@ -261,21 +226,18 @@
 					    <!-- all the meta database attributes are listed below -->
 					    <div class="panel-heading">
 						<h4 class="panel-title">
-						    <a data-toggle="collapse" data-parent="#accordion" href="#collapseMetaDescription">
-							Meta Description.
-						    </a>
+						Meta Description
 						</h4>
 					    </div>
 	
-					    <div id="collapseMetaDescription" class="panel-collapse collapse">
-						<div class="panel-body">
-						    <?php
-							$elem = $form->get('textAreaViewOnly');
-							$elem->setValue($plan['meta_description']);
-							echo $this->formTextarea($elem);
-						    ?>	
-						</div>
+					    <div class="panel-body">
+						<?php
+						    $elem = $form->get('textAreaViewOnly');
+						    $elem->setValue($plan['meta_description']);
+						    echo $this->formTextarea($elem);
+						?>	
 					    </div>
+					</div>
 				    <?php
 					}
 				    ?>
@@ -284,51 +246,32 @@
 					if ($role != 0)
 					{
 				    ?>
-		
-					    <!-- display all the feedback attributes -->
+				     
+				    <!-- display all the feedback attributes -->
+					<div class="panel panel-success">
 					    <div class="panel-heading">
 						<h4 class="panel-title">
-						    <a data-toggle="collapse" data-parent="#accordion" href="#collapseFeedback">
-							Describe feedback assessed.
-						    </a>
+						Feedback
+						<?php
+						    $feedbackFlag = $plan['feedback'];
+						    if ($feedbackFlag == 1) {
+							echo " &nbsp &nbsp  (In Need of Revision)";
+						    } else if ($feedbackFlag == 2){
+							echo " &nbsp &nbsp (Ready to be Carried Out)";
+						    }
+						?>    
 						</h4>
 					    </div>
 		    
-					    <div id="collapseFeedback" class="panel-collapse collapse">
-						<div class="panel-body">
-						    <?php
-							$elem = $form->get('textAreaViewOnly');
-							$elem->setValue($plan['feedback_text']);
-							echo $this->formTextarea($elem);
-						    ?>						
-						</div>
+					    <div class="panel-body">
+						<?php
+						    $elem = $form->get('textAreaViewOnly');
+						    $elem->setValue($plan['feedback_text']);
+						    echo $this ->formTextarea($elem);
+						?>						
 					    </div>
+					</div>
 		    
-					    <div class="panel-heading">
-						<h4 class="panel-title">
-						    <a data-toggle="collapse" data-parent="#accordion" href="#collapseFeedbackFlag">
-							Describe feedback flag assessed.
-						    </a>
-						</h4>
-					    </div>
-		    
-					    <div id="collapseFeedbackFlag" class="panel-collapse collapse">
-						<div class="panel-body">
-						    <?php
-							$feedbackFlag = $plan['feedback'];
-							$label = "";
-							if ($feedbackFlag == 1) {
-							    $label = "In Need of Revision";
-							} else if ($feedbackFlag == 2){
-							    $label = "Ready to be Carried Out";
-							}
-							
-							$elem = $form->get('textAreaViewOnly');
-							$elem->setValue($label);
-							echo $this->formTextarea($elem);
-						    ?>						
-						</div>
-					    </div>
 					<?php
 					}
 					?>

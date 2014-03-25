@@ -3,14 +3,53 @@
 if(!$results){
     echo 'There are no reports associated with this plan';
 }else{
+    $form->setAttribute('action', $this->url('reports', array('action' => 'updateReport')));
+    $form->setAttribute('name', 'data');
+    $form->setAttribute('id', 'data');
+    $form->setAttribute('enctype', 'multipart/form-data');
+
+    $form->prepare();
+    echo $this->form()->openTag($form);
+    echo $this->formHidden($form->get('id')->setAttribute('value', $report[0]['id']));
+    echo $this->formHidden($form->get('status')->setAttribute('value', '0'));
 ?>
+
 <div class="col-md-8">
     <div class="table-responsive">
 	<table class="table table-bordered table-striped">
 	    <colgroup>
 		<col class="col-xs-8">
 	    </colgroup>  
-	    <div class="bs-example">
+            <dl>
+        
+                        <dt><h3>Enter Feedback For Plan Shown Below</h3>
+                            Choose Feedback Option    
+                        </dt>
+                        <dd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                           <?php
+                                $feedbackFlag = $report[0]['feedback'];
+                                $elem = $form->get('feedbackFlag');
+                                $elem->setValue($feedbackFlag);
+                                $this->formRadio()->setSeparator('</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+                                echo $this->formRadio($elem);
+                             ?>
+                        </dd>
+                        </br>
+                        <dt>Enter Feedback Message</dt>
+                        <dd>
+                            <?php
+                                $elem = $form->get('feedbackText');
+                                $elem->setValue($report[0]['feedback_text']);
+                                echo $this->formTextarea($elem);
+                            ?>						
+                        </dd>
+                    </dl>
+                    <input class="btn btn-primary btn-md noprint" onclick="" id="submitButton" value="Submit"></input>
+
+                    </br>
+                    </br>	
+		      
+               <div class="bs-example">
 		<table class="table">
 		    <h6>View Report</h6>
 		    <h4><?php echo $report[0]['unit_id'] . ' - ' . $report[0]['name'] . ' - ' . $report[0]['year'];?></h4>
@@ -84,32 +123,7 @@ if(!$results){
 					<?php echo $report[0]['actions']?>
 				</div>
 			    </div>
-			     <?php
-				// general users may not see feedback
-				if ($role != 0)
-				{
-			    ?>
-				<div class="panel panel-success">
-				    <div class="panel-heading">
-					<!-- Feedback flag -->
-					<h4 class="panel-title">
-					    Feedback
-					    <?php
-						if($report[0]['feedback'] == 2){
-						    echo '&nbsp &nbsp (Approved)';
-						}else{
-						    echo '&nbsp &nbsp (In need of revision)';
-						}
-					    ?>
-					</h4>
-				    </div>
-				    <div class="panel-body">
-					    <?php echo $report[0]['feedback_text']?>
-				    </div>
-				</div>
-				<?php
-				}
-				?>
+			
 			</div>
 			<table>
 			    <!-- Show existing documents -->

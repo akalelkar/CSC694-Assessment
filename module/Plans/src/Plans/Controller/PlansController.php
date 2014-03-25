@@ -708,7 +708,7 @@ class PlansController extends AbstractActionController
       $namespace = new Container('user');
       $role = $namespace->role;
       
-      // form for modifly page
+      // form for modify page
       $form = new Plan('provideFeedback');
         
       // get the data from the request using json            

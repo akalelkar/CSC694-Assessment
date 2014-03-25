@@ -6,7 +6,12 @@
     $form->setAttribute('action', $this->url('plans',array('action'=>'updateplan')));
     $form->prepare();
 ?>
+<style type="text/css">
+dd {
 
+ padding-left: 2em;
+}
+</style>
 <!-- create the right side of the page -->
 <div class="container">
     <div class="row">
@@ -41,8 +46,7 @@
 		    $elem->setValue($plan['draft_flag']);					    
 		    echo $this->formInput($elem);
 		?>
-		<div class="controls">
-                    <dl>
+		    <dl>
                         <dt><h3>Enter Feedback For Plan Shown Below</h3>
                             Choose Feedback Option    
                         </dt>
@@ -90,7 +94,7 @@
 
                             </br>
                             <dt>Assessment Method</dt>
-                            <dd>
+                            <dd class='indent25'>
                                 <?php
                                     echo $plan['assessment_method'];
                                 ?>
@@ -180,9 +184,42 @@
 			}
 		    ?>
                     
-		</div> <!-- controls -->    
-
-		
+			    <!-- display all the plan documents and set them to no print -->
+			    <div class='noprint'>
+				<div>
+				    <?php
+				   	// loop through all the plan documents
+					$planDocumentsCount = 0;
+					if (!empty($planDocuments)) {
+					    foreach ($planDocuments as $planDocument) :
+						$planDocumentsCount++;
+						
+						// combine the file name and file ext
+						$filename = $planDocument['file_name'] . "." . $planDocument['file_ext'];
+						
+						//get the id
+						$id = $planDocument['id']
+				    ?>
+						<!-- display the plan document information -->
+						<p><?php echo $planDocumentsCount;?>.
+						
+						<a  href="<?php echo $this->url('plans',
+										 array('action'=>'downloadFile',
+										'id' => $id,
+										));
+							  ?>"
+						>
+						<?php echo $filename ?></a>
+						<?php echo "  Description: ". $planDocument['file_description']?></p>
+				    <?php
+					    endforeach;
+					}
+					else{
+					   echo "<p>No Documents Attached</p>";
+					}
+				    ?>
+				</div>
+				
 	    </div>
 	</div>
         <?php echo $this->form()->closeTag($form); ?>

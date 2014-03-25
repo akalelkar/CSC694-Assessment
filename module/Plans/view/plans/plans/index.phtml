@@ -52,32 +52,12 @@ $(document).on('change', '#action-menu', function () {
     // disable the submit button until all the selections are choosen
     $("#formListPlans").attr("disabled", "disabled");
     
-    // clear selectorlist before adding unit/department options
-    var oldSelections = $('#unit-menu option');
-    for (var i = 0; i < oldSelections.length; i++){
-       oldSelections.remove();
-    }
-    // data-hidden="true" shows title on button
-    $('#unit-menu').append('<option  data-hidden="true"></option>');
-    $('#unit-menu').selectpicker('refresh');
-   
-    // clear selectorlist for programs
-    var oldSelections = $('#prog-menu option');
-    for (var i = 0; i < oldSelections.length; i++){
-       oldSelections.remove();
-    }
-    $('#prog-menu').append('<option  data-hidden="true"></option>');
-    $('#prog-menu').selectpicker('refresh');
-   
-    // clear selectorlist for years
-    var oldSelections = $('#year-menu option');
-    for (var i = 0; i < oldSelections.length; i++){
-       oldSelections.remove();
-    }
-    // data-hidden="true" shows title on button
-    $('#year-menu').append('<option  data-hidden="true"></option>');
-    $('#year-menu').selectpicker('refresh');
-   
+    clearUnits();
+    
+    clearPrograms();
+        
+    clearYears();
+    
     // create url for redirect
     var urlform = "<?php echo $this->url('plans', array(
                                      'controller'=>'plans',
@@ -111,30 +91,18 @@ $(document).on('change', '#unit-menu', function () {
     // disable the submit button until all the selections are choosen
     $("#formListPlans").attr("disabled", "disabled");
     
-    // clear selectorlist before adding program/degree options
-    var oldSelections = $('#prog-menu option');
-    for (var i = 0; i < oldSelections.length; i++){
-       oldSelections.remove();
-    }
-    $('#prog-menu').selectpicker('refresh');
+    clearPrograms();
+        
+    clearYears();
    
-    // clear selectorlist before adding all the years
-    var oldSelections = $('#year-menu option');
-    for (var i = 0; i < oldSelections.length; i++){
-       oldSelections.remove();
-    }
-   // data-hidden="true" shows title on button
-   $('#year-menu').append('<option  data-hidden="true"></option>');
-   $('#year-menu').selectpicker('refresh');
-   
-   // create url for redirect
-   var urlform = "<?php echo $this->url('plans', array(
+    // create url for redirect
+    var urlform = "<?php echo $this->url('plans', array(
                                     'controller'=>'plans',
                                     'action'=>'getPrograms')); ?>";
-   urlform = urlform + '/' + unit;
+    urlform = urlform + '/' + unit;
    
-   // asynchronous ajax code to populate program/degree selector
-   $.ajax({
+    // asynchronous ajax code to populate program/degree selector
+    $.ajax({
       url: urlform,
       type: "GET",
       dataType: "json",
@@ -148,9 +116,8 @@ $(document).on('change', '#unit-menu', function () {
          }
          $('#prog-menu').selectpicker('refresh');
       },
-   });
+    });
 });
-
 
 /**
  * load all the year options after the unit/department & programs are selected
@@ -160,13 +127,6 @@ $(document).on('change', '#prog-menu', function () {
     // disable the submit button until all the selections are choosen
     $("#formListPlans").attr("disabled", "disabled");
     
-    // clear selectorlist before adding all the years
-    var oldSelections = $('#year-menu option');
-    for (var i = 0; i < oldSelections.length; i++){
-       oldSelections.remove();
-    }   
-  
-    $('#year-menu').append('<option  data-hidden="true"></option>');
     
     // get the action from the page, the action is needed to restrict access for certain roles
     var action = $('#action-menu option:selected').val();
@@ -182,8 +142,11 @@ $(document).on('change', '#prog-menu', function () {
     // 2013 - 2014 is from July 2013 - June 2014
     // 2012 - 2013 is from July 2012 - June 2013
     // repeat until startyear
-	    
-    // get today's data
+	
+    // start with empty set
+    clearYears();
+    
+    // get today's date
     var today = new Date();
     
     // identify the month and year
@@ -330,7 +293,7 @@ $(document).on('click', '#viewModifySelect', function () {
     }
     else if (action == "Provide Feedback")
     {
-        // create the url to redirect to the view plan page
+        // create the url to redirect to the provide feedback plan page
         var urlform = "<?php echo $this->url('plans', array(
                                     'controller'=>'plans',
                                     'action'=>'providefeedback')); ?>";
@@ -611,7 +574,42 @@ function validateAddPlan()
 
     return true;    
 }
+function clearUnits()
+{
+     // clear selectorlist before adding unit/department options
+    var oldSelections = $('#unit-menu option');
+    for (var i = 0; i < oldSelections.length; i++){
+       oldSelections.remove();
+    }
+    // data-hidden="true" shows title on button
+    $('#unit-menu').append('<option  data-hidden="true"></option>');
+    $('#unit-menu').selectpicker('refresh');
+}
 
+function clearPrograms()
+{
+    // clear selectorlist for programs
+    var oldSelections = $('#prog-menu option');
+    for (var i = 0; i < oldSelections.length; i++){
+       oldSelections.remove();
+    }
+    $('#prog-menu').append('<option  data-hidden="true"></option>');
+    $('#prog-menu').selectpicker('refresh');
+   
+}
+
+function clearYears()
+{
+    // clear selectorlist for years
+    var oldSelections = $('#year-menu option');
+    for (var i = 0; i < oldSelections.length; i++){
+       oldSelections.remove();
+    }
+    // data-hidden="true" shows title on button
+    $('#year-menu').append('<option  data-hidden="true"></option>');
+    $('#year-menu').selectpicker('refresh');
+    
+}
 
 /**
  * Only print specific elements on the view page.  To mark elements as non printable

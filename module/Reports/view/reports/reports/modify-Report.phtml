@@ -106,43 +106,6 @@ if(!$results){
 			       </div>
 			    </div>
 			    
-			    <div class="panel-heading">
-				<h4 class="panel-title">
-				  <a data-toggle="collapse" data-parent="#accordion" href="#collapseSeven">
-				    <!-- Show feedback status and text -->
-				      <?php
-					  if($report[0]['feedback'] == 2){
-					      $flag = 2;
-					  }else{
-					      $flag = 1;
-					  }
-				      ?>
-				     Feedback - &nbsp
-				     <?php
-				  if($role < 4){
-				      $read = '';		      
-				  }else{
-				      $read = 'readonly';
-				      if($report[0]['feedback'] == 2){
-					  $feedback = 'Approved';
-				      }else{
-					  $feedback = 'In need of revision';
-				      }
-				      echo $feedback; 
-				  }
-				  
-				  ?>
-				  </a>
-				  <?php
-				  if($role < 4){
-				      $read = '';
-				      echo $this->formRow($form->get('feedbackFlag')->setAttribute('value', $flag));
-			  
-				  }
-				  ?>
-				</h4>
-				
-			     </div>
 			     <div id="collapseSeven" class="panel-collapse collapse">
 				<div class="panel-body">
 			      <?php
@@ -192,7 +155,7 @@ if(!$results){
 			    <?php echo $this->formInput($form->get('fileDescription0')); ?>
 			</td>
 			<td>
-			    <?php echo $this->formFile($form->get('fileUpload')); ?>
+			    <?php echo $this->formFile($form->get('fileUpload0')); ?>
 			</td>
 		
 			<td>

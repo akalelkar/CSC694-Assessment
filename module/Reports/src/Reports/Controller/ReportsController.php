@@ -49,7 +49,7 @@ class ReportsController extends AbstractActionController
 
       // if general user - only view
       // get all units, since only view option is displayed
-      if ($role == null){
+      if ($role == NULL){
          $results = $this->getGenericQueries()->getUnits();
          // iterate over database results forming a php array
          foreach ($results as $result){
@@ -61,9 +61,15 @@ class ReportsController extends AbstractActionController
              'startyear' => $startyear,
          ));
       }
-      else{
-         // user in table with role - show actions
-         // wait to populate units until action chosen
+      else if ($role == 1 or $role == 2) // liaison or admin
+      {
+         return new ViewModel(array(
+            'useractions' => array('View', 'Add', 'Modify', 'Provide Feedback'),
+            'startyear' => $startyear,
+            'role' => $role,
+         ));
+      }
+      else{ // chair or assessor
          return new ViewModel(array(
             'useractions' => array('View', 'Add', 'Modify'),
             'startyear' => $startyear,));
@@ -75,9 +81,10 @@ class ReportsController extends AbstractActionController
    {
       // Get post data which is json
       $jsonData = $this->getRequest()->getContent();
-      
+
       // Get the plans
       $results = $this->getReports($jsonData)->getPlans($jsonData);
+
       // If there are plans
       if(count($results) > 0){
 
@@ -98,15 +105,14 @@ class ReportsController extends AbstractActionController
             $needsAdding = true;
             if(is_null($currPlan->id)){
                $currPlan = new PlanData($result['id'], $result['meta_flag']);
-               array_push($currPlan->descriptions, $result['text']);
             }elseif($currPlan->id == $result['id']){
-               array_push($currPlan->descriptions, $result['text']);
                
             }else{
                array_push($plans, $currPlan);
                $currPlan = new PlanData($result['id'], $result['meta_flag']);
-               array_push($currPlan->descriptions, $result['text']);
             }
+            array_push($currPlan->descriptions, $result['text']);
+                      
          }
          
          // Add last plan
@@ -182,9 +188,12 @@ class ReportsController extends AbstractActionController
    // to view the report for
    public function viewReportAction()
    {
+      // get the session variables
+      $namespace = new Container('user');
+      $role = $namespace->role;
+      
       // Get plan id from post data
       $planId = $this->params()->fromPost('id');
-      
       // Get report that correlates to that plan
       $results = $this->getReports()->getReport($planId);
       
@@ -194,6 +203,7 @@ class ReportsController extends AbstractActionController
          // Store descriptions(outcomes or assessment) in array
          $descriptions = array();
          foreach ($results as $result){
+           
             array_push($descriptions, $result['text']);
             $reportArray[] = $result;
          }
@@ -208,6 +218,7 @@ class ReportsController extends AbstractActionController
          
          // Make view and give it data
          $partialView = new ViewModel(array(
+            'role' => $role,
             'report' => $reportArray, 'descriptions' => $descriptions, 'documents' => $documentArray, 'results' => true,
          ));
       
@@ -259,6 +270,64 @@ class ReportsController extends AbstractActionController
             $documentArray[] = $result;
          }
          
+         // Create view, give it data
+         $partialView = new ViewModel(array(
+            'report' => $reportArray, 'descriptions' => $descriptions, 'form' => $form, 'results' => true,
+            'role' => $role, 'documents' => $documentArray,
+         ));
+         
+         
+      // If there is no report, tell the view to alert user
+      }else{
+         $partialView = new ViewModel(array(
+            'results' => false,
+         ));
+      }
+      
+      // Return view, no headers/footers
+      $partialView->setTerminal(true);
+      return $partialView;
+   }
+   
+    
+   // Called after user selects a report they want to provide feedback for
+   // Displays report data associated with user selected plan 
+   public function provideFeedbackAction()
+   {
+      
+      // get the session variables
+      $namespace = new Container('user');
+      $role = $namespace->role;
+      
+      // Get plan id from post data
+      $planId = $this->params()->fromPost('id');
+      
+      // Get report data for this plan
+      $results = $this->getReports()->getReport($planId);
+    
+      // If there is a report
+      if(count($results) > 0){
+         $descriptions = array();
+       
+         // Loop through results, 1 report, 1 or more outcomes/assessment
+         foreach ($results as $result){
+            array_push($descriptions, $result['text']);
+            $reportArray[] = $result;
+         }
+         
+         // Get a report form for putting in the view
+         $sl = $this->getServiceLocator();
+         $form = $sl->get('FormElementManager')->get('Reports\forms\ReportForm');
+         
+         // Get documents for the report
+         $results = $this->getReports()->getDocuments($reportArray[0]['id']);
+      
+         // Add results to an array
+         $documentArray = array();
+         foreach ($results as $result){
+            $documentArray[] = $result;
+         }
+     
          // Create view, give it data
          $partialView = new ViewModel(array(
             'report' => $reportArray, 'descriptions' => $descriptions, 'form' => $form, 'results' => true,
@@ -343,7 +412,11 @@ class ReportsController extends AbstractActionController
       // Redirect user to index if successful
       $this->redirect()->toRoute('index');
    }
-    
+   // This is called from provide-Feedback.phtml for inserting feedback into existing report
+   
+   public function addFeedback(){
+      
+   }
    // This is called from addReport view for inserting new report
    public function addNewReportAction()
    {

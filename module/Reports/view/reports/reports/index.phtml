@@ -55,9 +55,17 @@
     
 <script>
 function getReports(action, id) {
-    var urlform = "<?php echo $this->url('default', array(
-                                    'controller'=>'reports')); ?>";
-    urlform = urlform + action + 'Report';
+    
+    if (action == "Provide Feedback")
+    {
+        // create the url to redirect to the provide feedback plan page
+        var urlform = "<?php echo $this->url('default', array('controller'=>'reports','action'=>'provideFeedback')); ?>";
+    }
+    else
+    {
+        var urlform = "<?php echo $this->url('default', array('controller'=>'reports')); ?>";
+        urlform = urlform + action + 'Report';
+    }
     // asynchronous ajax code to get Report
     $.ajax({
       url: urlform,
@@ -74,50 +82,7 @@ function getReports(action, id) {
    
 }
 
-// This is only available when saving draft is available
-// Draft defaults to 0 above, if saving draft change to 1 and submit
-// the normal way
-$(document).on('click', '#draftButton', function () {
-    document.getElementById('status').value = 1;
-    document.getElementById('data').submit();
-});
 
-$(document).on('click', '#submitButton', function () {
-    document.getElementById('data').submit();
-});
-
-$(document).on('click', '#deleteButton', function () {
-    document.getElementById('status').value = 2;
-    document.getElementById('data').submit();
-});
-
-// Submit data to get plans
-$(document).on('click', '#submit', function () {
-    var action = document.getElementById('action-menu').value;
-    var unit = document.getElementById('unit-menu').value;
-    var programs = $('[name=prog-menu]').val();
-    var year = document.getElementById('year-menu').value;
-    
-    var json = '{"action" : "' + action + '", "unit" : "' + unit + '", "year" : "' + year + '", "programs" : ' + JSON.stringify(programs) + ' }';
-    // asynchronous ajax code to get plans
-    var urlform = "<?php echo $this->url('default', array(
-				'controller'=>'reports',
-				'action'=>'viewPlans')); ?>";
-    $.ajax({
-       url: urlform,
- 
-       type: "POST",
-       data: json,
-       dataType: "text",
-       error : function(xhr, status, error) {
-            alert(error);
-            console.log("ERROR: ", xhr, xhr.status, xhr.getAllResponseHeaders());
-       },
-       success: function(html){
-            document.getElementById('content').innerHTML = html;
-       },
-    });
-});
 
 // load actions based on user privileges
 $(document).ready(function() {
@@ -129,37 +94,7 @@ $(document).ready(function() {
     // this must come after the options are initialized
     $('.selectpicker').selectpicker();
    
-   // startyear for dropdowns set in session namespace variables
-    var startyear = <?php echo $startyear ?>;
-	    
-    // create the list of years the user can select
-    // identify today's date and adjust to the current school year
-    // 2013 - 2014 is from July 2013 - June 2014
-    // 2012 - 2013 is from July 2012 - June 2013
-    // repeat until startyear
-	    
-    // get today's data
-    var today = new Date();
-    
-    // identify the month and year
-    var month= today.getMonth() + 1; //January is 0
-    var year = today.getFullYear(); // yyyy
    
-    // if the current month is Jan - June the current year is correct
-    // if the current month is July - Dec then current year needs to be incremented by 1
-    if (month >= 7 && month <= 12) {
-	year++;
-    }
-	    
-    // set the complete number of years to display in the year selector 
-    var yearsToDisplay = year - startyear + 1; // add one since the last entry needs to be the (year before the low year) to the (low year)
-
-    $('#year-menu').append('<option  data-hidden="true"></option>');
-    for (var i = 0; i < yearsToDisplay; i++){	    
-        $('#year-menu').append('<option value = ' + year + '>' + (year-1) + ' - ' + year + '</option>');
-        year--;
-    }
-    $('#year-menu').selectpicker('refresh');
 });
 
 // update unit/department options based on actions
@@ -168,7 +103,7 @@ $(document).on('change', '#action-menu', function () {
     // Added this block because class voted to disable submit button
     var action = document.getElementById('action-menu').value;
     var unit = document.getElementById('unit-menu').value;
-    var programs = $('[name=prog-menu]').val();
+    var programs = document.getElementById('prog-menu').value;
     var year = document.getElementById('year-menu').value;
     
     if (!action || !unit || !programs || !year) {
@@ -178,14 +113,13 @@ $(document).on('change', '#action-menu', function () {
     }
     
     $action = $('#action-menu option:selected').val();
-    // clear selectorlist before adding unit/department options
-    var oldSelections = $('#unit-menu option');
-    for (var i = 0; i < oldSelections.length; i++){
-       oldSelections.remove();
-    }
-    // data-hidden="true" shows title on button
-    $('#unit-menu').append('<option  data-hidden="true"></option>');
-    $('#unit-menu').selectpicker('refresh');
+    
+    clearUnits();
+    
+    clearPrograms();
+    
+    clearYears();
+    
     // create url for redirect
     var urlform = "<?php echo $this->url('default', array(
                                     'controller'=>'reports',
@@ -225,15 +159,11 @@ $(document).on('change', '#unit-menu', function () {
     }
     
     $unit = $('#unit-menu option:selected').val();
-    // clear selectorlist before adding program/degree options
-    var oldSelections = $('#prog-menu option');
-    for (var i = 0; i < oldSelections.length; i++){
-       oldSelections.remove();
-    }
-    // data-hidden="true" shows title on button
-    $('#prog-menu').append('<option  data-hidden="true"></option>');
-    $('#prog-menu').selectpicker('refresh');
-   
+    
+    clearPrograms();
+    
+    clearYears();
+    
     // create url for redirect
     var urlform = "<?php echo $this->url('default', array(
                                     'controller'=>'reports',
@@ -264,7 +194,56 @@ $(document).on('change', '#unit-menu', function () {
     });
 });
 
-// Added this method because class voted to disable submit button
+// function executes when user chooses program from dropdown
+$(document).on('change', '#prog-menu', function () {
+    var action = document.getElementById('action-menu').value;
+    var unit = document.getElementById('unit-menu').value;
+    var programs = $('[name=prog-menu]').val();
+    var year = document.getElementById('year-menu').value;
+    
+    if (!action || !unit || !programs || !year) {
+	$("#submit").attr('disabled','disabled');
+    }else{
+	$("#submit").removeAttr('disabled');;
+    }
+    
+    // startyear for dropdowns set in session namespace variables
+    var startyear = <?php echo $startyear ?>;
+	    
+    // create the list of years the user can select
+    // identify today's date and adjust to the current school year
+    // 2013 - 2014 is from July 2013 - June 2014
+    // 2012 - 2013 is from July 2012 - June 2013
+    // repeat until startyear
+	
+    // start with empty set
+    clearYears();
+        
+    // get today's date
+    var today = new Date();
+    
+    // identify the month and year
+    var month= today.getMonth() + 1; //January is 0
+    var year = today.getFullYear(); // yyyy
+   
+    // if the current month is Jan - June the current year is correct
+    // if the current month is July - Dec then current year needs to be incremented by 1
+    if (month >= 7 && month <= 12) {
+	year++;
+    }
+	    
+    // set the complete number of years to display in the year selector 
+    var yearsToDisplay = year - startyear + 1; // add one since the last entry needs to be the (year before the low year) to the (low year)
+
+    $('#year-menu').append('<option  data-hidden="true"></option>');
+    for (var i = 0; i < yearsToDisplay; i++){	    
+        $('#year-menu').append('<option value = ' + year + '>' + (year-1) + ' - ' + year + '</option>');
+        year--;
+    }
+    $('#year-menu').selectpicker('refresh');
+});
+
+// function executes when user chooses year from dropdown
 $(document).on('change', '#year-menu', function () {
     var action = document.getElementById('action-menu').value;
     var unit = document.getElementById('unit-menu').value;
@@ -278,20 +257,55 @@ $(document).on('change', '#year-menu', function () {
     }
 });
 
-// Added this method because class voted to disable submit button
-$(document).on('change', '#prog-menu', function () {
-    var action = document.getElementById('action-menu').value;
-    var unit = document.getElementById('unit-menu').value;
-    var programs = $('[name=prog-menu]').val();
-    var year = document.getElementById('year-menu').value;
-    
-    if (!action || !unit || !programs || !year) {
-	$("#submit").attr('disabled','disabled');
-    }else{
-	$("#submit").removeAttr('disabled');;
-    }
+// This is only available when saving draft is available
+// Draft defaults to 0 above, if saving draft change to 1 and submit
+// the normal way
+$(document).on('click', '#draftButton', function () {
+    document.getElementById('status').value = 1;
+    document.getElementById('data').submit();
 });
 
+$(document).on('click', '#submitButton', function () {
+    document.getElementById('data').submit();
+});
+
+$(document).on('click', '#deleteButton', function () {
+    document.getElementById('status').value = 2;
+    document.getElementById('data').submit();
+});
+
+// Submit data to get plans
+$(document).on('click', '#submit', function () {
+    var action = document.getElementById('action-menu').value;
+    var unit = document.getElementById('unit-menu').value;
+    var programs = document.getElementById('prog-menu').value;
+    var year = document.getElementById('year-menu').value;
+    
+    var json = '{"action" : "' + action + '", "unit" : "' + unit + '", "year" : "' + year + '", "programs" : ' + JSON.stringify(programs) + ' }';
+    // asynchronous ajax code to get plans
+     
+    
+    // create the url to redirect to the view plan page
+    var urlform = "<?php echo $this->url('default', array(
+                            'controller'=>'reports',
+                            'action'=>'viewPlans')); ?>";
+    
+   
+    $.ajax({
+       url: urlform,
+ 
+       type: "POST",
+       data: json,
+       dataType: "text",
+       error : function(xhr, status, error) {
+            alert(error);
+            console.log("ERROR: ", xhr, xhr.status, xhr.getAllResponseHeaders());
+       },
+       success: function(html){
+            document.getElementById('content').innerHTML = html;
+       },
+    });
+});
 /**
  * File upload button #0 - check to make sure the file size is not too large
  */
@@ -343,6 +357,42 @@ $(document).on('click', '#removeFile1', function () {
    $("#textFileDescription1").val('');
 });
 
+function clearUnits()
+{
+     // clear selectorlist before adding unit/department options
+    var oldSelections = $('#unit-menu option');
+    for (var i = 0; i < oldSelections.length; i++){
+       oldSelections.remove();
+    }
+    // data-hidden="true" shows title on button
+    $('#unit-menu').append('<option  data-hidden="true"></option>');
+    $('#unit-menu').selectpicker('refresh');
+}
+
+function clearPrograms()
+{
+    // clear selectorlist for programs
+    var oldSelections = $('#prog-menu option');
+    for (var i = 0; i < oldSelections.length; i++){
+       oldSelections.remove();
+    }
+    $('#prog-menu').append('<option  data-hidden="true"></option>');
+    $('#prog-menu').selectpicker('refresh');
+   
+}
+
+function clearYears()
+{
+    // clear selectorlist for years
+    var oldSelections = $('#year-menu option');
+    for (var i = 0; i < oldSelections.length; i++){
+       oldSelections.remove();
+    }
+    // data-hidden="true" shows title on button
+    $('#year-menu').append('<option  data-hidden="true"></option>');
+    $('#year-menu').selectpicker('refresh');
+    
+}
 /**
  * Validate the passed file size against the max file size allowed
  *
@@ -375,7 +425,7 @@ function validateFileSize(fileSize)
 
 function printPage()
 {
- $('.panel-collapse').collapse('show');
+    $('.panel-collapse').collapse('show');
     $('.noprint').hide();
     window.print();
     $('.panel-collapse').collapse('hide');

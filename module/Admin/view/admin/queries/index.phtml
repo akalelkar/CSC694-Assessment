@@ -3,6 +3,12 @@
 $title = 'Queries';
 $this->headTitle($title);
 ?>
+<style type="text/css">
+dd {
+ font-weight: bold;
+ padding-left: 2em;
+}
+</style>
 <div id='topofpage'><center><h3>Administrator Queries</h3></center></div>
 <div class = "panel panel-default">
     <div class="panel-body">
@@ -10,21 +16,21 @@ $this->headTitle($title);
     <div class='col-md-4 noprint'>
         <!-- Choose Query -->
         <dl>
-            <dt>Query 1:<br />
-            Show programs missing plans.
+            <dt>Query 1:
             </dt>
             <dd>
-             <!-- Choose Years -->
+            Show programs missing plans.
+            <!-- Choose Years -->
             <select class="selectpicker" id="q1year" name="q1year" data-style="btn-primary" title='Choose Year'>
                <option data-hidden="true"></option>
             </select>
             </dd>
         </dl>
         <dl>
-            <dt>Query 2:<br />
-            Show programs missing reports.
+            <dt>Query 2:
             </dt>
             <dd>
+            Show programs missing reports.
              <!-- Choose Years -->
             <select class="selectpicker" id="q2year" name="q2year" data-style="btn-primary" title='Choose Year'>
                <option data-hidden="true"></option>
@@ -32,10 +38,10 @@ $this->headTitle($title);
             </dd>
         </dl>
         <dl>
-            <dt>Query 3:<br />
-            Show programs conducting meta assessment.
+            <dt>Query 3:
             </dt>
             <dd>
+            Show programs conducting meta assessment.
             <!-- Choose Years -->
             <select class="selectpicker" id="q3year" name="q3year" data-style="btn-primary" title='Choose Year'>
                <option data-hidden="true"></option>
@@ -43,57 +49,57 @@ $this->headTitle($title);
              </dd>
         </dl>
         <dl>
-            <dt>Query 4:<br />
-            Show programs requesting funding.
+            <dt>Query 4:
             </dt>
             <dd>
-               <!-- Choose Years -->
+            Show programs requesting funding.
+            <!-- Choose Years -->
             <select class="selectpicker" id="q4year" name="q4year" data-style="btn-primary" title='Choose Year'>
                <option data-hidden="true"></option>
             </select>
           </dd>
         </dl>
         <dl>
-            <dt>Query 5:<br/>
-            Show programs that have modified their outcomes since (<i>enter date</i>) 
+            <dt>Query 5:
             </dt>
             <dd>
+            Show programs that have modified their outcomes since (<i>enter date</i>) 
              <input type="text" class="span2" id="dp5">
              <button type="button" class="btn-primary" id="query5">Go</button>
             </dd>
         </dl>
         <dl>
-            <dt>Query 6:<br/>
-            Show programs that have added or modified last year's plan.
-            
+            <dt>Query 6:
+            </dt>
+            <dd>Show programs that have added or modified last year's plan.
             <button type="button" class="btn-primary" id="query6">Go</button>
-            </dt>
-            <dd></dd>
+            </dd>
         </dl>
         <dl>
-            <dt>Query 7:<br/>
-            Show programs that have added or modified last year's report.
-            
-            <button type="button" class="btn-primary" id="query7">Go</button>
-            </dt>
-            <dd></dd>
-        </dl>
-        <dl>
-            <dt>Query 8:<br />
-            Show plans/reports needing feedback.
+            <dt>Query 7:
             </dt>
             <dd>
-               <!-- Choose Years -->
+            Show programs that have added or modified last year's report.
+            <button type="button" class="btn-primary" id="query7">Go</button>
+            
+            </dd>
+        </dl>
+        <dl>
+            <dt>Query 8:
+            </dt>
+            <dd>
+            Show plans/reports needing feedback.
+            <!-- Choose Years -->
             <select class="selectpicker" id="q8year" name="q8year" data-style="btn-primary" title='Choose Year'>
                <option data-hidden="true"></option>
             </select>
           </dd>
         </dl>
         <dl>
-            <dt>Query 9:<br/>
-            Show programs that changed their assessors since (<i>enter date</i>) 
+            <dt>Query 9:
             </dt>
             <dd>
+             Show programs that changed their assessors since (<i>enter date</i>) 
              <input type="text" class="span2" id="dp9">
              <button type="button" class="btn-primary" id="query9">Go</button>
             </dd>

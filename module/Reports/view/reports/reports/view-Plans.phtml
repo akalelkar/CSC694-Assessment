@@ -7,45 +7,40 @@ if(!$results){
 
 ?>
 
-<div class="col-md-3">
+<div class="col-md-8">
     <div class="panel-group" id="accordion">
 	<!-- Loop through returned plans -->
 	<?php
 	    $ctr = 0;
 	    foreach($plans as $plan) :
 
-	    $ctr++; 
-	    $colId = 'collapse' . $ctr;
-	    $colNum = '#' . $colId;
+		$ctr++; 
+		
 	?>
-	    
 	<div class="panel panel-success">
 	    <div class="panel-heading">
 		<h4 class="title">
-		    <a data-toggle="collapse" data-parent="#accordion" href="<?php echo $colNum; ?>">Plan # <?php echo $ctr; ?> </a>
-		    <!-- add ".custom {width: 70px !important;}" to the bootstrap.css file and add 'custom' and 'pull-right' to btn-->
-		    <input class="btn btn-primary btn-sm" onclick="getReports('<?php echo $action;?>', <?php echo $plan->id; ?>);" id="<?php echo $action;?>" value="<?php echo $action;?>  &raquo"></input>
+		<?php echo "Plan # " . $ctr; ?>
+	        <input class="btn btn-primary btn-sm" onclick="getReports('<?php echo $action;?>', <?php echo $plan->id; ?>);" id="<?php echo $action;?>" value="<?php echo $action;?>  &raquo"></input>
 		    
 		</h4>
 	    </div>
-		    <!-- Show outcomes or assessment text for each plan -->
-	    <div id="<?php echo $colId; ?>" class="panel-collapse collapse">
-		<div class="panel-body">
-		    <table class="table">
-			<?php
-			    $oCtr = 0; 
-			    foreach($plan->descriptions as $text) : 
-			    $oCtr++;
-			?>
-			<tr>
-			    <th> <?php echo($oCtr); ?>.</th>
-			    <td><?php echo $text;?></td>
-			</tr>
-			<?php endforeach; ?>
-		    </table>
-			
-		</div><!-- close body-->
-	    </div><!-- close id-->
+		<!-- Show outcomes or assessment text for each plan -->
+	    <div class="panel-body">
+		<table class="table">
+		    <?php
+		    $oCtr = 0; 
+		    foreach($plan->descriptions as $text) : 
+			$oCtr++;
+		    ?>
+		    <tr>
+			<th><?php echo($oCtr); ?>.</th>
+			<td><?php echo $text;?></td>
+		    </tr>
+		    <?php endforeach; ?>
+		</table>
+		    
+	    </div><!-- close body-->
 	</div><!-- close panel-success-->
 
 	<?php
@@ -53,3 +48,4 @@ if(!$results){
 	?>
     </div><!-- close panel-group-->
 </div><!-- close column-->
+
