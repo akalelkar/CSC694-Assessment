@@ -4,7 +4,8 @@
 if(!$results){
     echo '</br></br></br></br>There are no plans that match your criteria';
 }else{
-
+   echo '<h4><center>Plans for ' . $title. '</center></h4>';
+		
 ?>
 
 <div class="col-md-8">
@@ -13,22 +14,45 @@ if(!$results){
 	<?php
 	    $ctr = 0;
 	    foreach($plans as $plan) :
-
 		$ctr++; 
-		
 	?>
 	<div class="panel panel-success">
 	    <div class="panel-heading">
 		<h4 class="title">
-		<?php echo "Plan # " . $ctr; ?>
-	        <input class="btn btn-primary btn-sm" onclick="getReports('<?php echo $action;?>', <?php echo $plan->id; ?>);" id="<?php echo $action;?>" value="<?php echo $action;?>  &raquo"></input>
-		    
+		<?php echo "Plan # " . $plan->id; 
+		    if ($plan->metaFlag == 1){
+			echo " &nbsp; Meta Assessment Plan";
+		    }
+		    else{
+			echo " &nbsp; Outcomes Plan";
+		    }
+		    if ($plan->hasReport == 0){
+			echo " <span class='pull-right'>Report Does Not Exist</span>";
+		    }
+		    else{
+		?>
+	        <input class="btn btn-primary btn-sm pull-right"
+		       onclick="getReports('<?php echo $action;?>', <?php echo $plan->id; ?>);"
+		       id="<?php echo $action;?>"
+		       <?php
+		          if ($action=="View"){
+			    echo 'value="' . $action . ' Report &raquo"';
+			  }
+			  else{
+			    echo 'value="' . $action . '  &raquo"';
+			  }
+			?>
+		</input>
+		<?php
+		    }
+		?>
 		</h4>
 	    </div>
 		<!-- Show outcomes or assessment text for each plan -->
 	    <div class="panel-body">
 		<table class="table">
 		    <?php
+		    
 		    $oCtr = 0; 
 		    foreach($plan->descriptions as $text) : 
 			$oCtr++;

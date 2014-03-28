@@ -6,12 +6,14 @@ class PlanData
 {
     public $id; // Plan id
     public $metaFlag; // Has meta?
-    public $descriptions; // Text of either outcome or assessment
+    public $hasReport; // Has a report?
+    public $descriptions; // Text of either outcome or meta assessment
     
-    public function __construct($id, $meta)
+    public function __construct($id, $meta, $hasReport)
     {
         $this->id = $id;
         $this->metaFlag = $meta;
+        $this->hasReport = $hasReport;
         $this->descriptions = array();
     }
 }

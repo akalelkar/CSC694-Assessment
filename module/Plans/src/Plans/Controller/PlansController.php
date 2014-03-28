@@ -356,7 +356,7 @@ class PlansController extends AbstractActionController
    
          $programs = $programsArray;   
       }
- 
+
       // create a partial view to send back to the caller
       $partialView = new ViewModel(array(
             'action' => $action,

@@ -70,86 +70,89 @@
 			    
 		<?php					    			
 		    // Loop through all the returned plans
-		    $planCount = 0;
 		    if (!empty($plans)) {
+			// A plan may be represented more than one time if multiple outcomes associated
+			// with plan.  Need to grab outcome text from multiple listings.
+			$prevPlan = 0;
+			$prevEnding = '';
 			foreach ($plans as $plan) :
-			    $planCount++;
+			    // if new plan, create new row
+			    if ($plan['planId'] != $prevPlan){
+				$prevPlan = $plan['planId'];
+				echo $prevEnding;
+				$prevEnding = "</table></div></div></div>";  // a bit redundant
 		?>
-		<!-- Create the plan row -->
-		<div class="panel-heading">
-		    <h4 class="title">					
-			<a data-toggle="collapse" data-parent="#accordion"
-			       href="#collapse<?php echo $planCount; ?>">
-				Plan # <?php echo $planCount; ?> &nbsp; </a>
-		    
-			<!-- Create a select button for each row -->
-			<a
-			    <?php
-				$elem = $form->get('viewModifySelect');
-				$elem->setValue($plan['planId']);					    
-				echo $this->formButton($elem);
-			    ?>
-			&raquo
-			</a>&nbsp;
-			
-			<!-- Create a delete button for each row -->
-			<!-- Assessors (role = 4) are not allowed to delete a plan -->
-			<?php
-			    if ($action == "Modify" && $role != 4) {
-			?>
-				<a
-				    <?php
-					$elem = $form->get('modifyDelete');
-					$elem->setValue($plan['planId']);					    
-					echo $this->formButton($elem);
-				    ?>
-				&raquo
-				</a>&nbsp;
-			<?php
-			    }
-			?>
-		    </h4>
-		</div>
-
-		<!-- Create the outcome data for each row -->
-		<div id="collapse<?php echo $planCount; ?>" class="pane<?php echo $planCount; ?>-collapse collapse">
-		    <div class="panel-body">
-			<div class="control-group">
-			    <div class="controls">
-				<table class="table">							  
-				    <?php
-					// loop through all the outcomes
-					$outcomeCount = 0;
-					if (!empty($outcomes)) {
-					    foreach ($outcomes as $outcome) :
-
-						//Check to see if the outcome exists for the plan id
-						if($plan['planId'] == $outcome->getPlanId()) {
-						    $outcomeCount++;
-				    ?>
-						    <!-- create a row in the table -->
-						    <tr>
-							<th><?php echo $outcomeCount; ?>.</th> <td> <?php echo $outcome->getOutcomeText() ?></td>
-							<input type="hidden" name="outcomeId<?php echo $outcomeCount; ?>" value="<?php echo $outcome->getOutcomeId() ?>">
-						    </tr>
-				    <?php
+				<!-- Create the plan row -->
+				<div class="panel-heading">
+				    <h4 class="title">					
+					<?php
+					    echo "Plan # " . $plan['planId'] . " &nbsp;";
+					    if ($plan['meta_flag'] == 1){
+						echo " Meta Assessment Plan";
+					    }
+					    else{
+						echo " Outcomes Plan";
+					    }
+					    if ($plan['draft_flag'] == 1){
+						echo " &nbsp;(Draft)";
+					    }
+					?>
+					
+					<!-- Create a delete button for each row -->
+					<!-- Assessors (role = 4) are not allowed to delete a plan -->
+					<!-- Delete and Select buttons pull right, so delete is listed first
+						so it pulls furthest to the right -->
+					<?php
+					    if ($action == "Modify" && $role != 4) {
+					?>
+						<a
+						    <?php
+							$elem = $form->get('modifyDelete');
+							$elem->setValue($plan['planId']);					    
+							echo $this->formButton($elem);
+						    ?>
+						&raquo
+						</a>
+					<?php
+					    }
+					?>
+					<!-- Create a select button for each row -->
+					<a 
+					    <?php
+						$elem = $form->get('viewModifySelect');
+						$elem->setValue($plan['planId']);
+						if ($action=="View"){
+						    $elem->setLabel($action . ' Plan');
 						}
-					    endforeach;
-					}
-					// If there are no outcomes then display a meta assessment plan 
-					if ($outcomeCount == 0) {
-				    ?>
-					    <tr>
-						<th></th> <td>This is a meta assessment</td>
-					    </tr>
-				    <?php
-					}
-				    ?>						
-				</table>
-			    </div>
-			</div>
-		    </div>
-		</div>
+						else{
+						    $elem->setLabel($action);
+						}
+						echo $this->formButton($elem);
+					    ?>
+					&raquo
+					</a>
+					
+				    </h4>
+				</div>
+		
+				<!-- Create the outcome data for each row -->
+				    <div class="panel-body">
+					<div class="control-group">
+					    <div class="controls">
+						<table class="table">							  
+						    <?php
+							// loop through all the outcomes
+							$outcomeCount = 1;
+						    ?>
+						    
+				<?php
+				}
+				?>
+				<tr>
+				    <th><?php echo $outcomeCount; $outcomeCount++?>.</th>
+				    <td><?php echo $plan['text'] ?></td>
+				</tr>
+				
 		<?php
 			endforeach;
 		    }

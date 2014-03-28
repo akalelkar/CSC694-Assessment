@@ -26,7 +26,7 @@
         <br />
      
         <!-- Choose Program/Degree -->
-        <select class="selectpicker" id="prog-menu" name="prog-menu" data-style="btn-primary" title='Choose Program/Degree' multiple>
+        <select class="selectpicker" id="prog-menu" name="prog-menu" data-style="btn-primary" title='Choose Program/Degree' multiple data-selected-text-format="values">
 	 <option data-hidden="true"></option>
         </select>
         <br />
@@ -103,7 +103,8 @@ $(document).on('change', '#action-menu', function () {
     // Added this block because class voted to disable submit button
     var action = document.getElementById('action-menu').value;
     var unit = document.getElementById('unit-menu').value;
-    var programs = document.getElementById('prog-menu').value;
+    // must grab programs by name otherwise won't grab all values
+    var programs = $('[name=prog-menu]').val();
     var year = document.getElementById('year-menu').value;
     
     if (!action || !unit || !programs || !year) {
@@ -278,10 +279,21 @@ $(document).on('click', '#deleteButton', function () {
 $(document).on('click', '#submit', function () {
     var action = document.getElementById('action-menu').value;
     var unit = document.getElementById('unit-menu').value;
-    var programs = document.getElementById('prog-menu').value;
+    // must grab programs using name otherwise only grabs one value
+    var programs = $('[name=prog-menu]').val();
+    // build comma delimited list of selected names to display in title on page
+    var programNames = '';
+    var ctr = 1;
+    $( "#prog-menu option:selected" ).each(function( index ) {
+        if (ctr > 1){
+            programNames = programNames + ', ';
+        }
+        programNames = programNames + $( this ).text();
+        ctr++;
+    });
     var year = document.getElementById('year-menu').value;
     
-    var json = '{"action" : "' + action + '", "unit" : "' + unit + '", "year" : "' + year + '", "programs" : ' + JSON.stringify(programs) + ' }';
+    var json = '{"action" : "' + action + '", "unit" : "' + unit + '", "programNames" : "' + programNames + '", "year" : "' + year + '", "programs" : ' + JSON.stringify(programs) + ' }';
     // asynchronous ajax code to get plans
      
     

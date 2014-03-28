@@ -86,7 +86,7 @@ class Plan extends Form
             'name' => 'viewModifySelect',
             'attributes' => array(
                 'id' => 'viewModifySelect',
-                'class' => 'btn btn-primary btn-xs',           
+                'class' => 'btn btn-primary btn-sm pull-right',           
             ),
             'options' => array(
                 'label' => 'Select',
@@ -98,7 +98,7 @@ class Plan extends Form
             'name' => 'modifyDelete',
             'attributes' => array(
                 'id' => 'modifyDelete',
-                'class' => 'btn btn-warning btn-xs',           
+                'class' => 'btn btn-warning btn-sm pull-right',           
             ),
             'options' => array(
                 'label' => 'Delete',

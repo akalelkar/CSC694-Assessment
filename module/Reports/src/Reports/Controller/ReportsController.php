@@ -75,72 +75,76 @@ class ReportsController extends AbstractActionController
             'startyear' => $startyear,));
       }
    }
+
+   // This function is called by viewPlansAction to create an array of the plans
+   // The array $plans is passed by reference as the second parameter.
+   public function createPlans($results, &$plans){
+         // Start with an empty plan
+         $currPlan = new PlanData(null, null, null);
     
-    // Called to show all matching plans after selection is made on left nav
+         // Loop through results, adding all outcomes for same plan id
+         // to same planData, otherwise start a new planData
+         foreach ($results as $result){
+            // determine if report exists for plan
+            $count = $this->getReports()->reportExists($result['id']);
+            $test[] = $result;
+            if(is_null($currPlan->id)){
+               $currPlan = new PlanData($result['id'], $result['meta_flag'], $count);
+            }elseif($currPlan->id != $result['id']){
+               // new plan starting
+               // add existing currPlan to array of $plans 
+               array_push($plans, $currPlan);
+               $currPlan = new PlanData($result['id'], $result['meta_flag'], $count);
+            }
+            array_push($currPlan->descriptions, $result['text']);
+         }
+         // Add last plan
+         array_push($plans, $currPlan);
+   }
+
+   // Called to show all matching plans after selection is made on left nav
    public function viewPlansAction()
    {
       // Get post data which is json
       $jsonData = $this->getRequest()->getContent();
 
-      // Get the plans
-      $results = $this->getReports($jsonData)->getPlans($jsonData);
-
-      // If there are plans
-      if(count($results) > 0){
-
-         // Create array to hold the plans
-         $plans = array();
-         $sl = $this->getServiceLocator();
-   
-         // Start with an empty plan
-         $currPlan = new PlanData(null, null);
-         $needsAdding = true;
-         
-         // Loop through results, adding all outcomes for same plan id
-         // to same planData, otherwise start a new planData
-         // This was created here when trying a different approach,
-         // May remove planData class as it doesn't serve much purpose anymore
-         foreach ($results as $result){
-            $test[] = $result;
-            $needsAdding = true;
-            if(is_null($currPlan->id)){
-               $currPlan = new PlanData($result['id'], $result['meta_flag']);
-            }elseif($currPlan->id == $result['id']){
-               
-            }else{
-               array_push($plans, $currPlan);
-               $currPlan = new PlanData($result['id'], $result['meta_flag']);
-            }
-            array_push($currPlan->descriptions, $result['text']);
-                      
-         }
-         
-         // Add last plan
-         array_push($plans, $currPlan);
-         
-         // Get the action from the request json data
-         $data = json_decode($jsonData, true);
-         $action = $data['action'];
-   
-         // Create view with plan data
-         $partialView = new ViewModel(array(
-            'plans' => $plans, 'action' => $action, 'results' => true,
-         ));
-         
-         // Set to terminal so ignores header/footer and return
-         $partialView->setTerminal(true);
-         return $partialView;
+      // Get the plans that have outcomes
+      $results = $this->getReports($jsonData)->getPlansWithOutcomes($jsonData);
+      $results2 = $this->getReports($jsonData)->getPlansWithMeta($jsonData);
       
-      // If no results, tell the view to alert user
-      }else{
+      // if no data display page with appropriate message
+      if (count($results) == 0 && count($results2) == 0){
          $partialView = new ViewModel(array(
             'results' => false,
          ));
       }
-      
-      // Set to terminal and return
+      // data exists, show plans
+      else{
+               
+         // Create array to hold the plans
+         $finalplans = array();
+            
+         // If there are plans with outcomes add to array for display
+         if(count($results) > 0){
+             $this->createPlans($results, $finalplans);
+         }
+         // If there are plans with meta assessment add to array for display
+         if(count($results2) > 0){
+             $this->createPlans($results2, $finalplans);
+         }
+         // Get the action from the request json data
+         $data = json_decode($jsonData, true);
+         $action = $data['action'];
+         $title = $data['unit'] . ': ' . $data['programNames'] . ': ' . $data['year'];
+         // Create view with plan data
+         $partialView = new ViewModel(array(
+            'plans' => $finalplans, 'action' => $action, 'results' => true, 'title' => $title,
+         ));
+      }      
+         // Set to terminal so ignores header/footer and return
       $partialView->setTerminal(true);
       return $partialView;
+   
    }
     
    // Display addReport view

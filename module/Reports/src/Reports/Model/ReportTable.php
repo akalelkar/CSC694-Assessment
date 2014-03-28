@@ -37,9 +37,12 @@ class ReportTable extends AbstractTableGateway
                         ->join(array('o' => 'outcomes'),     
                               'po.outcome_id = o.id', array('text' => 'outcome_text'))
                         ->join(array('pr' => 'programs'),'o.program_id = pr.id',array('unit_id', 'name'))
-                        ->where(array("p.id = $planId", "r.deactivated_user IS NULL"))
+                        ->where(array("p.id = $planId",
+                                      "r.deactivated_user IS NULL",
+                                      "pr.active_flag = 1",
+                                      "p.meta_flag = 0"))
         ;
-        
+                
         // This returns the report if it contains meta assessment
         $select2 = $sql->select()
                         ->from(array('r' => 'reports'))
@@ -48,7 +51,11 @@ class ReportTable extends AbstractTableGateway
                                'r.plan_id = p.id', array('year', 'meta_flag', 'text' => 'meta_description'))
                        ->join(array('pp' => 'plan_programs'),'p.id = pp.plan_id',array())
                         ->join(array('pr' => 'programs'),'pp.program_id = pr.id',array('unit_id', 'name'))
-                        ->where(array("p.id = $planId", "r.deactivated_user IS NULL"))
+                        ->where(array("p.id = $planId",
+                                      "r.deactivated_user IS NULL",
+                                      "pr.active_flag = 1",
+                                      "p.meta_flag != 0",
+                                ))
         ;
         $select->combine($select2);
         // Execute and return results 
@@ -173,28 +180,37 @@ class ReportTable extends AbstractTableGateway
                       ->join(array('o' => 'outcomes'),     
                             'po.outcome_id = o.id', array('text' => 'outcome_text'))
                       ->join(array('pr' => 'programs'),'o.program_id = pr.id',array('unit_id', 'name'))
-                      ->where("p.id = $planId");
-             
-        // This grabs plan data if it has assessment         
+                      ->where(array("p.id = $planId",
+                              "pr.active_flag = 1",
+                              "p.draft_flag = 0",
+                              "p.meta_flag = 0"))
+        ;
+
+        // This grabs plan data if it has meta assessment         
         $select2 = $sql->select()
                        ->from(array('p' => 'plans'))
                         ->columns(array('id', 'year', 'meta_flag', 'text' => 'meta_description'))
                        ->join(array('pp' => 'plan_programs'),'p.id = pp.plan_id',array())
                         ->join(array('pr' => 'programs'),'pp.program_id = pr.id',array('unit_id', 'name'))
-                        ->where("p.id = $planId");
+                        ->where(array("p.id = $planId",
+                                "pr.active_flag = 1",
+                                "p.draft_flag = 0",
+                                "p.meta_flag != 0"))
+        ;
         
         // Combine queries so only have to query onece
         $select->combine($select2);       
-              
+
+        
         // Create statemnt and execute       
         $statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
-        
+
         return $result;
     }
     
-    // Get's all plans that match left nav search criteria
-    public function getPlans($programJson)
+    // Get's all plans that match left nav search criteria Outcomes
+    public function getPlansWithOutcomes($programJson)
     {
         $sql = new Sql($this->adapter);
         
@@ -206,7 +222,7 @@ class ReportTable extends AbstractTableGateway
         // get plans with outcomes
         $select = $sql->select()
                       ->from(array('p' => 'plans'))
-                      ->columns(array('id', 'year', 'meta_flag'))
+                      ->columns(array('id', 'year', 'meta_flag', 'draft_flag'))
                       ->join(array('po' => 'plan_outcomes'),
                              'p.id = po.plan_id', array())
                       ->join(array('o' => 'outcomes'),     
@@ -218,32 +234,47 @@ class ReportTable extends AbstractTableGateway
                       ->where(array('p.year' => $year,
                                       'pr.id' => $programs,
                                       'pr.active_flag = 1',
+                                      "p.draft_flag = 0",
                                       'p.meta_flag = 0',
                                    )
                                 )
+                      ->order('p.id')
         ;
+
+        // Create statment and execute
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+        return $result;
+    }
+    
+    // Get's all plans that match left nav search criteria with Meta
+    public function getPlansWithMeta($programJson)
+    {
+        $sql = new Sql($this->adapter);
+        
+        // Get data from json
+        $data = json_decode($programJson, true);
+	$programs = $data['programs'];
+        $year = $data['year'];
+     
         // get plans with meta assessment
-        $select2 = $sql->select()
+        $select = $sql->select()
                        ->from(array('p' => 'plans'))
-                        ->columns(array('id', 'year', 'meta_flag', 'text' => 'meta_description'))
+                        ->columns(array('id', 'year', 'meta_flag', 'draft_flag', 'text' => 'meta_description'))
                        ->join(array('pp' => 'plan_programs'),'p.id = pp.plan_id',array())
                         ->join(array('pr' => 'programs'),'pp.program_id = pr.id',array('unit_id', 'name'))
                         ->where(array('p.year' => $year,
                                       'pr.id' => $programs,
                                       'pr.active_flag = 1',
+                                      "p.draft_flag = 0",
                                       'p.meta_flag != 0'
                                      )
                                 )
+                        ->order('p.id')
         ;
-        
-        // Combine queries so only have to query onece
-        $select->combine($select2);       
-
         // Create statment and execute
         $statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
-
-        
         return $result;
     }
     

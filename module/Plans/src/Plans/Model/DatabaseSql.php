@@ -647,49 +647,14 @@ group by o.id, pl.id, o.outcome_text
      */
     public function getPlans($unitId, $names, $year, $action)
     {
-/*
 
-// view action, only select where draft flag is 0 or null
- SELECT 
-    pl.id 
-from assessment.plans pl
-    inner join assessment.plan_programs pp
-	on pl.id = pp.plan_id
-    inner join assessment.programs p
-	on pp.program_id = p.id
-    inner join assessment.units un
-	on p.unit_id = un.id
-where un.id = 'CSC'
-  and p.name = 'BS Computer Science'
-  and pl.year = 2010
-  and pl.active_flag = 1
-  and (pl.draft_flag = 0 or pl.draft_flag is null)
-group by pl.id
-;
 
-// modify action can see all plans
-SELECT 
-    pl.id 
-from assessment.plans pl
-    inner join assessment.plan_programs pp
-	on pl.id = pp.plan_id
-    inner join assessment.programs p
-	on pp.program_id = p.id
-    inner join assessment.units un
-	on p.unit_id = un.id
-where un.id = 'CSC'
-  and p.name = 'BS Computer Science'
-  and pl.year = 2010
-  and pl.active_flag = 1
-group by pl.id
-;
-*/
-
-$where = new \Zend\Db\Sql\Where();
-
+    $whereoutcomes = new \Zend\Db\Sql\Where();
+    $wheremeta = new \Zend\Db\Sql\Where();
+    
     // if the action is view do not return plans that are in a draft status
     if (strtolower($action) == "view") {
-	$where	
+	$whereoutcomes	
 	    ->equalTo('units.id', $unitId)
 	    ->and
 	    ->in('programs.name', $names)
@@ -697,6 +662,24 @@ $where = new \Zend\Db\Sql\Where();
 	    ->equalTo('plans.year', $year)
 	    ->and
     	    ->equalTo('plans.active_flag', 1)
+	    ->and
+	    ->equalTo('plans.meta_flag', 0)
+	    ->and
+	    ->nest()
+	    ->equalTo('plans.draft_flag', 0)
+	    ->or
+	    ->isNull('plans.draft_flag')
+	    ->unnest();
+	$wheremeta	
+	    ->equalTo('units.id', $unitId)
+	    ->and
+	    ->in('programs.name', $names)
+	    ->and
+	    ->equalTo('plans.year', $year)
+	    ->and
+    	    ->equalTo('plans.active_flag', 1)
+	    ->and
+	    ->equalTo('plans.meta_flag', 1)
 	    ->and
 	    ->nest()
 	    ->equalTo('plans.draft_flag', 0)
@@ -706,27 +689,57 @@ $where = new \Zend\Db\Sql\Where();
     }
     else {
 	// modify can see all the plans
-	$where
+	$whereoutcomes
 	    ->equalTo('units.id', $unitId)
 	    ->and
 	    ->in('programs.name', $names)
 	    ->and
 	    ->equalTo('plans.year', $year)
 	    ->and
+	    ->equalTo('plans.meta_flag', 0)
+	    ->and
+    	    ->equalTo('plans.active_flag', 1);
+	    
+	$wheremeta
+	    ->equalTo('units.id', $unitId)
+	    ->and
+	    ->in('programs.name', $names)
+	    ->and
+	    ->equalTo('plans.year', $year)
+	    ->and
+	    ->equalTo('plans.meta_flag', 1)
+	    ->and
     	    ->equalTo('plans.active_flag', 1);
     }
 
+
+
 	$sql = new Sql($this->adapter);
+	
+	// get plans with outcomes
 	$select = $sql->select()
-                      ->columns(array('planId' => new Expression('plans.id')))
+                      ->columns(array('planId' => new Expression('plans.id'), 'year', 'meta_flag', 'draft_flag'))
+		      ->from('plans', array('id' => 'plans.id'))
+		      ->join('plan_outcomes','plans.id = plan_outcomes.plan_id', array())
+                      ->join('outcomes','plan_outcomes.outcome_id = outcomes.id', array('text' => 'outcome_text'))
+                      ->join('plan_programs', 'plan_programs.plan_id = plans.id', array())
+		      ->join('programs', 'plan_programs.program_id = programs.id', array())
+		      ->join('units', 'programs.unit_id = units.id', array())
+		   ;
+	$select->where($whereoutcomes);
+	
+	// get plans with meta assessment
+	$select2 = $sql->select()
+                      ->columns(array('planId' => new Expression('plans.id'), 'year', 'meta_flag', 'draft_flag', 'text' => 'meta_description'))
 		      ->from('plans', array('id' => 'plans.id'))
 		      ->join('plan_programs', 'plan_programs.plan_id = plans.id', array())
 		      ->join('programs', 'plan_programs.program_id = programs.id', array())
-		      ->join('units', 'programs.unit_id = units.id', array())		      		  
-		      ->group (array('planId' => new Expression('plans.id')))
+		      ->join('units', 'programs.unit_id = units.id', array())
 		   ;
-	$select->where($where);
-		   
+	$select2->where($wheremeta);
+    
+	$select->combine($select2);
+	
         $statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
 
