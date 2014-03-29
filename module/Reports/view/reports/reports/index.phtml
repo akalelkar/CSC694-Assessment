@@ -90,6 +90,8 @@ $(document).ready(function() {
     for (var i = 0; i < actions.length; i++){
        $('#action-menu').append('<option>' + actions[i] + '</option>');
     }
+    $("#submit").attr('disabled','disabled');
+
     // call code to initialize the selectpicker
     // this must come after the options are initialized
     $('.selectpicker').selectpicker();
@@ -100,19 +102,7 @@ $(document).ready(function() {
 // update unit/department options based on actions
 $(document).on('change', '#action-menu', function () {
     
-    // Added this block because class voted to disable submit button
-    var action = document.getElementById('action-menu').value;
-    var unit = document.getElementById('unit-menu').value;
-    // must grab programs by name otherwise won't grab all values
-    var programs = $('[name=prog-menu]').val();
-    var year = document.getElementById('year-menu').value;
-    
-    if (!action || !unit || !programs || !year) {
-	$("#submit").attr('disabled','disabled');
-    }else{
-	$("#submit").removeAttr('disabled');;
-    }
-    
+     
     $action = $('#action-menu option:selected').val();
     
     clearUnits();
@@ -146,18 +136,6 @@ $(document).on('change', '#action-menu', function () {
 
 // update program options based on unit/department
 $(document).on('change', '#unit-menu', function () {
-    
-    // Added this block because class voted to disable submit button
-    var action = document.getElementById('action-menu').value;
-    var unit = document.getElementById('unit-menu').value;
-    var programs = $('[name=prog-menu]').val();
-    var year = document.getElementById('year-menu').value;
-    
-    if (!action || !unit || !programs || !year) {
-	$("#submit").attr('disabled','disabled');
-    }else{
-	$("#submit").removeAttr('disabled');;
-    }
     
     $unit = $('#unit-menu option:selected').val();
     
@@ -197,16 +175,6 @@ $(document).on('change', '#unit-menu', function () {
 
 // function executes when user chooses program from dropdown
 $(document).on('change', '#prog-menu', function () {
-    var action = document.getElementById('action-menu').value;
-    var unit = document.getElementById('unit-menu').value;
-    var programs = $('[name=prog-menu]').val();
-    var year = document.getElementById('year-menu').value;
-    
-    if (!action || !unit || !programs || !year) {
-	$("#submit").attr('disabled','disabled');
-    }else{
-	$("#submit").removeAttr('disabled');;
-    }
     
     // startyear for dropdowns set in session namespace variables
     var startyear = <?php echo $startyear ?>;
@@ -246,34 +214,45 @@ $(document).on('change', '#prog-menu', function () {
 
 // function executes when user chooses year from dropdown
 $(document).on('change', '#year-menu', function () {
-    var action = document.getElementById('action-menu').value;
-    var unit = document.getElementById('unit-menu').value;
-    var programs = $('[name=prog-menu]').val();
-    var year = document.getElementById('year-menu').value;
+    $("#submit").removeAttr('disabled');;
+  
+});
+
+// button actions on add/modify/provide feedback screens
+$(document).on('click', '#submitButton', function () {
+    document.getElementById('status').value = 0;  // submit report or feedback
+    document.getElementById('data').submit();  // calls action set in .phtml view
+});
+
+$(document).on('click', '#draftButton', function () { 
+    var conf = confirm("You are saving a draft of the report");
     
-    if (!action || !unit || !programs || !year) {
-	$("#submit").attr('disabled','disabled');
-    }else{
-	$("#submit").removeAttr('disabled');;
+    document.getElementById('status').value = 1;  //save draft
+    document.getElementById('data').submit();  // calls action set in .phtml view
+});
+
+$(document).on('click', '#deleteDraft', function () {
+      //confirm deletion
+    var conf = confirm("Are you sure you want to delete this draft?");
+
+    // if confirmed?
+    if(conf == true){
+        document.getElementById('status').value = 2;  // physically delete draft 
+        document.getElementById('data').submit();  // calls action set in .phtml view
     }
 });
 
-// This is only available when saving draft is available
-// Draft defaults to 0 above, if saving draft change to 1 and submit
-// the normal way
-$(document).on('click', '#draftButton', function () {
-    document.getElementById('status').value = 1;
-    document.getElementById('data').submit();
-});
-
-$(document).on('click', '#submitButton', function () {
-    document.getElementById('data').submit();
-});
-
 $(document).on('click', '#deleteButton', function () {
-    document.getElementById('status').value = 2;
-    document.getElementById('data').submit();
+      //confirm deletion
+    var conf = confirm("Are you sure you want to delete this report?");
+
+    // if confirmed?
+    if(conf == true){
+        document.getElementById('status').value = 3;  // inactivate active report
+        document.getElementById('data').submit();   // calls action set in .phtml view
+    }
 });
+
 
 // Submit data to get plans
 $(document).on('click', '#submit', function () {
@@ -403,7 +382,7 @@ function clearYears()
     // data-hidden="true" shows title on button
     $('#year-menu').append('<option  data-hidden="true"></option>');
     $('#year-menu').selectpicker('refresh');
-    
+    $("#submit").attr('disabled','disabled');
 }
 /**
  * Validate the passed file size against the max file size allowed

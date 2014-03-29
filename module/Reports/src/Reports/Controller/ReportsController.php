@@ -14,7 +14,8 @@ use Zend\View\Model\ViewModel;
 use Reports\Model\ReportTable;
 use Reports\Model\PlanTable;
 use Reports\Model\PlanData;
-use Reports\Forms\ReportForm;
+use Reports\Form;
+use Reports\Form\Report;
 use Zend\View\Model\JsonModel;
 use Zend\Session\Container;
 use Application\Authentication\AuthUser;
@@ -85,16 +86,16 @@ class ReportsController extends AbstractActionController
          // Loop through results, adding all outcomes for same plan id
          // to same planData, otherwise start a new planData
          foreach ($results as $result){
-            // determine if report exists for plan
-            $count = $this->getReports()->reportExists($result['id']);
+            // determine if report exists for plan (0-none, 1-draft, 2-submitted)
+            $reportType = $this->getReports()->reportExists($result['id']);
             $test[] = $result;
             if(is_null($currPlan->id)){
-               $currPlan = new PlanData($result['id'], $result['meta_flag'], $count);
+               $currPlan = new PlanData($result['id'], $result['meta_flag'], $reportType);
             }elseif($currPlan->id != $result['id']){
                // new plan starting
                // add existing currPlan to array of $plans 
                array_push($plans, $currPlan);
-               $currPlan = new PlanData($result['id'], $result['meta_flag'], $count);
+               $currPlan = new PlanData($result['id'], $result['meta_flag'], $reportType);
             }
             array_push($currPlan->descriptions, $result['text']);
          }
@@ -107,7 +108,7 @@ class ReportsController extends AbstractActionController
    {
       // Get post data which is json
       $jsonData = $this->getRequest()->getContent();
-
+      
       // Get the plans that have outcomes
       $results = $this->getReports($jsonData)->getPlansWithOutcomes($jsonData);
       $results2 = $this->getReports($jsonData)->getPlansWithMeta($jsonData);
@@ -167,8 +168,9 @@ class ReportsController extends AbstractActionController
    
       // If no reports exist, get plan data for selected plan
       $results = $this->getReports()->getPlanForAdd($planId);
-      $sl = $this->getServiceLocator();
-      $form = $sl->get('FormElementManager')->get('Reports\forms\ReportForm');
+      //$sl = $this->getServiceLocator();
+      $form = new Report();
+      //$form = $sl->get('FormElementManager')->get('Reports\forms\ReportForm');
       $descriptions = array();
 
       // Will only be 1 plan returned, but 1 or more rows for each outcome/assessment
@@ -219,7 +221,7 @@ class ReportsController extends AbstractActionController
          foreach ($results as $result){
             $documentArray[] = $result;
          }
-         
+       
          // Make view and give it data
          $partialView = new ViewModel(array(
             'role' => $role,
@@ -262,8 +264,9 @@ class ReportsController extends AbstractActionController
          }
          
          // Get a report form for putting in the view
-         $sl = $this->getServiceLocator();
-         $form = $sl->get('FormElementManager')->get('Reports\forms\ReportForm');
+         //$sl = $this->getServiceLocator();
+         //$form = $sl->get('FormElementManager')->get('Reports\forms\ReportForm');
+         $form = new Report();
          
          // Get documents for the report
          $results = $this->getReports()->getDocuments($reportArray[0]['id']);
@@ -298,7 +301,6 @@ class ReportsController extends AbstractActionController
    // Displays report data associated with user selected plan 
    public function provideFeedbackAction()
    {
-      
       // get the session variables
       $namespace = new Container('user');
       $role = $namespace->role;
@@ -320,8 +322,9 @@ class ReportsController extends AbstractActionController
          }
          
          // Get a report form for putting in the view
-         $sl = $this->getServiceLocator();
-         $form = $sl->get('FormElementManager')->get('Reports\forms\ReportForm');
+         //$sl = $this->getServiceLocator();
+         //$form = $sl->get('FormElementManager')->get('Reports\forms\ReportForm');
+         $form = new Report();
          
          // Get documents for the report
          $results = $this->getReports()->getDocuments($reportArray[0]['id']);
@@ -361,7 +364,8 @@ class ReportsController extends AbstractActionController
       $userID = $namespace->userID;
       
       // Call method to update report, give arguments from post data
-      // This receives a status of 0 for submit, 1 for draft, 2 for delete
+      // This receives a status of 0 for submit, 1 for draft, 2 for delete draft, 3 for delete report
+
       // ReportTable object handles the difference
       $this->getServiceLocator()->get('ReportTable')
                ->updateReport($this->params()->fromPost('id'),

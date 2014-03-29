@@ -24,7 +24,17 @@ dd {
 	    <div class="bs-example">
 		<!-- create header line -->
 		<?php
-		        
+		    $allPrograms = "";
+		    if (!empty($programs)) {
+			foreach ($programs as $program) :
+			    $allPrograms = $allPrograms . $program . ", ";
+			endforeach;
+			
+			// remove the last ", " added on after the last loop above
+			$allPrograms = substr($allPrograms, 0, -2);
+		    }
+		    echo "<h4>" . $unit . ": " . $allPrograms . ": " . $year . "</h4>";
+		   
 		    // prepare hidden elements to pass data between pages		
 		    $elem = $form->get('planId');
 		    $elem->setValue($planId);					    
@@ -35,7 +45,7 @@ dd {
 		    echo $this->formInput($elem);
     
 		    $elem = $form->get('programs');
-		    $elem->setValue($programs);					    
+		    $elem->setValue($allPrograms);					    
 		    echo $this->formInput($elem);
 		    
 		    $elem = $form->get('year');
@@ -47,7 +57,7 @@ dd {
 		    echo $this->formInput($elem);
 		?>
 		    <dl>
-                        <dt><h3>Enter Feedback For Plan Shown Below</h3>
+                        <dt><h3>Enter Feedback For Plan <?php echo $planId; ?> Shown Below</h3>
                             Choose Feedback Option    
                         </dt>
                         <dd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -77,8 +87,7 @@ dd {
                     </br>	
 		    <!-- if there are outcomes present display the array of outcomes -->
 		    <?php
-                        echo "<h4>" . $unit . ", " . $programs . ", " . $year . "</h4>";
-		
+                        
 			if (!empty($outcomes))
 			{
                             echo "<dl><dt>Outcomes</dt>";

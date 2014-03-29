@@ -1,13 +1,24 @@
-<?PHP
-namespace Reports\forms;
+<?php
+namespace Reports\Form;
 
+use Zend\InputFilter;
 use Zend\Form\Form;
-class ReportForm extends Form
+use Zend\Form\Element;
+use Zend\InputFilter\Input;
+use Zend\InputFilter\FileInput;
+
+class Report extends Form
 {
-    // Report form used for capturing report data from view
-    public function init()
+    public function __construct()
     {
-        
+        // we want to ignore the name passed
+        parent::__construct('reports');
+        $this->setAttribute('method', 'post');
+        $this->addElements();
+    }
+    
+    public function addElements()
+    {
         // Action data
         $this->add(array(
             'name' => 'actions',
@@ -164,7 +175,7 @@ class ReportForm extends Form
             ),
         ));
         
-        
+                
         /********** Textbox used for the file description **********/
         $this->add(array(
             'name' => 'textFileDescription0',

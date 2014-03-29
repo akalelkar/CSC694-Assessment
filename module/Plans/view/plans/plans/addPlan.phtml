@@ -26,9 +26,17 @@
 
 		<!-- create header line -->
 		<?php
-		    $label = "";
-		    echo "<h4>" . $label . $unit . ", " . $programs . ", " . $year . "</h4>";
-		    
+		     $allPrograms = "";
+		    if (!empty($programs)) {
+			foreach ($programs as $program) :
+			    $allPrograms = $allPrograms . $program . ", ";
+			endforeach;
+			
+			// remove the last ", " added on after the last loop above
+			$allPrograms = substr($allPrograms, 0, -2);
+		    }
+		    echo "<h4>" . $unit . ": " . $allPrograms . ": " . $year . "</h4>";
+			    
 		    // prepare hidden elements to pass data between pages
 		    $elem = $form->get('action');
 		    $elem->setValue($action);					    
@@ -39,7 +47,7 @@
 		    echo $this->formInput($elem);
 		
 		    $elem = $form->get('programs');
-		    $elem->setValue($programs);					    
+		    $elem->setValue($allPrograms);					    
 		    echo $this->formInput($elem);
 				
 		    $elem = $form->get('year');
@@ -103,7 +111,7 @@
 			    <div class="panel-heading">
 				<h4 class="panel-title">
 				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAssessmentMethod">
-					Describe assessment method.
+					Assessment Method
 				    </a>
 				</h4>
 			    </div>
@@ -120,7 +128,7 @@
 			    <div class="panel-heading">
 				<h4 class="panel-title">
 				    <a data-toggle="collapse" data-parent="#accordion" href="#collapsePopulation">
-					Describe population assessed.
+					Population Assessed
 				    </a>
 				</h4>
 			    </div>
@@ -137,7 +145,7 @@
 			    <div class="panel-heading">
 				<h4 class="panel-title">
 				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseSampleSize">
-					Describe sample size assessed.
+					Sample Size Assessed
 				    </a>
 				</h4>
 			    </div>
@@ -154,7 +162,7 @@
 			    <div class="panel-heading">
 				<h4 class="panel-title">
 				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAssessmentDate">
-					Describe assessment date assessed.
+					Assessment Date
 				    </a>
 				</h4>
 			    </div>
@@ -171,7 +179,7 @@
 			    <div class="panel-heading">
 				<h4 class="panel-title">
 				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseCost">
-					Describe cost assessed.
+					Cost of Assessment 
 				    </a>
 				</h4>
 			    </div>
@@ -188,7 +196,7 @@
 			    <div class="panel-heading">
 				<h4 class="panel-title">
 				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseFundingFlag">
-					Are you requesting funding?
+					Funding Requested
 				    </a>
 				</h4>
 			    </div>
@@ -207,7 +215,7 @@
 			    <div class="panel-heading">
 				<h4 class="panel-title">
 				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAnalysisType">
-					Describe analysis type assessed.
+					 Type of Analysis
 				    </a>
 				</h4>
 			    </div>
@@ -224,7 +232,7 @@
 			    <div class="panel-heading">
 				<h4 class="panel-title">
 				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAdministrator">
-					Describe administrator assessed.
+					 Administrator
 				    </a>
 				</h4>
 			    </div>
@@ -241,7 +249,7 @@
 			    <div class="panel-heading">
 				<h4 class="panel-title">
 				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseAnalysisMethod">
-					Describe analysis method assessed.
+					 Analysis Method
 				    </a>
 				</h4>
 			    </div>
@@ -258,7 +266,7 @@
 			    <div class="panel-heading">
 				<h4 class="panel-title">
 				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseScope">
-					Describe scope assessed.
+					Scope of Assessment
 				    </a>
 				</h4>
 			    </div>

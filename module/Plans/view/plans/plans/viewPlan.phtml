@@ -26,12 +26,21 @@
 			<table class="table">
 			    <!-- create header line -->
 			    <?php
-				$label="";
-				echo "<h4>" . $label . $unit . ", " . $programs . ", " . $year . "</h4>";
+			        $allPrograms = "";
+				if (!empty($programs)) {
+				    foreach ($programs as $program) :
+					$allPrograms = $allPrograms . $program . ", ";
+				    endforeach;
+				    
+				    // remove the last ", " added on after the last loop above
+				    $allPrograms = substr($allPrograms, 0, -2);
+				}
+				echo "<h4>" . $unit . ": " . $allPrograms . ": " . $year . "</h4>";
 			    ?>
 			     
 			    <div class="controls">
-				
+				<h3>Showing Plan <?php echo $planId; ?></h3>
+                    
 				<!-- begin creating the accordion -->
 				<div class="panel-group" id="accordion">
 				    
@@ -112,7 +121,7 @@
 					    <div class="panel panel-success">
 						<div class="panel-heading">
 						    <h4 class="panel-title">
-							    Assessment Date
+						    Assessment Date
 						    </h4>
 						</div>
 	    
@@ -127,7 +136,7 @@
 					    <div class="panel panel-success">
 						<div class="panel-heading">
 						    <h4 class="panel-title">
-							    Cost of Assessment 
+						    Cost of Assessment 
 						    </h4>
 						</div>
 					        <div class="panel-body">

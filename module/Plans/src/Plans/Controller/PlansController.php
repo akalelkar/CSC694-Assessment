@@ -350,11 +350,7 @@ class PlansController extends AbstractActionController
 
          // update the active flag on the reports table to inactive         
          $this->getDatabaseData()->updateReportsActiveByPlanId($planId, $userID);
-         
-         // change the program string into an array for DB select
-         $programsArray = $this->createProgramArray($programs);
-   
-         $programs = $programsArray;   
+        
       }
 
       // create a partial view to send back to the caller
@@ -394,17 +390,15 @@ class PlansController extends AbstractActionController
       $unit = $_POST['unit'];
       $programs = $_POST['programs'];
       $year = $_POST['year'];
-      
-      // change the program string into an array for DB select
-      $programsArray = $this->createProgramArray($programs);
-      
+  
+    
       // create a partial view to send back to the caller
       $partialView = new ViewModel(array(
          'planId' => $planId,
          'unit' => $unit,
          'programs' => $programs,
          'year' => $year,
-         'outcomes' => $this->getDatabaseData()->getOutcomesByPlanId($planId, $programsArray),
+         'outcomes' => $this->getDatabaseData()->getOutcomesByPlanId($planId, $programs),
          'plan' => $this->getDatabaseData()->getPlanByPlanId($planId),
          'planDocuments' => $this->getDatabaseData()->getPlanDocumentsByPlanId($planId),
          'form' => $form,
@@ -502,9 +496,6 @@ class PlansController extends AbstractActionController
       $programs = trim($request->getPost('programs'));
       $button = $request->getPost('formSubmitPlan'); // identify which button "Save" or "Draft" was pressed
       
-      //turn programs into an array      
-      $programsArray = $this->createProgramArray($programs);
-      
       // set the draft flag
       $draftFlag = $this->getDraftFlag($button);
             
@@ -542,12 +533,9 @@ class PlansController extends AbstractActionController
       $programs = $_POST['programs'];
       $year = $_POST['year'];
       
-      //turn programs into an array
-      $programsArray = $this->createProgramArray($programs);
-      
       // get an array of outcome entities for each program
       // the outcomes array is an array of entity arrays
-      foreach ($programsArray as $program) :
+      foreach ($programs as $program) :
          $dbData = $this->getDatabaseData()->getUniqueOutcomes($unit, $program);
          $outcomes[] = $dbData;
       endforeach;
@@ -676,17 +664,14 @@ class PlansController extends AbstractActionController
       $unit = $_POST['unit'];
       $programs = $_POST['programs'];
       $year = $_POST['year'];
-      
-      // change the program string into an array for DB select
-      $programsArray = $this->createProgramArray($programs);
-         
+   
       // create a partial view to send back to the caller
       $partialView = new ViewModel(array(
          'planId' => $planId,
          'unit' => $unit,
          'programs' => $programs,
          'year' => $year,
-         'outcomes' => $this->getDatabaseData()->getOutcomesByPlanId($planId, $programsArray),
+         'outcomes' => $this->getDatabaseData()->getOutcomesByPlanId($planId, $programs),
          'plan' => $this->getDatabaseData()->getPlanByPlanId($planId),
          'planDocuments' => $this->getDatabaseData()->getPlanDocumentsByPlanId($planId),
          'role' => $role,
@@ -717,16 +702,13 @@ class PlansController extends AbstractActionController
       $programs = $_POST['programs'];
       $year = $_POST['year'];
       
-      // change the program string into an array for DB select
-      $programsArray = $this->createProgramArray($programs);
-         
       // create a partial view to send back to the caller
       $partialView = new ViewModel(array(
          'planId' => $planId,
          'unit' => $unit,
          'programs' => $programs,
          'year' => $year,
-         'outcomes' => $this->getDatabaseData()->getOutcomesByPlanId($planId, $programsArray),
+         'outcomes' => $this->getDatabaseData()->getOutcomesByPlanId($planId, $programs),
          'plan' => $this->getDatabaseData()->getPlanByPlanId($planId),
          'planDocuments' => $this->getDatabaseData()->getPlanDocumentsByPlanId($planId),
          'role' => $role,
@@ -841,21 +823,4 @@ class PlansController extends AbstractActionController
       return $draftFlag;
    }
    
-   /**
-    * Turn a comma separated list of programs into an array
-    *
-    * return the array
-    */
-   private function createProgramArray($programs)
-   {
-      //turn programs into an array
-      $splitArray = preg_split("/,/", $programs);
-         
-      // trim whitespaces from the elements in the array
-      foreach ($splitArray as $split) :
-         $programsArray[] = trim($split);
-      endforeach;
-      
-      return $programsArray;
-   }
 }

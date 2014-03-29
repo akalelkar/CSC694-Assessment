@@ -15,13 +15,7 @@
         <div class="row">
 	    <p></p>
 	    <!-- create header row -->
-	    <?php $label = "" ?>
-	    <?php echo $this->partial('plans/plans/displayAllPrograms.phtml', array('programs' => $programs,
-										    'label' => $label,
-										    'unit' => $unit,
-										    'year' => $year,
-										    ));
-	
+		<?php  
 		// create a string out of the programs array to use as a hidden element to pass between the pages
 		$allPrograms = "";
 		if (!empty($this->programs)) {
@@ -32,7 +26,8 @@
 		    // remove the last ", " added on after the last loop above
 		    $allPrograms = substr($allPrograms, 0, -2);
 		}
-	        
+                echo "<h4>" . $unit . ": " . $allPrograms . ": " . $year . "</h4>";
+		
 		// prepare hidden elements to pass data between pages	
 		$elem = $form->get('action');
 		$elem->setValue($action);					    

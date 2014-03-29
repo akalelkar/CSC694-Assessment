@@ -12,10 +12,10 @@ if(!$results){
 	    </colgroup>  
 	    <div class="bs-example">
 		<table class="table">
-		    <h6>View Report</h6>
 		    <h4><?php echo $report[0]['unit_id'] . ' - ' . $report[0]['name'] . ' - ' . $report[0]['year'];?></h4>
 		    <div class="controls">
-			<div class="panel-group" id="accordion">
+		      <h3>Showing Report for Plan <?php echo $report[0]['plan_id'] ?></h3>
+		 	<div class="panel-group" id="accordion">
 			    <!-- Show meta or outcomes -->
 			    <div class="panel panel-success">
 				<div class="panel-heading">
@@ -97,7 +97,7 @@ if(!$results){
 					    <?php
 						if($report[0]['feedback'] == 2){
 						    echo '&nbsp &nbsp (Approved)';
-						}else{
+						}else if($report[0]['feedback'] == 1){
 						    echo '&nbsp &nbsp (In need of revision)';
 						}
 					    ?>

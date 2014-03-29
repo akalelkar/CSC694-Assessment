@@ -26,23 +26,40 @@ if(!$results){
 		    else{
 			echo " &nbsp; Outcomes Plan";
 		    }
-		    if ($plan->hasReport == 0){
-			echo " <span class='pull-right'>Report Does Not Exist</span>";
+		
+		    $showButton = 1;
+		    if ($action=="View" || $action== "Provide Feedback")
+		    {
+		        if ($plan->hasReport != 2){ // no submitted report exists
+			    echo " <span class='pull-right'>Report Does Not Exist</span>";
+			    $showButton = 0;
+			}
 		    }
-		    else{
-		?>
-	        <input class="btn btn-primary btn-sm pull-right"
-		       onclick="getReports('<?php echo $action;?>', <?php echo $plan->id; ?>);"
-		       id="<?php echo $action;?>"
-		       <?php
-		          if ($action=="View"){
-			    echo 'value="' . $action . ' Report &raquo"';
-			  }
-			  else{
-			    echo 'value="' . $action . '  &raquo"';
-			  }
-			?>
-		</input>
+		    else if($action == "Add")
+		    {
+		        if ($plan->hasReport == 1)  // draft exists
+			{
+			    echo " <span class='pull-right'>Report Draft Already Exists</span>";
+			    $showButton = 0;
+			}
+			else if ($plan->hasReport == 2) // submitted report already exists
+			{
+			     echo " <span class='pull-right'>Report Already Exists</span>";
+			     $showButton = 0;
+			}
+		    }
+		    else // modify action
+		    {
+			if ($plan->hasReport == 0){
+			    echo " <span class='pull-right'>Report Does Not Exist</span>";
+			    $showButton = 0;
+			}
+		    }
+		    if ($showButton == 1){	
+		?>	    <input class="btn btn-primary btn-sm pull-right"
+			 	    onclick="getReports('<?php echo $action;?>', <?php echo $plan->id; ?>);"
+				    id="<?php echo $action . '" value="' . $action . ' &raquo"';?>"
+			    </input>
 		<?php
 		    }
 		?>

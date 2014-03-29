@@ -31,7 +31,7 @@ class ReportTable extends AbstractTableGateway
                         ->from(array('r' => 'reports'))
                         ->columns(array('id','population', 'results', 'conclusions', 'actions', 'draft_flag', 'feedback', 'feedback_text'))
                         ->join(array('p' => 'plans'),
-                               'r.plan_id = p.id', array('year', 'meta_flag'))
+                               'r.plan_id = p.id', array('plan_id' => 'id', 'year', 'meta_flag'))
                         ->join(array('po' => 'plan_outcomes'),
                                'p.id = po.plan_id', array())
                         ->join(array('o' => 'outcomes'),     
@@ -48,7 +48,7 @@ class ReportTable extends AbstractTableGateway
                         ->from(array('r' => 'reports'))
                         ->columns(array('id','population', 'results', 'conclusions', 'actions', 'draft_flag', 'feedback', 'feedback_text'))
                         ->join(array('p' => 'plans'),
-                               'r.plan_id = p.id', array('year', 'meta_flag', 'text' => 'meta_description'))
+                               'r.plan_id = p.id', array('plan_id' => 'id', 'year', 'meta_flag', 'text' => 'meta_description'))
                        ->join(array('pp' => 'plan_programs'),'p.id = pp.plan_id',array())
                         ->join(array('pr' => 'programs'),'pp.program_id = pr.id',array('unit_id', 'name'))
                         ->where(array("p.id = $planId",
@@ -66,7 +66,7 @@ class ReportTable extends AbstractTableGateway
     
     // Takes all report data from form needed for updating a report
     // All arguments match column names in report table except
-    // $status - this is 0 for submitted, 1 for draft, 2 for delete the thing
+    // $status - this is 0 for submitted, 1 for save draft, 2 for delete draft, 3 for delete submitted report
     // $user - user ID to be inserted where appropriate
     public function updateReport($id, $population, $results, $conclusions, $actions, $status, $user, $feedbackText, $feedback){
         
@@ -83,29 +83,43 @@ class ReportTable extends AbstractTableGateway
                             'feedback_text' => $feedbackText,
                             'feedback' => $feedback);
         
-        // If status is 2, we are deactivating the report
-        // So add deactivated user and ts, but don't change draft_flag
-        if($status == 2){
-            $values = array_merge(array('deactivated_ts' => $now, 'deactivated_user' => $user), $values);
-        
-        // Otherwise if we aren't deleting, we just update the draft flag with status
-        // which will be either 0 or 1
-        }else{
-            $values = array_merge(array('draft_flag' => $status), $values);
+        if ($status == 2){ // we want to physically delete the draft report
+            $this->deleteReport($id);
         }
-        
-        // Formulate update
-        $sql = new Sql($this->adapter);
-        $update = $sql->update()
-                ->table('reports')
-                ->set($values)
-                ->where("id = $id");
-
-        // Execute this bad boy
-        $statement = $sql->prepareStatementForSqlObject($update);
-        $statement->execute();
+        // If status is 3, we are deactivating the report
+        // So add deactivated user and ts and set active_flag to 0
+        else
+        {   if($status == 3){
+               $values = array_merge(array('deactivated_ts' => $now, 'deactivated_user' => $user, 'active_flag' => 0), $values);
+            }else {
+                // Otherwise if we aren't deleting, we just update the draft flag with status
+                // which will be either 0 or 1
+                $values = array_merge(array('draft_flag' => $status), $values);
+            }
+            // Formulate update
+            $sql = new Sql($this->adapter);
+            $update = $sql->update()
+                    ->table('reports')
+                    ->set($values)
+                    ->where("id = $id");
+    
+            // Execute this bad boy
+            $statement = $sql->prepareStatementForSqlObject($update);
+            $statement->execute();
+        }
     }
     
+    // physically delete report - only allowed if it is a draft
+    public function deleteReport($id){
+        $sql = new Sql($this->adapter);
+        $delete = $sql->delete()
+                    ->from('reports')
+                    ->where("id = $id");
+    
+            // Execute this bad boy
+        $statement = $sql->prepareStatementForSqlObject($delete);
+        $statement->execute();
+    }
     // Inserts a new report into the DB
     // All arguments match column names except
     // $id - plan id report is associated to
@@ -147,22 +161,33 @@ class ReportTable extends AbstractTableGateway
         return $this->adapter->getDriver()->getLastGeneratedValue();
     }
     
-    // Just grabs report count for plan to see if one already exists
-    // Returns count
+    // Returns 0 if no report exists, 1 if draft report exists and 2 if submitted report exists
     public function reportExists($planId){
         $sql = new Sql($this->adapter);
         
-        // Grab active reports for selected plan ID
         $select = $sql->select()
-                    ->from(array('r' => 'reports'))
-                    ->where(array('r.plan_id' => $planId, "r.deactivated_user IS NULL"));
-
+                ->from(array('r' => 'reports'))
+                ->columns(array('draft_flag'))
+                ->where(array('r.plan_id' => $planId,
+                              "r.active_flag = 1"));
+        
         $statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
         $count = $result->count();
+        if ($count == 0){
+            return 0;
+        }
+        else{
+            foreach ($result as $r){ // need to iterate even if only 1 report should be returned
+                if ($r['draft_flag'] == 1){
+                    return 1;
+                }
+                else{
+                    return 2;
+                }
+            }
+        }
         
-        // Returns just the count, not the results
-        return $count;
     }
     
     // This grabs plan data we're adding a report to
@@ -222,7 +247,7 @@ class ReportTable extends AbstractTableGateway
         // get plans with outcomes
         $select = $sql->select()
                       ->from(array('p' => 'plans'))
-                      ->columns(array('id', 'year', 'meta_flag', 'draft_flag'))
+                      ->columns(array('id', 'year', 'meta_flag'))
                       ->join(array('po' => 'plan_outcomes'),
                              'p.id = po.plan_id', array())
                       ->join(array('o' => 'outcomes'),     
@@ -260,7 +285,7 @@ class ReportTable extends AbstractTableGateway
         // get plans with meta assessment
         $select = $sql->select()
                        ->from(array('p' => 'plans'))
-                        ->columns(array('id', 'year', 'meta_flag', 'draft_flag', 'text' => 'meta_description'))
+                        ->columns(array('id', 'year', 'meta_flag', 'text' => 'meta_description'))
                        ->join(array('pp' => 'plan_programs'),'p.id = pp.plan_id',array())
                         ->join(array('pr' => 'programs'),'pp.program_id = pr.id',array('unit_id', 'name'))
                         ->where(array('p.year' => $year,

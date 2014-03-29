@@ -12,8 +12,7 @@ class Plan extends Form
 {
     public $rows = 6;
     public $cols = 100;
-    public $numFileElements = 5;
-    
+        
     public function __construct($name)
     {
         // we want to ignore the name passed

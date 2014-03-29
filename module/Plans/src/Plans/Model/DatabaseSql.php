@@ -652,8 +652,8 @@ group by o.id, pl.id, o.outcome_text
     $whereoutcomes = new \Zend\Db\Sql\Where();
     $wheremeta = new \Zend\Db\Sql\Where();
     
-    // if the action is view do not return plans that are in a draft status
-    if (strtolower($action) == "view") {
+    // if the action is view or provide feedback do not return plans that are in a draft status
+    if ($action == "View" || $action == "Provide Feedback") {
 	$whereoutcomes	
 	    ->equalTo('units.id', $unitId)
 	    ->and

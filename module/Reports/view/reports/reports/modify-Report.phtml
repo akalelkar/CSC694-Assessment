@@ -27,9 +27,9 @@ if(!$results){
 	    
 		?>
 		<table class="table">
-		    <h6>Modify Report</h6>
 		    <!-- Show form info -->
 		    <h4><?php echo $report[0]['unit_id'] . ' - ' . $report[0]['name'] . ' - ' . $report[0]['year'];?></h4>
+		    <h3>Modifying Report for Plan <?php echo $report[0]['plan_id'] ?></h3>
 		    <div class="controls">
 			<div class="panel-group" id="accordion">
 			    <div class="panel panel-success">
@@ -40,8 +40,7 @@ if(!$results){
 					</a>
 				    </h4>
 				</div>
-				<div id="collapseOne" class="panel-collapse collapse">
-				  <div class="panel-body">
+				<div class="panel-body">
 				    <?php $ctr = 0;?>
 				    <!-- Show outcome/assessment text -->
 				    <?php foreach($descriptions as $description) : ?>
@@ -50,7 +49,6 @@ if(!$results){
 					</br>
 					
 					<?php endforeach; ?>
-				  </div>
 				</div>
 			    
 			<!-- Other database fields -->
@@ -176,19 +174,27 @@ if(!$results){
 		</table>
 		</br>
 	    </div> <!-- controls -->
-	    <input class="btn btn-primary btn-md" onclick="" id="submitButton" value="Submit Changes"></input>
+	    <input class="btn btn-success btn-md" onclick="" id="submitButton" value="Submit Changes"></input>
 
 		<?php
+		// onclick jquery functions appear in index.phtml
 		    if($report[0]['draft_flag'] == 1){
 		    ?>
 		       <input class="btn btn-primary btn-md" onclick="" id="draftButton" value="Save Draft"></input>
 	   
 		    <?php
 		   }
-		   if($role < 3){
+		   if($role == 1 || $role == 2){  // admin and chairs can delete
+		      if ($report[0]['draft_flag'] == 1){ // drafts are completely deleted
 		   ?>
-		   <input class="btn btn-primary btn-md" onclick="" id="deleteButton" value="Delete Report"></input>
+		       <input class="btn btn-warning btn-md pull-right" onclick="" id="deleteDraft" value="Delete Draft"></input>
+		    <?php
+		      }
+		      else{// submitted reports are set to inactive
+		    ?>
+			 <input class="btn btn-warning btn-md pull-right" onclick="" id="deleteButton" value="Delete Report"></input>
 		   <?php
+		      }
 		   }
 		?>
 	    </table>

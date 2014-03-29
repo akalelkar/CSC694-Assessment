@@ -8,7 +8,7 @@
     $form->prepare();
 ?>
 
-<!-- create the rigth side of the page -->
+<!-- create the right side of the page -->
 <p></p>
 <center><h3>Assessment Plans - List All Plans</h3></center>
 <div class="col-md-8">
@@ -26,15 +26,7 @@
 		$label="Select a plan to provide feedback for: ";
 	    }
 	}
-    ?>
-    
-    <!-- create a header line -->			
-    <?php echo $this->partial('plans/plans/displayAllPrograms.phtml', array('programs' => $programs,
-								      'label' => $label,
-								      'unit' => $unit,
-								      'year' => $year,
-								      ));
-
+ 
 	// create a string out of the programs array to use as a hidden element to pass between the pages
 	$allPrograms = "";
 	if (!empty($this->programs)) {
@@ -45,7 +37,8 @@
 	    // remove the last ", " added on after the last loop above
 	    $allPrograms = substr($allPrograms, 0, -2);
 	}
-
+	echo "<h4>" . $label . $this->unit . ": " . $allPrograms . ": " . $this->year . "</h4>";
+  	
 	// prepare hidden elements to pass data between pages	
 	$elem = $form->get('action');
 	$elem->setValue($action);					    
@@ -93,6 +86,7 @@
 					    else{
 						echo " Outcomes Plan";
 					    }
+					    // query only returns drafts if modified selected
 					    if ($plan['draft_flag'] == 1){
 						echo " &nbsp;(Draft)";
 					    }
