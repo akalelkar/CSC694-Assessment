@@ -21,33 +21,48 @@
 	    <div class="row">
 		<p></p>
 		<!-- create header line -->
-		<?php
-		    $label = "&nbsp;&nbsp;";
-		    echo "<h4>" . $label . $unit . ", " . $programs . ", " . $year . "</h4>";
+		<?php	
+		    // create a string out of the programs array to use as a hidden element to pass between the pages
+		    $allPrograms = "";
+		    if (!empty($this->programs)) {
+			foreach ($this->programs as $program) :
+			    $allPrograms = $allPrograms . $program . ", ";
+			endforeach;
+			
+			// remove the last ", " added on after the last loop above
+			$allPrograms = substr($allPrograms, 0, -2);
+		    }
+		    echo "<h4>" . $this->unit . ": " . $allPrograms . ": " . $this->year . "</h4>";
 		    
 		    // prepare hidden elements to pass data between pages	
+		    $elem = $form->get('action');
+		    $elem->setValue($action);					    
+		    echo $this->formInput($elem);
+	    
+		    $elem = $form->get('unit');
+		    $elem->setValue($unit);					    
+		    echo $this->formInput($elem);
+	    
 		    $elem = $form->get('programs');
-		    $elem->setValue($programs);					    
+		    $elem->setValue($allPrograms);					    
 		    echo $this->formInput($elem);
 		    
 		    $elem = $form->get('year');
 		    $elem->setValue($year);					    
-		    echo $this->formInput($elem);		    
+		    echo $this->formInput($elem);
 		?>
-		    
 		<!-- create meta assessment block -->
 		<div class="col-md-8">
 		    <div class="controls">
 			<h4>Describe the Meta Assessment Plan & Rationale</h4>
 			<p></p>
 			    
-			<div class="controls">
+			
 			    <?php
 				$elem = $form->get('textMetaDescription');
 				echo $this->formTextarea($elem);
 			    ?>
 		    
-			</div>
 			
 	    		<!-- use partials to load the upload buttons -->
 			<?php echo $this->partial('plans/plans/plansUploadButtonPartial.phtml', array('form' => $form,)); ?>

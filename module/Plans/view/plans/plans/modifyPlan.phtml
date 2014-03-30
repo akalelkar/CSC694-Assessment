@@ -294,14 +294,13 @@
 				</h4>
 			    </div>
 
-			    <div id="collapseMetaDescription" class="panel-collapse collapse">
-				<div class="panel-body">
+			    <div class="panel-body">
 				    <?php
 					$elem = $form->get('textMetaDescription');
 					$elem->setValue($plan['meta_description']);
 					echo $this->formTextarea($elem);
 				    ?>	
-				</div>
+				
 			    </div>
 			</div>
 		    <?php
@@ -325,7 +324,7 @@
 				    $filename = $planDocument['file_name'] . "." . $planDocument['file_ext'];
 			?>						    					
 				<p>
-				    <!-- Create a delete button for each row -->
+				    <!-- Create a delete button  -->
 				    <a class="btn btn-warning btn-xs" id="deleteDocument" name="deleteDocument" value="<?php echo $planDocument['id'];?>"> 
 					Delete &raquo;
 				    </a>

@@ -341,18 +341,16 @@ class PlansController extends AbstractActionController
       $programs = $_POST['programs'];
       $year = $_POST['year'];
       $planId = $_POST['planId'];
-
+      
+      // listPlansAction is also called if user chooses to delete a plan
       // if there is a plan id present then it needs to be deleted from the database otherwise just list all the plans
       if($planId > 0 ){
     
-         // update the active flag on the plans table to inactive
+         // update the active flag on the plans table to inactive or if draft, delete plan
+         // this will change the active flag on the reports table to inactive if a report exists for the plan
          $this->getDatabaseData()->updatePlanActiveByPlanId($planId, $userID);
-
-         // update the active flag on the reports table to inactive         
-         $this->getDatabaseData()->updateReportsActiveByPlanId($planId, $userID);
-        
+         
       }
-
       // create a partial view to send back to the caller
       $partialView = new ViewModel(array(
             'action' => $action,
@@ -494,25 +492,25 @@ class PlansController extends AbstractActionController
       $year = $request->getPost('year');
       $metaDescription = trim($request->getPost('textMetaDescription'));
       $programs = trim($request->getPost('programs'));
+      //turn programs into an array
+      $splitArray = preg_split("/,/", $programs);
+      
+      // trim whitespaces from the elements in the array
+      foreach ($splitArray as $split) :
+         $programsArray[] = trim($split);
+      endforeach;
+   
       $button = $request->getPost('formSubmitPlan'); // identify which button "Save" or "Draft" was pressed
       
       // set the draft flag
       $draftFlag = $this->getDraftFlag($button);
-            
-      // insert into plan table and obtain the primary key of the insert
-      $planId = $this->getDatabaseData()->insertPlan(1, $metaDescription, $year, "","","","","","","","","","","","",$draftFlag, $userID);
-     
-      // get all the program ids based on the array of program
-      $programIds = $this->getDatabaseData()->getProgramIdsByProgram($programsArray);
-
-      // loop through the array of programs inserting each value into the meta plans table
-      foreach ($programIds as $program) :
-         $this->getDatabaseData()->insertPlanPrograms($program['programId'], $planId);
-      endforeach;
+      
+      // add meta plan
+      $this->getDatabaseData()->insertMetaPlan($metaDescription, $year, $draftFlag, $userID, $programsArray);
 
       // upload files and save file name in DB
       $this->uploadFiles($request, $planId);
-      
+
       return $this->redirect()->toRoute('plans');
    }
    
@@ -746,6 +744,12 @@ class PlansController extends AbstractActionController
       // get all the data from the form
       $planId = trim($request->getPost('planId'));
       $metaDescription = trim($request->getPost('textMetaDescription'));
+      if ($metaDescription != NULL){
+         $metaFlag = 1;
+      }
+      else{
+         $metaFlag = 0;
+      }
       $assessmentMethod = trim($request->getPost('textAssessmentMethod'));
       $population = trim($request->getPost('textPopulation'));
       $sampleSize = trim($request->getPost('textSamplesize'));
@@ -759,9 +763,8 @@ class PlansController extends AbstractActionController
       $feedback = trim($request->getPost('textFeedback'));
       $feedbackFlag = trim($request->getPost('feedbackFlag'));
       $dbDraftFlag = trim($request->getPost('dbDraftFlag'));
-      
       //update the database
-      $this->getDatabaseData()->updatePlanById($planId,0,$metaDescription,$assessmentMethod,$population,$sampleSize,$assessmentDate,$cost,$fundingFlag,$analysisType,$administrator,$analysisMethod,$scope,$feedback,$feedbackFlag,$draftFlag,$userID,$dbDraftFlag);
+      $this->getDatabaseData()->updatePlanById($planId,$metaFlag,$metaDescription,$assessmentMethod,$population,$sampleSize,$assessmentDate,$cost,$fundingFlag,$analysisType,$administrator,$analysisMethod,$scope,$feedback,$feedbackFlag,$draftFlag,$userID,$dbDraftFlag);
 
       // upload files and save file name in DB
       $this->uploadFiles($request, $planId);

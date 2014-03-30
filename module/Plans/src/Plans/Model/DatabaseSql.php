@@ -37,67 +37,6 @@ class DatabaseSql extends AbstractTableGateway
     public function insertPlan($metaFlag,$metaDescription,$year,$assessmentMethod,$population,$sampleSize,$assessmentDate,$cost,$fundingFlag,$analysisType,$administrator,$analysisMethod,$scope,$feedbackText,$feedbackFlag,$draftFlag,$userId)
     {
 
-/*
-INSERT INTO `assessment`.`plans`
-(
-    -- `id`, -- auto incremented
-    `created_ts`,
-    `submitted_ts`,
-    `modified_ts`,
-    `deactivated_ts`,
-    `created_user`,
-    `submitted_user`,
-    `modified_user`,
-    `deactivated_user`,
-    `draft_flag`,
-    `meta_flag`,
-    `funding_flag`,
-    `meta_description`,
-    `year`,
-    `assessment_method`,
-    `population`,
-    `sample_size`,
-    `assessment_date`,
-    `cost`,
-    `analysis_type`,
-    `administrator`,
-    `analysis_method`,
-    `scope`,
-    `feedback_text`,
-    `feedback`,
-    `active_flag`
-)
-VALUES
-(
-    -- <{id: }>, auto incremented
-    '1970-01-01 00:00:01',
-    '1970-01-01 00:00:01',
-    '1970-01-01 00:00:01',
-    '1970-01-01 00:00:01',
-    19,
-    19,
-    19,
-    19,
-    0,
-    0,
-    0,
-    'meta_description',
-    2014,
-    'assessment_method:',
-    'population:',
-    'sample_size:',
-    'assessment_date:',
-    'cost:',
-    'analysis_type:',
-    'administrator:',
-    'analysis_method:',
-    'scope:',
-    'feedback_text:',
-    0,
-    0
-)
-;
-*/
 	// database timestamp format    
         //"1970-01-01 00:00:01";
       
@@ -141,10 +80,7 @@ VALUES
 	$insert = $sql->insert('plans');
 	$insert->values($data);		    
 		
-	// create an automic database operation for the tuple insert and retreival of the auto-generated primary key		
-	$connection = $this->adapter->getDriver()->getConnection();
-	$connection->beginTransaction();
-
+	
 	// perform the insert
         $statement = $sql->prepareStatementForSqlObject($insert);
         $statement->execute();
@@ -152,10 +88,7 @@ VALUES
 	// get the primary key id
 	$rowId = $this->adapter->getDriver()->getConnection()->getLastGeneratedValue();
 		
-	// finish the transaction		
-	$connection->commit();
-  
-        return $rowId;
+	return $rowId;
     }    
     
     
@@ -164,21 +97,6 @@ VALUES
      */
     public function insertPlanOutcome($outcomeId, $planId)
     {
-/*	
-INSERT INTO `assessment`.`plan_outcomes`
-(
-	-- `id`,  auto incremented
-	`plan_id`,
-	`outcome_id`
-)
-VALUES
-(
-	-- <{id: }>,   auto incremented
-	6016,
-	1
-)
-;
-*/	
 
         $sql = new Sql($this->adapter);
 	$data = array('outcome_id' => $outcomeId,
@@ -197,41 +115,12 @@ VALUES
      */
     public function insertPlanDocuments($planId, $fileName, $fileDescription, $userId, $fileDocument, $fileSize, $fileType)
     {
-/*
- INSERT INTO `assessment`.`plan_documents`
-(
--- `id`, auto incremented
-	`created_ts`,
-	`created_user`,
-	`file_name`,
-	`file_ext`,
-	`file_description`,
-	`file_document`,
-	`file_size`,
-	`file_type`,
-	`plan_id`
-)
-VALUES
-(
-	-- <{id: }>,  auto incremented
-	'1970-01-01 00:00:01',
-	19,
-	'file_name:',
-	'file_ext:',
-	'file_description:',
-	'file_document:',
-	26,
-	'file_type:',
-	6016
-)
-;
-*/
 	// database timestamp format    
         //"1970-01-01 00:00:01";
 	
 	// create the sytem timestamp
 	$currentTimestamp = date("Y-m-d H:i:s", time());
-		
+	
 	/*
 	 * split the file name into
 	 *  1) File Name
@@ -264,20 +153,6 @@ VALUES
      */
     public function insertPlanPrograms($programId, $planId)
     {
-/*
-INSERT INTO `assessment`.`plan_programs`
-(
-    -- `id`, auto increment
-    `plan_id`,
-    `program_id`
-)
-VALUES
-(
-    -- <{id: }>,
-    6016,
-    1
-);
-*/
         $sql = new Sql($this->adapter);
 	$data = array('plan_id' => $planId,
 		      'program_id' => $programId,
@@ -298,14 +173,6 @@ VALUES
      */
     public function updatePlanById($id,$metaFlag,$metaDescription,$assessmentMethod,$population,$sampleSize,$assessmentDate,$cost,$fundingFlag,$analysisType,$administrator,$analysisMethod,$scope,$feedbackText,$feedbackFlag,$draftFlag,$userId,$dbDraftFlag)
     {
-/*
-update assessment.plans
-set meta_description = 'Hello',
-    modified_ts = '1970-01-01 00:00:01',
-    active_flag = 1
-where id = 1175
-;
-*/
 	// database timestamp format    
         //"1970-01-01 00:00:01";
 	
@@ -374,28 +241,95 @@ where id = 1175
         $statement->execute();
     }
 
-    
+    public function insertMetaPlan($metaDescription, $year, $draftFlag, $userID, $programsArray){
+	
+	$sql = new Sql($this->adapter);
+
+	// create an atomic database transaction to update plan and possibly report
+	$connection = $this->adapter->getDriver()->getConnection();
+	$connection->beginTransaction();
+
+	// insert into plan table and obtain the primary key of the insert
+        $planId = $this->insertPlan(1, $metaDescription, $year, "","","","","","","","","","","","",$draftFlag, $userID);
+     
+        // get all the program ids based on the array of program
+	$programIds = $this->getProgramIdsByProgram($programsArray);
+
+	 // loop through the array of programs inserting each value into the meta plans table
+	foreach ($programIds as $program) :
+	   $this->insertPlanPrograms($program['programId'], $planId);
+	 endforeach;
+
+	// finish the transaction		
+	$connection->commit();
+      
+    }
     /*
      * Update the active flag in plans table setting it to in-active (0)
      */
     public function updatePlanActiveByPlanId($id, $userId)
     {
-/*
-UPDATE `assessment`.`plans`
-SET deactivated_ts = '1970-01-01 00:00:01',
-    deactivated_user = 19,
-    active_flag = 0
-WHERE id = 6016
-;
-*/
 	// database timestamp format    
         //"1970-01-01 00:00:01";
       
 	// create the sytem timestamp
 	$currentTimestamp = date("Y-m-d H:i:s", time());
 	
-        $sql = new Sql($this->adapter);
-	$update = $sql->update()
+	$sql = new Sql($this->adapter);
+
+	// create an atomic database transaction to update plan and possibly report
+	$connection = $this->adapter->getDriver()->getConnection();
+	$connection->beginTransaction();
+
+	// determine if plan is a draft
+	$select = $sql->select()
+		      ->from('plans')
+		      ->columns(array('draft_flag', 'meta_flag'))
+		      ->where(array('id' => $id))
+	;
+	$statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+	foreach($result as $r){  // should only be one plan though
+	    if ($r['draft_flag'] == 1){
+		// delete plan - there won't be a report to deal with
+	    	// first delete plan from plan_outcomes table - but only for outcomes plans
+		if ($r['meta_flag'] == 0)
+		{
+		    $update = $sql->delete()
+			      ->from('plan_outcomes')
+			      ->where(array('plan_id' => $id))
+		    ;
+		    $statement = $sql->prepareStatementForSqlObject($update);
+	            $statement->execute();
+		}
+		// next delete any associated plan_documents
+		$update = $sql->delete()
+			      ->from('plan_documents')
+			      ->where(array('plan_id' => $id))
+		;
+		$statement = $sql->prepareStatementForSqlObject($update);
+	        $statement->execute();
+		
+		// next delete plan from plan_programstable
+		$update = $sql->delete()
+			      ->from('plan_programs')
+			      ->where(array('plan_id' => $id))
+		;
+		
+		$statement = $sql->prepareStatementForSqlObject($update);
+	        $statement->execute();
+	
+		// now delete plan
+		$update = $sql->delete()
+			      ->from('plans')
+			      ->where(array('id' => $id))
+		;
+		$statement = $sql->prepareStatementForSqlObject($update);
+	        $statement->execute();
+	    }
+	    else{
+			
+		$update = $sql->update()
 			->table('plans')
 			->set(array('active_flag' => 0,
 				    'deactivated_ts' => $currentTimestamp,
@@ -403,9 +337,14 @@ WHERE id = 6016
 				    ))
 			->where(array('id' => $id))
 		    ;
-		    
-        $statement = $sql->prepareStatementForSqlObject($update);
-        $statement->execute();
+		$statement = $sql->prepareStatementForSqlObject($update);
+		$statement->execute();
+		$this->updateReportsActiveByPlanId($id, $userId);
+	    }
+	}
+	// finish the transaction		
+	$connection->commit();
+  
     }    
     
     
@@ -414,15 +353,6 @@ WHERE id = 6016
      */
     public function updateReportsActiveByPlanId($id, $userId)
     {
-/*
-UPDATE `assessment`.`reports`
-SET 
-    deactivated_ts = '1970-01-01 00:00:01',
-    deactivated_user = 19,
-    active_flag = 0
-WHERE plan_id = 6016
-;
-*/
 	// database timestamp format    
         //"1970-01-01 00:00:01";
       
@@ -443,8 +373,7 @@ WHERE plan_id = 6016
         $statement->execute();
     }
     
-
-    
+   
 /********** All delete queries *********/    
 
     /**
@@ -452,11 +381,6 @@ WHERE plan_id = 6016
      */
     public function deletePlanDocuments($id)
     {
-/*
-DELETE FROM `assessment`.`plan_documents`
-WHERE id = 1
-;
-*/
         $sql = new Sql($this->adapter);
 	$delete = $sql->delete('plan_documents');
 	$delete->where(array('id' => $id));		    
@@ -474,10 +398,6 @@ WHERE id = 1
      */ 
     public function getLowYear()
     {
-/*    
-SELECT MIN(year) as year from assessment.plans
-;
- */   
         $sql = new Sql($this->adapter);
         $select = $sql->select()
 		      ->columns(array('year' => new Expression('MIN(plans.year)')))
@@ -498,18 +418,6 @@ SELECT MIN(year) as year from assessment.plans
      */
     public function getPlanDocumentsByPlanId($planId)
     {
-/*
-    select
-	p.id, 
-	pd.file_name,
-	pd.file_ext,
-	pd.file_description
-FROM `assessment`.`plans` p 
-	inner join `assessment`.`plan_documents` pd
-		on p.id = pd.plan_id
-where p.id = 6026
-;
-*/
         $sql = new Sql($this->adapter);
         $select = $sql->select()
 		      ->columns(array('id' => new Expression('plan_documents.id'),
@@ -534,22 +442,6 @@ where p.id = 6026
      */
     public function getPlanDocumentsById($Id)
     {
-/*
- SELECT
-    id,
-    created_ts,
-    created_user,
-    file_name,
-    file_ext,
-    file_description,
-    file_document,
-    file_size,
-    file_type,
-    plan_id
-FROM assessment.plan_documents
-where id = 26
-;
-*/
         $sql = new Sql($this->adapter);
         $select = $sql->select()
                       ->from('plan_documents')
@@ -570,11 +462,6 @@ where id = 26
      */
     public function getPlanByPlanId($planId)
     {
-/*
-select * from assessment.plans
-where id = 1175
-;
-*/
         $sql = new Sql($this->adapter);
         $select = $sql->select()
                       ->from('plans')
@@ -595,20 +482,6 @@ where id = 1175
      */
     public function getOutcomesByPlanId($planId, $names)
     {
-/*
-SELECT 
-    o.id,
-    pl.id, 
-    o.outcome_text 
-from assessment.outcomes o	
-    inner join assessment.plan_outcomes po
-	on po.outcome_id = o.id
-    inner join assessment.plans pl
-	on pl.id = po.plan_id
-where pl.id = 1175
-group by o.id, pl.id, o.outcome_text
-;
-*/	
 	
         $sql = new Sql($this->adapter);
         $select = $sql->select()
@@ -647,8 +520,6 @@ group by o.id, pl.id, o.outcome_text
      */
     public function getPlans($unitId, $names, $year, $action)
     {
-
-
     $whereoutcomes = new \Zend\Db\Sql\Where();
     $wheremeta = new \Zend\Db\Sql\Where();
     
@@ -755,54 +626,8 @@ group by o.id, pl.id, o.outcome_text
      */
     public function getOutcomes($unitId, $names, $year, $action)
     {
-/*
-// view action select where draft flag is 0 or null
-SELECT 
-    p.name, 
-    o.id, 
-    pl.id, 
-    o.outcome_text 
-from assessment.units un
-    inner join assessment.programs p
-	on p.unit_id = un.id
-    inner join assessment.outcomes o
-	on o.program_id = p.id
-    inner join assessment.plan_outcomes po
-	on po.outcome_id = o.id
-    inner join assessment.plans pl
-	on pl.id = po.plan_id
-where un.id = 'CSC'
-  and p.name = 'BS Computer Science'
-  and pl.year = 2010
-  and pl.active_flag = 1
-  and (pl.draft_flag = 0 or pl.draft_flag is null)
-group by p.name, o.id, pl.id, o.outcome_text
-;
 
-// modify action can see all plans
-SELECT 
-    p.name, 
-    o.id, 
-    pl.id, 
-    o.outcome_text 
-from assessment.units un
-    inner join assessment.programs p
-	on p.unit_id = un.id
-    inner join assessment.outcomes o
-	on o.program_id = p.id
-    inner join assessment.plan_outcomes po
-	on po.outcome_id = o.id
-    inner join assessment.plans pl
-	on pl.id = po.plan_id
-where un.id = 'CSC'
-  and p.name = 'BS Computer Science'
-  and pl.year = 2010
-  and pl.active_flag = 1
-group by p.name, o.id, pl.id, o.outcome_text
-;
-*/
-
-$where = new \Zend\Db\Sql\Where();
+    $where = new \Zend\Db\Sql\Where();
 
     // if the action is view do not return outcomes that are is a draft status
     if (strtolower($action) == "view") {
@@ -869,21 +694,6 @@ $where = new \Zend\Db\Sql\Where();
      */
     public function getUniqueOutcomes($unitId, $names)
     {
-/*
-SELECT 
-    p.name,
-    o.id, 
-    o.outcome_text 
-from assessment.units un
-    inner join assessment.programs p
-	on p.unit_id = un.id
-    inner join assessment.outcomes o
-	on o.program_id = p.id
-where un.id = 'CSC'
-  and p.name = 'BS Computer Science'
-group by p.name, o.id, o.outcome_text
-;
-*/	
                 
         $sql = new Sql($this->adapter);
         $select = $sql->select()
@@ -919,11 +729,6 @@ group by p.name, o.id, o.outcome_text
      */
     public function getProgramIdsByProgram($names)
     {
-/*
-select id from `assessment`.`programs`
-where name in ('BA Computer Science','BS Computer Science')
-;
-*/
         $sql = new Sql($this->adapter);
         $select = $sql->select()
                       ->columns(array('programId' => new Expression('programs.id'),
@@ -944,20 +749,6 @@ where name in ('BA Computer Science','BS Computer Science')
      */
     public function getLastMetaYear($unitId, $names)
     {
-/*
- SELECT 
-	max(pl.year) as year
-from assessment.plans pl
-	inner join assessment.plan_programs pp
-		on pp.plan_id = pl.id
-	inner join assessment.programs p
-		on pp.program_id = p.id
-	inner join assessment.units un
-		on un.id = p.unit_id
-where un.id = 'CSC'
-	and p.name in ('BA Computer Science','BS Computer Science')
-;
-*/
         $sql = new Sql($this->adapter);
 	$select = $sql->select()
                       ->columns(array('year' => new Expression('MAX(plans.year)')))
@@ -965,7 +756,7 @@ where un.id = 'CSC'
 		      ->join('plan_programs', 'plan_programs.plan_id = plans.id', array())
 		      ->join('programs', 'plan_programs.program_id = programs.id', array())
 		      ->join('units', 'programs.unit_id = units.id', array())		      		  
-                      ->where(array('units.id' => $unitId, 'programs.name' => $names, 'plans.meta_flag' => 1))
+                      ->where(array('units.id' => $unitId, 'programs.name' => $names, 'plans.meta_flag' => 1, 'plans.active_flag' => 1))
 		   ;
 
         $statement = $sql->prepareStatementForSqlObject($select);

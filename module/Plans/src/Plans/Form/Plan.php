@@ -351,7 +351,7 @@ class Plan extends Form
                 'type'  => 'submit',
                 'value' => 'formSavePlan',
                 'id' => 'formSubmitPlan',
-                'class' => 'btn btn-primary btn-md pull-left',               
+                'class' => 'btn btn-success btn-md pull-right',               
             ),
             'options' => array(
                 'label' => 'Submit',

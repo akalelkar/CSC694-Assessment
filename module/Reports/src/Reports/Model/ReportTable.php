@@ -116,7 +116,6 @@ class ReportTable extends AbstractTableGateway
                     ->from('reports')
                     ->where("id = $id");
     
-            // Execute this bad boy
         $statement = $sql->prepareStatementForSqlObject($delete);
         $statement->execute();
     }
