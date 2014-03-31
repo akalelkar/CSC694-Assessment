@@ -134,7 +134,8 @@ class Plan extends Form
             'type' => 'Radio',
             'name' => 'feedbackFlag',
             'id' => 'feedbackFlag',            
-            'options' => array(               
+            'options' => array(
+                'separator' => '  ',
                 'value_options' => array(
                     '1' => 'In Need of Revision',
                     '2' => 'Ready to be Carried Out',

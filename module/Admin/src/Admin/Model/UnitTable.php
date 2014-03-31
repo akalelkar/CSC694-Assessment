@@ -69,58 +69,50 @@ class UnitTable extends AbstractTableGateway
     }
     
     /*
-     * get unit by id
+     * get units for privileges select
      */
-    public function getUnitsForSelect()
+    public function getPrivsForSelect($role)
     {
         $sql = new Sql($this->adapter);
-        $select = $sql->select($this->table)
+        if ($role != 4){ // other than assessor
+            $select = $sql->select()
+                      ->from('units')
                       ->columns(array('id'))
-                      ->where(array('active_flag' =>'1'));                   
-        $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
-        $results = array();
-        foreach($result as $key => $value){
-            $results[$value['id']] = $value['id'];
+                      ->where(array('active_flag' =>'1'))
+            ;          
         }
-        return $results;
+        else{ // assessor
+            $subselect = $sql->select()
+                           ->from('user_roles')
+                           ->columns(array('user_id'))
+                           ->where(array('user_roles.role' => 4))
+            ;
+            
+            $select = $sql->select()
+                          ->from('units')
+                          ->columns(array('id'))
+                          ->join('assessor_privs', 'assessor_privs.unit_id = units.id', array(), 'left')
+                          ->join(array('subselect' => $subselect), 'subselect.user_id = assessor_privs.user_id', array(), 'left')
+                          ->where(array('units.active_flag' =>'1'))
+                          ->group('assessor_privs.unit_id')
+                          ->having(array('count(*) < 3'))
+                          ->order('units.id')
+            ;
+        }
+        
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $results = $statement->execute();
+    
+        $resultArray = array();
+        // array must be created as key=>value pair where both key and value are the unit_id
+        // so when accessing values from multi select you get the unit_id and not the array subscript
+        foreach($results as $result){
+            $resultsArray[$result['id']] = $result['id'];
+        }
+        return $resultsArray;
     }
     
-    public function getDisablePrivUnits()
-    {
-        $sql = new Sql($this->adapter);
-        $select = $sql->select('unit_privs')
-                      ->columns(array('unit_id','active_flag'))
-                      ->group(array('unit_id','active_flag'))
-                      ->having(array('count(*) >= 2','active_flag = 1'));       
-        $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
-        $results = array();
-        foreach($result as $key => $value){
-            $results[] = $value['unit_id'];
-        }
-        return $results;   
-    }
-
-    
-    /*
-     * get unit by id that have less than two assessors
-     */
-    public function getUnitsForSelectAssessors()
-    {
-             $sql = new Sql($this->adapter);
-        $select = $sql->select($this->table)
-                      ->columns(array('id'))
-                      ->where(array('active_flag' =>'1'));                   
-        $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
-        $results = array();
-        foreach($result as $key => $value){
-            $results[$value['id']] = $value['id'];
-        }
-        return $results;   
-    }
-    
+       
     /*
      * Add a record to one of the two priv tables, liaison_priv or unit_priv
      */
@@ -128,18 +120,18 @@ class UnitTable extends AbstractTableGateway
     {
         $namespace = new Container('user');
         
-            $data = array(
-                'user_id' => $user,
-                'unit_id' => $id,
-                'created_user' => $namespace->userID,
-                'created_ts' => date('Y-m-d h:i:s', time()),
-                'active_flag' => 1
-            );
-            $sql = new Sql($this->adapter);
-            $insert = $sql->insert($table);
-            $insert->values($data);
-            $insertString = $sql->getSqlStringForSqlObject($insert);
-            $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);
+        $data = array(
+            'user_id' => $user,
+            'unit_id' => $id,
+            'created_user' => $namespace->userID,
+            'created_ts' => date('Y-m-d h:i:s', time()),
+            'active_flag' => 1
+        );
+        $sql = new Sql($this->adapter);
+        $insert = $sql->insert($table);
+        $insert->values($data);
+        $insertString = $sql->getSqlStringForSqlObject($insert);
+        $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);
     }
     
     /*
@@ -231,23 +223,6 @@ class UnitTable extends AbstractTableGateway
         } 
     }
     
-    /*
-     * Returns Units Priv records
-     */
-    public function getUnitPrivs($id,$table,$active_flag)
-    {
-        $sql = new Sql($this->adapter);
-        $select = $sql->select($table)
-                      ->columns(array('user_id'))
-                      ->where(array('unit_id'=>$id, 'active_flag' =>$active_flag));                   
-        $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
-        $results = array();
-        foreach($result as $key => $value){
-            $results[] = $value['user_id'];
-        }
-        return $results;
-    }
     
     /*
      * Saves a unit

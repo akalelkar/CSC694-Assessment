@@ -1,5 +1,4 @@
 <?php
-// module/Admin/view/admin/user/index.phtml:
 $title = 'Modify User';
 $this->headTitle($title);
 ?>
@@ -10,7 +9,10 @@ $this->headTitle($title);
     // get form ready to be used
     $form = $this->form;
     $form->prepare();
-    echo $this->form()->openTag($form);
+    // prepare id as hidden element ($id passed as viewmodel parameter from user controller)
+    $elem = $form->get('id');
+    $elem->setValue($id);
+    echo $this->formInput($elem);
 ?>
     
 <div class="row user-content">
@@ -23,28 +25,105 @@ $this->headTitle($title);
   
     <div class="user-form-wrapper col-md-12" style="overflow:hidden;">
        <div class="user-form" style="overflow:hidden;">
-        <div class="col-md-3">  
-            <?php echo $this->formLabel($form->get('full_name')->setLabelAttributes(array('class'=>'control-label'))); ?>
-            <?php echo $this->formInput($form->get('full_name')); ?>
-        </div>
-        <div class="col-md-3">  
-        <div class="form-group col-md-12 user-roles-wrapper">
-            <label class="control-label head-label">Roles</label>
-            <div class="user-roles-container">
-                <?php 
-                     for($i=0; $i<$this->count; $i++)
-                    {
-                         echo $this->formSelect($form->get('role_'.$i)->setLabelAttributes(array('class'=>'control-label ')));
-                    }
-                ?>
-                 <div class="form-group col-md-12 user-role-options-placeholder">
-            <?php  echo $this->formSelect($form->get('liaison_privs'));
-                 echo $this->formSelect($form->get('unit_privs')); 
-              ?>
-        </div>
+            <div class="col-md-3">  
+                <?php echo $this->formLabel($form->get('full_name')->setLabelAttributes(array('class'=>'control-label'))); ?>
+                <?php echo $this->formInput($form->get('full_name')); ?>
             </div>
-        </div>
+            <div class="col-md-2">  
+                <?php
+                    echo "<h4> Current Privileges </h4>";
+                    echo "<h5> Liaison Privileges </h5>";
+                    echo $this->formSelect($form->get('user_liaison_privs'));
+                    echo "<h5> Chair Privileges </h5>";
+                    echo $this->formSelect($form->get('user_chair_privs'));
+                    echo "<h5> Assessor Privileges </h5>";
+                    echo $this->formSelect($form->get('user_assessor_privs'));
+                ?>
+            </div>
+            <div class="col-md-2">  
+                     <?php
+                        echo "<h4> Add Privileges </h4>";
+                        echo "<h5> Liaison Privileges </h5>";
+                        echo $this->formSelect($form->get('add_liaison_privs'));
+                        echo "<h5> Chair Privileges </h5>";
+                        echo $this->formSelect($form->get('add_chair_privs'));
+                        echo "<h5> Assessor Privileges </h5>";
+                        echo $this->formSelect($form->get('add_assessor_privs'));
+                        echo "</br>";
+                    ?>
+            </div>
+            <div class="col-md-2">  
+                     <?php
+                        echo "<h4> Remove Privileges </h4>";
+                        echo "<h5> Liaison Privileges </h5>";
+                        echo $this->formSelect($form->get('remove_liaison_privs'));
+                        echo "<h5> Chair Privileges </h5>";
+                        echo $this->formSelect($form->get('remove_chair_privs'));
+                        echo "<h5> Assessor Privileges </h5>";
+                        echo $this->formSelect($form->get('remove_assessor_privs'));
+                        echo "</br>";
+                    ?>
+              <?php
+                  $submit = $form->get('submit');
+                  echo $this->formRow($submit) . "</br>";
+              ?>
+            </div>
+          
         </div>
     </div>
     <?php echo $this->form()->closeTag($form); ?>
 </div>
+
+<script>
+/**
+ * add user privileges
+ */
+$(document).on('click', '#submit', function () {
+
+    // obtain the data from the different privileges on the page
+    // must grab by name otherwise won't grab all values
+    // multi select name is appended with []
+    // returns as a comma delimited list
+    
+    // get user id
+    var id = document.getElementById('id').value;
+    
+    // get liaison privileges
+    var user_liaison = $('[name="user_liaison_privs[]"]').val();
+    var add_liaison = $('[name="add_liaison_privs[]"]').val();
+    var remove_liaison = $('[name="remove_liaison_privs[]"]').val();
+
+    // get chair privileges
+    var user_chair = $('[name="user_chair_privs[]"]').val();
+    var add_chair = $('[name="add_chair_privs[]"]').val();
+    var remove_chair = $('[name="remove_chair_privs[]"]').val();
+
+    // get assessor privileges
+    var user_assessor = $('[name="user_assessor_privs[]"]').val();
+    var add_assessor = $('[name="add_assessor_privs[]"]').val();
+    var remove_assessor = $('[name="remove_assessor_privs[]"]').val();
+
+    // create the url to perform update to privileges and return to manage users page
+    var urlform = "<?php echo $this->url('user', array(
+                                    'controller'=>'user',
+                                    'action'=>'edit')); ?>";
+    
+   // asynchronous ajax code generate the partial view plan or modify plan page
+   $.ajax({
+      url: urlform,
+      type: "POST",
+      data: {"id":id, "userLiaison":user_liaison, "addLiaison":add_liaison, "removeLiaison":remove_liaison,
+                      "userChair":user_chair, "addChair":add_chair, "removeChair":remove_chair,
+                      "userAssessor":user_assessor, "addAssessor":add_assessor, "removeAssessor":remove_assessor},
+      dataType: "text", // data returned from the controller
+      error : function(xhr, status, error) {
+         console.log("ERROR: ", xhr, xhr.status, xhr.getAllResponseHeaders());
+      },
+     success: function(data){
+        document.open();
+        document.write(data);
+        document.close();   
+      },
+   });
+});
+</script>

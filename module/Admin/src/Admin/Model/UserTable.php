@@ -123,18 +123,101 @@ class UserTable extends AbstractTableGateway
         }
         return $roles;
     }
+
+    
+    public function removePrivileges($id, $privs, $role){
+        // removes the privileges for that role by inactivating the privileges
+        // if none remain, then that role is also inactivated for the user
+        // $privs is an array of unit_ids to remove
+
+        $sql = new Sql($this->adapter);
+        if ($role == 2){
+            $table = 'liaison_privs';
+        }
+        else if ($role == 3){
+            $table = 'chair_privs';
+        }
+        else{
+            $table = 'assessor_privs';
+        }
+        
+        $where = new \Zend\Db\Sql\Where();
+       	$where->equalTo('user_id', $id)
+              ->and
+              ->in('unit_id', $privs)
+        ;
+
+        $namespace = new Container('user');
+        
+        $data = array(
+                    'active_flag' => 0,
+                    'deactivated_ts' =>  date('Y-m-d h:i:s', time()),
+                    'deactivated_user' =>  $namespace->userID
+        );
+       
+        // create an atomic database transaction to update roles and possibly privileges
+        $connection = $this->adapter->getDriver()->getConnection();
+	$connection->beginTransaction();
+         
+        $update = $sql->update($table)
+                      ->set($data)
+                      ->where($where)
+        ;
+
+        $updateString = $sql->getSqlStringForSqlObject($update);
+        $this->adapter->query($updateString, Adapter::QUERY_MODE_EXECUTE);
+        
+        // check if user has any privileges left for that role
+        $select = $sql->select()
+                      ->columns(array('id'))
+		      ->from($table)
+                      ->where(array('user_id' => $id, 'active_flag' => 1))
+	;
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+        if ($result->count() == 0){
+            // no privileges for that role - inactivate user role
+            $update = $sql->update('user_roles')
+                          ->set($data)
+                          ->where(array('user_id' => $id, 'role' => $role));
+
+            $updateString = $sql->getSqlStringForSqlObject($update);
+            $this->adapter->query($updateString, Adapter::QUERY_MODE_EXECUTE);
+        }
+
+        // finish the transaction		
+	$connection->commit();
+      
+    }
     
     /*
-     * deletes all roles a user has
-     * @id - the user id
+     * enable or disable a role
      */
-    public function deleteRoles($id)
+    function updateRole($userID,$role, $action)
     {
+        $namespace = new Container('user');
+        switch($action){
+            case 'disable':
+                $data = array(
+                        'active_flag' => 0,
+                        'deactivated_ts' =>  date('Y-m-d h:i:s', time()),
+                        'deactivated_user' =>  $namespace->userID
+                    );
+                break;
+            
+            case 'enable':
+                $data = array(
+                        'active_flag' => 1,
+                    );
+                break;
+        }
+
         $sql = new Sql($this->adapter);
-        $delete = $sql->delete('user_roles')
-                       ->where(array('user_id = ?' => $id));
-        $deleteString = $sql->getSqlStringForSqlObject($delete);
-        $this->adapter->query($deleteString, Adapter::QUERY_MODE_EXECUTE);
+        $update = $sql->update('user_roles')
+                      ->set($data)
+                       ->where(array('user_id = ?' => $userID, 'role = ?' => $role));
+        $updateString = $sql->getSqlStringForSqlObject($update);
+        $this->adapter->query($updateString, Adapter::QUERY_MODE_EXECUTE);
     }
     
     /*
@@ -162,7 +245,8 @@ class UserTable extends AbstractTableGateway
             $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);
        }
     }
-    
+
+   
     /*
      *  Updates Users Roles
      * @userID - id to the user object
@@ -208,35 +292,6 @@ class UserTable extends AbstractTableGateway
         }
     }
     
-    /*
-     * enable or disable a role
-     */
-    function updateRole($userID,$role, $action)
-    {
-        $namespace = new Container('user');
-        switch($action){
-            case 'disable':
-                $data = array(
-                        'active_flag' => 0,
-                        'deactivated_ts' =>  date('Y-m-d h:i:s', time()),
-                        'deactivated_user' =>  $namespace->userID
-                    );
-                break;
-            
-            case 'enable':
-                $data = array(
-                        'active_flag' => 1,
-                    );
-                break;
-        }
-
-        $sql = new Sql($this->adapter);
-        $update = $sql->update('user_roles')
-                      ->set($data)
-                       ->where(array('user_id = ?' => $userID, 'role = ?' => $role));
-        $updateString = $sql->getSqlStringForSqlObject($update);
-        $this->adapter->query($updateString, Adapter::QUERY_MODE_EXECUTE);
-    }
     
    
 
@@ -280,150 +335,42 @@ class UserTable extends AbstractTableGateway
     }
     
     /*
-     * Get unit privs
+     * Get user's privileges based on a role
      */
-    public function getUserUnitPrivs($user,$table)
+    public function getUserPrivs($user, $role)
     {
         $sql = new Sql($this->adapter);
+        if ($role == 2){ // liaison
+            $table = 'liaison_privs';
+        }
+        else if ($role == 3){ // chair
+            $table = 'chair_privs';
+        }
+        else{ // assessor
+            $table = 'assessor_privs';
+        }
         $select = $sql->select()
-                    ->from($table)
-                    ->columns(array('unit_id'))
-                    ->where(array(
-                        'user_id' => $user,
-                        'active_flag' => 1));
-        
+                ->from(array('t' => $table))
+                ->columns(array('unit_id'))
+                ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
+                ->join('user_roles', 'user_roles.user_id = t.user_id', array())
+                ->where(array(
+                    't.user_id' => $user,
+                    'user_roles.role' => $role,
+                    't.active_flag' => 1))
+                ->order('t.unit_id');
         
         $statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
         $privs = array();
         foreach($result as $row){
-            $privs[] = $row['unit_id'];
+            $privs[$row['unit_id']] = $row['unit_id'];
         }
         return $privs;
         
     }
     
 
-    /*
-     * Saves a user
-     */
-    public function saveUser(User $user)
-    {
-        //build the data array to add to users table
-        $data = array(
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
-            'middle_init' => $user->middle_init,
-            'email' => $user->email,
-            'datatel_id' => 0
-        );
-        
-        //just put users roles into a new array  
-        if(isset($user->role_0) && $user->role_0 != '')
-        {
-            $roles[] = $user->role_0;
-        }
-        if(isset($user->role_1) && $user->role_1 != '')
-        {
-            $roles[] = $user->role_1;
-        }
-        if(isset($user->role_2) && $user->role_2 != '')
-        {
-            $roles[] = $user->role_2;
-        }
-        if(isset($user->role_3) && $user->role_3 != '')
-        {
-            $roles[] = $user->role_3;
-        }
-        
-        //get the user id
-        $id = (int)$user->id;
-        
-        
-        //if user doesn't exists
-        if ($id == 0 OR empty($id)) {
-            //insert user
-            try {
-                $this->insert($data);
-            } catch (\Exception $e)  {
-                var_dump($e->getMessage());
-            }
-            
-            //get the new user id
-            $id = $this->adapter->getDriver()->getLastGeneratedValue();
-            
-            //add role(s)
-            $this->addRoles($id,$roles);
-            
-            //add any liaison or unit privs
-            if(isset($user->unit_privs) && !empty($user->unit_privs))
-            {
-                foreach($user->unit_privs as $key => $value)
-                {
-                   $this->UnitTable()->addPriv($value,$id,'unit_privs');
-                }
-            }
-            if(isset($user->liaison_privs) && !empty($user->liaison_privs))
-            {
-                foreach($user->liaison_privs as $key => $value)
-                {
-                    $this->UnitTable()->addPriv($value,$id,'liaison_privs');
-                }
-            }            
-            
-        } else {
-            if ($this->getUser($id)) {
-                
-                //update user information
-                $this->update($data, array('id' => $id));
-                
-                //update and add roles
-                $this->updateRoles($user->id,$roles);
-                
-                
-                //update unit and liaison privs
-                if(isset($user->unit_privs) && !empty($user->unit_privs))
-                {
-                    foreach($user->unit_privs as $key => $value)
-                    {
-                        $this->UnitTable()->updatePrivs($value,array($id),'unit_privs');
-                    }
-                }
-                if(isset($user->liaison_privs) && !empty($user->liaison_privs))
-                {
-                    foreach($user->unit_privs as $key => $value)
-                    {
-                        $this->UnitTable()->updatePrivs($value,array($id),'liaison_privs');
-                    }
-                }
-                
-  
-            } else {
-                throw new \Exception('Form id does not exist');
-            }
-        }
-    }
-
-    /*
-     * deletes a user
-     */
-    public function deleteUser($id)
-    {
-
-       //delete user roles first
-       $this->deleteRoles($id);
-       
-       //delete unit privs
-       $this->UnitTable()->deletePriv($id,'unit_privs');
-       $this->UnitTable()->deletePriv($id,'liaison_privs');
-       
-       //delete the user
-       $sql = new Sql($this->adapter);
-       $delete = $sql->delete('users')
-                       ->where(array('id = ?' => $id));
-       $deleteString = $sql->getSqlStringForSqlObject($delete);
-       $this->adapter->query($deleteString, Adapter::QUERY_MODE_EXECUTE);
-    }
     
     /*
      * Instantiate Generic Class

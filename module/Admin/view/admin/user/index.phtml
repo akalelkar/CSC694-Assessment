@@ -42,10 +42,7 @@ $this->headTitle($title);
                             </td>    
                             <td>
                                 <a class="btn btn-primary btn-xs" href="<?php echo $this->url('user', array('action' => 'edit', 'id' => $user->id));
-    ?>"><?php echo $this->translate('Modify') ?> &raquo;</a>
-                                <a class="btn btn-warning btn-xs" onclick="if (confirm('Are you sure you want to delete  <?php echo $user->first_name .' '.$user->last_name;?>?')) { document.location = this.href; } return false;"href="<?php echo $this->url('user', array('action' => 'delete', 'id' => $user->id));
-    ?>"><?php echo $this->translate('Delete') ?> &raquo;</a>
-
+                                 ?>"><?php echo $this->translate('Modify') ?> &raquo;</a>
                             </td>
                         </tr>
 <?php endforeach; ?>

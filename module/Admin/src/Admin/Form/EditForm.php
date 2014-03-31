@@ -22,8 +22,9 @@ class EditForm extends Form
         parent::__construct('edit');        
  
         $this->setAttribute('method', 'post');
-        $this->setAttribute('action', $url);
-        
+        //$url = $url . $args['action'];
+        //$this->setAttribute('action', $url);
+    
         $this->add(array(
             'name' => 'id',
             'type' => 'Zend\Form\Element\Hidden',
@@ -46,59 +47,134 @@ class EditForm extends Form
             ),
         ));
         
-        
-     $count = $args['count'];   
-     for($i=0; $i< $count; $i++)
-     {
         $this->add(array(
-            'name' => 'role_'.$i,
+            'name' => 'add_liaison_privs',
             'type' => 'Zend\Form\Element\Select',
             'attributes' => array(
-                'class'=> 'form-control user-roles',
-                'id' => 'role_'.$i,
-            ),
-            'options' => array(
-                'empty_option' => 'Choose Role',
-                'value_options' => $args['roles'],
-            ),
-        ));  
-     }  
-       $this->add(array(
-            'name' => 'liaison_privs',
-            'type' => 'Zend\Form\Element\Select',
-            'attributes' => array(
-                'class'=> 'form-control hide',
-                'id' => 'liaison_privs',
+                'class'=> 'form-control',
+                'id' => 'add_liaison_privs',
                 'multiple' => 'multiple',
-                'disabled' => 'disabled'
             ),
             'options' => array(
                 'value_options' => $args['liaison_privs'],
-            ),
+             ),
         ));  
         $this->add(array(
-            'name' => 'unit_privs',
+            'name' => 'add_chair_privs',
             'type' => 'Zend\Form\Element\Select',
             'attributes' => array(
-                'class'=> 'form-control hide',
-                'id' => 'unit_privs',
+                'class'=> 'form-control',
+                'id' => 'add_chair_privs',
                 'multiple' => 'multiple',
-                'disabled' => 'disabled'
             ),
             'options' => array(
-                'value_options' => $args['unit_privs'],
+                'value_options' => $args['chair_privs'],
             ),
         ));  
-
+        
+        $this->add(array(
+            'name' => 'add_assessor_privs',
+            'type' => 'Zend\Form\Element\Select',
+            'attributes' => array(
+                'class'=> 'form-control',
+                'id' => 'add_assessor_privs',
+                'multiple' => 'multiple',
+            ),
+            'options' => array(
+                'value_options' => $args['assessor_privs'],
+            ),
+        ));  
+        
+        $this->add(array(
+            'name' => 'user_assessor_privs',
+            'type' => 'Zend\Form\Element\Select',
+            'attributes' => array(
+                'class'=> 'form-control',
+                'id' => 'user_assessor_privs',
+                'multiple' => 'multiple',
+                'disabled' => 'disabled',
+            ),
+            'options' => array(
+                'value_options' => $args['user_assessor_privs'],
+            ),
+        ));  
          
+        $this->add(array(
+            'name' => 'user_chair_privs',
+            'type' => 'Zend\Form\Element\Select',
+            'attributes' => array(
+                'class'=> 'form-control',
+                'id' => 'user_chair_privs',
+                'multiple' => 'multiple',
+                'disabled' => 'disabled',
+            ),
+            'options' => array(
+                'value_options' => $args['user_chair_privs'],
+            ),
+        ));  
+        
+        $this->add(array(
+            'name' => 'user_liaison_privs',
+            'type' => 'Zend\Form\Element\Select',
+            'attributes' => array(
+                'class'=> 'form-control',
+                'id' => 'user_liaison_privs',
+                'multiple' => 'multiple',
+                'disabled' => 'disabled',
+            ),
+            'options' => array(
+                'value_options' => $args['user_liaison_privs'],
+            ),
+        ));  
+        
+        $this->add(array(
+            'name' => 'remove_assessor_privs',
+            'type' => 'Zend\Form\Element\Select',
+            'attributes' => array(
+                'class'=> 'form-control',
+                'id' => 'remove_assessor_privs',
+                'multiple' => 'multiple',
+            ),
+            'options' => array(
+                'value_options' => $args['user_assessor_privs'],
+            ),
+        ));  
+         
+        $this->add(array(
+            'name' => 'remove_chair_privs',
+            'type' => 'Zend\Form\Element\Select',
+            'attributes' => array(
+                'class'=> 'form-control',
+                'id' => 'remove_chair_privs',
+                'multiple' => 'multiple',
+            ),
+            'options' => array(
+                'value_options' => $args['user_chair_privs'],
+            ),
+        ));  
+        
+        $this->add(array(
+            'name' => 'remove_liaison_privs',
+            'type' => 'Zend\Form\Element\Select',
+            'attributes' => array(
+                'class'=> 'form-control',
+                'id' => 'remove_liaison_privs',
+                'multiple' => 'multiple',
+            ),
+            'options' => array(
+                'value_options' => $args['user_liaison_privs'],
+            ),
+        ));
+        
         $this->add(array(
             'name' => 'submit',
             'attributes' => array(
                 'type' => 'submit',
-                'value' => 'Go',
-                'id' => 'submitbutton',
-                'class'=> 'btn btn-primary btn-lg',
+                'value' => 'Submit Changes',
+                'id' => 'submit',
+                'class'=> 'btn btn-success btn-md',
             ),
         ));
+       
     }    
 }

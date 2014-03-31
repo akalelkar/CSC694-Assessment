@@ -68,18 +68,16 @@ class UserController extends AbstractActionController {
 
         //create user form
         $args['count'] = 1;
-        $args['liaison_privs'] = $this->getUnitQueries()->getUnitsForSelect();//unlimited liaisons
-        $args['unit_privs'] = $this->getUnitQueries()->getUnitsForSelectAssessors();//two assessors
+        $args['liaison_privs'] = $this->getUnitQueries()->getPrivsForSelect('2');//unlimited liaisons
+        $args['unit_privs'] = $this->getUnitQueries()->getPrivsForSelect('4');//two assessors
         $form = new UserForm(null, $args);
         $form->get('submit')->setValue('Add');
-        $disabledPrivs = $this->getUnitQueries()->getDisablePrivUnits();
-
+        
         //send paginator and form to page
         return new ViewModel(array(
             'page' => $page,
             'paginator' => $paginator,
             'form' => $form,
-            'disabledPrivs' =>$disabledPrivs
         ));
     }
 
@@ -90,7 +88,24 @@ class UserController extends AbstractActionController {
     public function editAction() {
         //the user id from route
         $id = (int) $this->params()->fromRoute('id');
-       
+
+        // if post then this action was called from jquery code for submit button in edit.phtml
+        $request = $this->getRequest();
+        $post = $this->params();
+        
+        if ($request->isPost()) {
+            $id = $post->fromPost('id');
+            if ($post->fromPost('removeLiaison') != null){
+                $this->getUserQueries()->removePrivileges($id, $post->fromPost('removeLiaison'), 2); // liaison = 2
+            }
+            if ($post->fromPost('removeChair') != null){
+                $this->getUserQueries()->removePrivileges($id, $post->fromPost('removeChair'), 3); // chair = 3
+            }
+            if ($post->fromPost('removeAssessor') != null){
+                $this->getUserQueries()->removePrivileges($id, $post->fromPost('removeAssessor'), 4); // assessor = 4
+            }
+         }
+         
         //get the user object from the database
         $user = $this->getUserQueries()->getUser($id);
 
@@ -103,76 +118,34 @@ class UserController extends AbstractActionController {
         }
                 
         //get unit and liasion privs
-        $user->unit_privs = $this->getUserQueries()->getUserUnitPrivs($id,'unit_privs');
-        $user->liaison_privs = $this->getUserQueries()->getUserUnitPrivs($id,'liaison_privs');
+        $user->chair_privs = $this->getUserQueries()->getUserPrivs($id, '3'); // chair = 3
+        $user->liaison_privs = $this->getUserQueries()->getUserPrivs($id, '2'); // liaison = 2
+        $user->assessor_privs = $this->getUserQueries()->getUserPrivs($id, '4'); // assessor = 4
 
         //build form
+        $args['action'] = 'update';
         $args['full_name'] = $user->first_name . ' ' . $user->middle_init . ' ' . $user->last_name;
-        $args['count'] = 4;
         $args['roles'] = $this->getGenericQueries()->getRoleTerms(false);
         $args['user_id'] = $id;
-        $args['liaison_privs'] = $this->getUnitQueries()->getUnitsForSelect();//unlimited liaisons
-    var_dump($args['liaison_privs']);
-        $args['unit_privs'] = $this->getUnitQueries()->getUnitsForSelectAssessors();//two assessors
-        $disabledPrivs = $this->getUnitQueries()->getDisablePrivUnits();
+        $args['user_liaison_privs'] = $user->liaison_privs;
+        $args['user_chair_privs'] = $user->chair_privs;
+        $args['user_assessor_privs'] = $user->assessor_privs;
+        $args['liaison_privs'] = $this->getUnitQueries()->getPrivsForSelect('2');//unlimited liaisons
+        $args['chair_privs'] = $this->getUnitQueries()->getPrivsForSelect('3');//unlimited chairs
+        $args['assessor_privs'] = $this->getUnitQueries()->getPrivsForSelect('4');//two assessors
         $form = new EditForm($this->url()->fromRoute('user'), $args);
-        //$form->bind($user);
-        //$form->get('submit')->setAttribute('value', 'Save');
-
+        
         $request = $this->getRequest();
-        if ($request->isPost()) {
-            $form->setInputFilter($user->getInputFilter());
-            $form->setData($request->getPost());
-
-            if ($form->isValid()) {
-                //save user
-                $this->getUserQueries()->saveUser($form->getData());
-
-                // Redirect to list of users
-                return $this->redirect()->toRoute('user');
-            }
-        }
-        var_dump("here");
-        return new ViewModel(array(
+        
+        $viewModel = new ViewModel(array(
             'id' => $id,
             'form' => $form,
-            'count' => 4,
-            'disabledPrivs' =>$disabledPrivs,
         ));
+         
+       // $viewModel->setTerminal(true);
+        return $viewModel;
     }
     
-    public function updateAction() {
-        var_dump('updateaction');
-    }
-    /*
-     * Delete user action
-     */
-
-    public function deleteAction() {
-        //id from route
-        $id = (int) $this->params()->fromRoute('id', 0);
-        if (!$id) {
-            return $this->redirect()->toRoute('user');
-        }
-
-        //post request, otherwise return form (only accepting post)
-        $request = $this->getRequest();
-        if ($request->isPost()) {
-            $del = $request->getPost('del', 'No');
-
-            if ($del == 'Yes') {
-                $id = (int) $request->getPost('id');
-                $this->getUserQueries()->deleteUser($id);
-            }
-
-            // Redirect to list of users
-            return $this->redirect()->toRoute('user');
-        } else {
-            $this->getUserQueries()->deleteUser($id);
-            return $this->redirect()->toRoute('user');
-        }
-    }
-
     /*
      * Method to get Generic.php
      */
@@ -207,80 +180,4 @@ class UserController extends AbstractActionController {
         }
         return $this->unittableResults;
     }
-
-    /* not working but would have been awesome
-     * 
-     * Files this function uses
-     *  Entity
-     *       Role.php
-     *       UnitPriv.php
-     *       UserObj.php
-     *  Form
-     *       CreateUserObj.php
-     *       RoleFieldset.php
-     *       UnitPrivFieldset.php
-     *       UserObjFieldset.php
-     *  view
-     *   admin
-     *       user
-     *           newuser.phtml
-     * 
-     *  These files together would have created a form that 
-     *  got displayed in fieldsets and was capable to having multiple 
-     *  fieldsets generated for entities.
-     * 
-     *  This would be nice for assigning Units to users but due to time
-     *  constraints it was left unfinished. It also would have replaced 
-     *  the current "working" user form" and is much cleaner/easier to follow
-     *  I came really close though!
-     * 
-     *  The snag I hit involved not getting the Role and UnitPriv Fieldsets
-     *  to bind with preloaded values.
-     *
-      public function newuserAction()
-      {
-        $id = (int) $this->params()->fromRoute('id');
-        if (!$id) {
-            return $this->redirect()->toRoute('user', array(
-                        'action' => 'add'
-            ));
-        }
-        $ouser = $this->getUserQueries()->getUser('137');
-        foreach ($ouser->user_roles as $role => $value) {
-            $user_roles[] = $role;
-        }
-
-        $form = new CreateUserObj();
-        $user = new UserObj();
-        $user->setFirstname('Jack');
-        $user->setLastname('gregory');
-        $user->setMiddleinit('w');
-        $user->setEmail('jgregory700@gmail.com');
-
-        $role1 = new Role();
-        $role1->setName('Admin');
-
-        $role2 = new Role();
-        $role2->setName(3);
-
-        $roles = array($role1, $role2);
-        $priv = new UnitPriv();
-        $priv->setName('HST');
-
-        $user->setRoles($roles);
-        $user->setUnitPrivs(array($priv));
-
-        $form->bind($user);
-        Debug::dump($user);
-        if ($this->request->isPost()) {
-            $form->setData($this->request->getPost());
-
-            if ($form->isValid()) {
-                var_dump($form);
-            }
-        }
-        return array(
-            'form' => $form
-        );
-      } */
 }
