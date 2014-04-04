@@ -64,12 +64,10 @@ class UserController extends AbstractActionController {
                 ->setPageRange(7);
 
         //get role terms for user form
-        $args['roles'] = $this->getGenericQueries()->getRoleTerms(false);
+        $args['roles'] = $this->getGenericQueries()->getRoleTerms();
 
         //create user form
         $args['count'] = 1;
-        $args['liaison_privs'] = $this->getUnitQueries()->getPrivsForSelect('2');//unlimited liaisons
-        $args['unit_privs'] = $this->getUnitQueries()->getPrivsForSelect('4');//two assessors
         $form = new UserForm(null, $args);
         $form->get('submit')->setValue('Add');
         
@@ -105,7 +103,7 @@ class UserController extends AbstractActionController {
                 $this->getUserQueries()->removePrivileges($id, $post->fromPost('removeAssessor'), 4); // assessor = 4
             }
          }
-         
+var_dump($id);
         //get the user object from the database
         $user = $this->getUserQueries()->getUser($id);
 
@@ -116,20 +114,15 @@ class UserController extends AbstractActionController {
             $user->$name = $key;
             $count++;        
         }
-                
-        //get unit and liasion privs
-        $user->chair_privs = $this->getUserQueries()->getUserPrivs($id, '3'); // chair = 3
-        $user->liaison_privs = $this->getUserQueries()->getUserPrivs($id, '2'); // liaison = 2
-        $user->assessor_privs = $this->getUserQueries()->getUserPrivs($id, '4'); // assessor = 4
 
         //build form
         $args['action'] = 'update';
         $args['full_name'] = $user->first_name . ' ' . $user->middle_init . ' ' . $user->last_name;
-        $args['roles'] = $this->getGenericQueries()->getRoleTerms(false);
+        $args['roles'] = $this->getGenericQueries()->getRoleTerms();
         $args['user_id'] = $id;
-        $args['user_liaison_privs'] = $user->liaison_privs;
-        $args['user_chair_privs'] = $user->chair_privs;
-        $args['user_assessor_privs'] = $user->assessor_privs;
+        $args['user_liaison_privs'] = $this->getUserQueries()->getUserPrivs($id, '2'); // liaison = 2
+        $args['user_chair_privs'] =  $this->getUserQueries()->getUserPrivs($id, '3'); // chair
+        $args['user_assessor_privs'] = $this->getUserQueries()->getUserPrivs($id, '4'); // assessor = 4
         $args['liaison_privs'] = $this->getUnitQueries()->getPrivsForSelect('2');//unlimited liaisons
         $args['chair_privs'] = $this->getUnitQueries()->getPrivsForSelect('3');//unlimited chairs
         $args['assessor_privs'] = $this->getUnitQueries()->getPrivsForSelect('4');//two assessors

@@ -4,18 +4,25 @@ $title = 'Administration Menu';
 $this->headTitle($title);
 ?>
 <div class="row admin-home">
-    <div class="title col-md-12">
-        <center><h2><?php echo $this->escapeHtml($title); ?></h2></center>
-        <center>
-            <h3>Manage Users
-              <a role="button" class="btn btn-primary btn-md" href="<?php echo $this->url('user');?>">Go</a>
-            </h3>
-            <h3>Manage Programs
-              <a role="button" class="btn btn-primary btn-md" href="<?php echo $this->url('program');?>">Go</a>
-            </h3>
-            <h3>Run Queries
-              <a role="button" class="btn btn-primary btn-md" href="<?php echo $this->url('query');?>">Go</a>
-            </h3>
-        </center>
+    
+    <div class="title col-md-4">
+    </div>
+    <div class="title col-md-4">
+        <center><h3><?php echo $this->escapeHtml($title); ?></h3></center>
+        </br>
+        <dl>
+            <dt><h4>Manage Users
+              <a role="button" class="btn btn-primary btn-sm pull-right" href="<?php echo $this->url('user');?>">Select</a>
+            </h4></dt>
+            </br>
+            <dt><h4>Manage Programs
+              <a role="button" class="btn btn-primary btn-sm pull-right" href="<?php echo $this->url('program');?>">Select</a>
+            </h4></dt>
+            </br>
+            <dt><h4>Run Queries
+              <a role="button" class="btn btn-primary btn-sm pull-right" href="<?php echo $this->url('query');?>">Select</a>
+            </h4></dt>
+        </dl>
+        
     </div>
 </div>

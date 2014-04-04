@@ -27,7 +27,7 @@ $this->headTitle($title);
                     </tr>
                 </thead>
                 <tbody>
-<?php foreach ($this->paginator as $user) : ?>
+                <?php foreach ($this->paginator as $user) : ?>
                         <tr class="active">
                             <td><?php echo $this->escapeHtml($user->id); ?></td>
                             <td><?php echo $this->escapeHtml($user->first_name); ?></td>
@@ -37,7 +37,7 @@ $this->headTitle($title);
                             <td>
                                 <?php foreach ($user->user_roles as $row => $role) : ?>
                                     <?php echo $this->escapeHtml($role['term']); ?>
-    <?php endforeach; ?>
+                <?php endforeach; ?>
 
                             </td>    
                             <td>

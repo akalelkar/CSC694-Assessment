@@ -21,10 +21,12 @@ class Generic extends AbstractTableGateway
     }
     public function getUnits()
     {
-      $sql = new Sql($this->adapter);
-      $select = $sql->select()
+        $sql = new Sql($this->adapter);
+        $select = $sql->select()
                     ->from('units')
-                    ->columns(array('id' => 'id'));
+                    ->columns(array('id' => 'id'))
+                    ->where(array('active_flag' => 1));
+                    
         $statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
         $results = array();
@@ -39,34 +41,45 @@ class Generic extends AbstractTableGateway
      * Assigns a role id to a term
      */
     public function getRoleTerm($id){
-      if(!$id){
-          return;
-      }  
-        $roles = array(
-          '1' => 'Admin',
-          '2' => 'Liason',
-          '3' => 'Chair',
-          '4' => 'Assessor',
-          '5' => 'User',
-        );
-        return $roles[$id];
+        if(!$id){
+            return;
+        }  
+        $sql = new Sql($this->adapter);
+        $select = $sql->select()
+                    ->from('roles')
+                    ->columns(array('name'))
+                    ->where(array('id' => $id));
+                    
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+        // only one result returned
+        foreach($result as $r){
+            return $r['name'];
+        }
+
     }
     /*
-     * Assigns a role id to a term
+     * Get the role names except for user
      */
-    public function getRoleTerms($admin = true){
-        $roles = array(
-          '1' => 'Admin',
-          '2' => 'Liason',
-          '3' => 'Chair',
-          '4' => 'Assessor',
-          '5' => 'User',
-        );
-        if(!$admin)
-        {
-            unset($roles[1]);
-        }
+    public function getRoleTerms(){
+        $roles = [];
+        $sql = new Sql($this->adapter);
+        $where = new \Zend\Db\Sql\Where();
+        $where->notEqualTo('roles.id', 0);
+	
+        $select = $sql->select()
+                    ->from('roles')
+                    ->columns(array('name'))
+        ;
+        $select->where($where);
         
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+        
+        // build array of terms
+        foreach($result as $r){
+            $roles[] = $r['name'];
+        }
         return $roles;
     }
 

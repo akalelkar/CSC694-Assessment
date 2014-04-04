@@ -91,18 +91,19 @@ class OutcomesTable extends AbstractTableGateway
         $this->deactivateOutcome($deactivatedOutcomeId, $userId);       
     }
     
-    // return 1 if the user has permission to modify the unit
+    // return 1 if the user has permission to modify the unit's outcomes
     public function checkPermissions($userID, $unitID)
     {
         $sql = new Sql($this->adapter);
         $where = new Where();
         
-        // check the unit privs table to see is the user exists with the correct unit priv
+        // check the chair privs table to see is the user exists with the correct unit priv
         $select1 = $sql->select()
-                      ->from('unit_privs')
+                      ->from('chair_privs')
                       ->columns(array('id'))
-                      ->where(array('unit_privs.user_id' => $userID))
-                      ->where(array('unit_privs.unit_id' => $unitID))                   
+                      ->where(array('chair_privs.user_id' => $userID))
+                      ->where(array('chair_privs.unit_id' => $unitID))
+		      ->where(array('chair_privs.active_flag' => 1))
         ;
         
         $statement = $sql->prepareStatementForSqlObject($select1);
@@ -120,28 +121,43 @@ class OutcomesTable extends AbstractTableGateway
                       ->columns(array('id'))
                       ->where(array('liaison_privs.user_id' => $userID))
                       ->where(array('liaison_privs.unit_id' => $unitID))
-                      
+        	      ->where(array('liaison_privs.active_flag' => 1))
         ;
-       $statement = $sql->prepareStatementForSqlObject($select2);
+        
+	$statement = $sql->prepareStatementForSqlObject($select2);
         $result = $statement->execute();
         
+        // check the assessor privs table to see if the user exists with the correct unit priv
+        $select3 = $sql->select()
+                      ->from('assessor_privs')
+                      ->columns(array('id'))
+                      ->where(array('assessor_privs.user_id' => $userID))
+                      ->where(array('assessor_privs.unit_id' => $unitID))
+        	      ->where(array('assessor_privs.active_flag' => 1))
+        ;
+        
+	$statement = $sql->prepareStatementForSqlObject($select3);
+        $result = $statement->execute();
+ 
         // if $result not empty return true
         if ($result->count() > 0)
         {
             return true;
         } 
         
-        // check is the user's role gives him / her access to modify every unit
+        // check is the user's role gives him / her admin access to modify every unit
         $select2 = $sql->select()
                       ->from('user_roles')
                       ->columns(array('id'))
                       ->where(array('user_roles.user_id' => $userID))
                       ->where(array('user_roles.role' => 1))
-                      
+        	      ->where(array('user_roles.active_flag' => 1))
         ;
-       $statement = $sql->prepareStatementForSqlObject($select2);
+
+        $statement = $sql->prepareStatementForSqlObject($select2);
         $result = $statement->execute();
-        // if $result not empty return true
+        
+	// if $result not empty return true
         if ($result->count() > 0)
         {
             return true;

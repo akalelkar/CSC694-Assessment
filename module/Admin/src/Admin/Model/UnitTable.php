@@ -6,6 +6,7 @@ use Zend\Db\TableGateway\AbstractTableGateway;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Sql\Sql;
 use Zend\Db\Sql\Where;
+use Zend\Db\Sql\Predicate\NotIn;
 use Zend\Db\Sql\Select;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Paginator\Adapter\DbSelect;
@@ -82,28 +83,24 @@ class UnitTable extends AbstractTableGateway
             ;          
         }
         else{ // assessor
-            $subselect = $sql->select()
-                           ->from('user_roles')
-                           ->columns(array('user_id'))
-                           ->where(array('user_roles.role' => 4))
+            $select1 = $sql->select()
+                           ->from('assessor_privs')
+                           ->columns(array('unit_id'))
+                           ->group('unit_id')
+                           ->having(array('count(*) < 2'))
             ;
-            
             $select = $sql->select()
                           ->from('units')
                           ->columns(array('id'))
-                          ->join('assessor_privs', 'assessor_privs.unit_id = units.id', array(), 'left')
-                          ->join(array('subselect' => $subselect), 'subselect.user_id = assessor_privs.user_id', array(), 'left')
-                          ->where(array('units.active_flag' =>'1'))
-                          ->group('assessor_privs.unit_id')
-                          ->having(array('count(*) < 3'))
-                          ->order('units.id')
-            ;
+                          ->where(array('active_flag' =>1))
+                          ->where(new NotIn('id', $select1))
+                       
+            ;         
         }
-        
         $statement = $sql->prepareStatementForSqlObject($select);
         $results = $statement->execute();
     
-        $resultArray = array();
+        $resultsArray = array();
         // array must be created as key=>value pair where both key and value are the unit_id
         // so when accessing values from multi select you get the unit_id and not the array subscript
         foreach($results as $result){

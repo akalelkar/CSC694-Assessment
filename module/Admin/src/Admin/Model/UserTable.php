@@ -166,25 +166,28 @@ class UserTable extends AbstractTableGateway
 
         $updateString = $sql->getSqlStringForSqlObject($update);
         $this->adapter->query($updateString, Adapter::QUERY_MODE_EXECUTE);
-        
+     
         // check if user has any privileges left for that role
         $select = $sql->select()
                       ->columns(array('id'))
 		      ->from($table)
                       ->where(array('user_id' => $id, 'active_flag' => 1))
 	;
+    
         $statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
+       
         if ($result->count() == 0){
+     
             // no privileges for that role - inactivate user role
             $update = $sql->update('user_roles')
                           ->set($data)
                           ->where(array('user_id' => $id, 'role' => $role));
-
             $updateString = $sql->getSqlStringForSqlObject($update);
             $this->adapter->query($updateString, Adapter::QUERY_MODE_EXECUTE);
         }
 
+  
         // finish the transaction		
 	$connection->commit();
       
@@ -235,7 +238,7 @@ class UserTable extends AbstractTableGateway
                 'user_id' => $userID,
                 'role' => $value,
                 'created_user' => $namespace->userID,
-                'created_ts' => date('Y-d-m h:i:s', time()),
+                'created_ts' => date('Y-m-d h:i:s', time()),
                 'active_flag' => 1
             );
             $sql = new Sql($this->adapter);
@@ -292,9 +295,6 @@ class UserTable extends AbstractTableGateway
         }
     }
     
-    
-   
-
     /*
      * Get user by id
      * @returns null if no user is found or the user object
@@ -359,7 +359,6 @@ class UserTable extends AbstractTableGateway
                     'user_roles.role' => $role,
                     't.active_flag' => 1))
                 ->order('t.unit_id');
-        
         $statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
         $privs = array();
@@ -369,8 +368,6 @@ class UserTable extends AbstractTableGateway
         return $privs;
         
     }
-    
-
     
     /*
      * Instantiate Generic Class

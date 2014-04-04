@@ -40,7 +40,7 @@ class Queries extends AbstractTableGateway
                        ->columns(array('id', 'unit_id', 'name'))
                        ->where(new NotIn('programs.id', $select1))
                        ->where(array('programs.active_flag' => 1))
-                       ->order(array('programs.id'))
+                       ->order(array('unit_id'))
                    
         ;
         
@@ -63,7 +63,7 @@ class Queries extends AbstractTableGateway
                             ->from('reports')
                             ->columns(array('plan_id'))
         ;
-        
+  
         // get programs that have a plan for the selected year but are not in above set
         $select = $sql->select()
                       ->from('programs')
@@ -88,13 +88,14 @@ class Queries extends AbstractTableGateway
     {
         $sql = new Sql($this->adapter);
         
-        // get programs that have a meta-assessment plan for the selected year but no report
+        // get programs that have a meta-assessment plan for the selected year 
         $select = $sql->select()
                       ->from('programs')
                       ->columns(array('unit_id', 'name'))
                       ->join('plan_programs', 'plan_programs.program_id = programs.id', array())
                       ->join('plans', 'plans.id = plan_programs.plan_id', array())
                       ->where(array('plans.year' => $year))
+                      ->where(array('plans.meta_flag' => 1))
                       ->where(array('programs.active_flag' => 1))
                       ->order(array('programs.id'))
                    
@@ -121,7 +122,6 @@ class Queries extends AbstractTableGateway
                       ->where(array('plans.year' => $year))
                       ->where(array('plans.funding_flag' => 1))
                       ->order(array('programs.id'))
-                   
         ;
         
         $statement = $sql->prepareStatementForSqlObject($select);
@@ -133,7 +133,6 @@ class Queries extends AbstractTableGateway
     // query 5
     public function getProgramsWithModifiedOutcomes($fromDate)
     {
- 
         $sql = new Sql($this->adapter);
         $where = new Where();
         
@@ -142,7 +141,7 @@ class Queries extends AbstractTableGateway
         $deactivated = new \Zend\Db\Sql\Predicate\Expression("'Deactivated'");
         $created = new \Zend\Db\Sql\Predicate\Expression("'Created'");
     
-        // date arrives in mmddyyyy format
+        // user chosen fromDate arrives in mmddyyyy format
         // strtotime requires dd-mm-yyyy format
         $fromDate = substr($fromDate, 2, 2) . '-' .
                     substr($fromDate, 0, 2) . '-' .
@@ -156,10 +155,10 @@ class Queries extends AbstractTableGateway
                       ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
                       ->join('outcomes', 'outcomes.program_id = programs.id',array())
                       ->join('users', 'users.id = outcomes.deactivated_user', array('last_name', 'first_name'))
+                      ->where(array('outcomes.active_flag' => 0))
                       ->where($where->isNotNull('outcomes.deactivated_ts'))
                       ->where($where->greaterThan('outcomes.deactivated_ts', $fromDate))
-                      ->order(array('programs.id'))
-                   
+                      ->order(array('programs.unit_id'))
         ;
         
         // get programs that added outcomes since fromdate
@@ -171,7 +170,7 @@ class Queries extends AbstractTableGateway
                       ->join('users', 'users.id = outcomes.created_user', array('last_name', 'first_name'))
                       ->where($where->isNotNull('outcomes.created_ts'))
                       ->where($where->greaterThan('outcomes.created_ts', $fromDate))
-                      ->order(array('programs.id'))
+                      ->order(array('programs.unit_id'))
                    
         ;
         // union results
@@ -333,16 +332,15 @@ class Queries extends AbstractTableGateway
                       ->from('programs')
                       ->columns(array('unit_id', 'name', 'type' => $deactivated))
                       ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
-                      ->join('unit_privs', 'unit_privs.unit_id = programs.unit_id',array())
-                      ->join('user_roles', 'user_roles.user_id = unit_privs.user_id',array())
+                      ->join('assessor_privs', 'assessor_privs.unit_id = programs.unit_id',array())
+                      ->join('user_roles', 'user_roles.user_id = assessor_privs.user_id',array())
                       // grab user responsible for deactivating assessor
-                      ->join('users', 'users.id = user_roles.deactivated_user', array('last_name', 'first_name'))
-                      ->where($where->isNotNull('user_roles.deactivated_ts'))
-                      ->where($where->greaterThan('user_roles.deactivated_ts', $fromDate))
+                      ->join('users', 'users.id = assessor_privs.deactivated_user', array('last_name', 'first_name'))
+                      ->where($where->isNotNull('assessor_privs.deactivated_ts'))
+                      ->where($where->greaterThan('assessor_privs.deactivated_ts', $fromDate))
                       // liaison role = 4
                       ->where(array('user_roles.role' => 4))
                       ->order(array('programs.id'))
-                   
         ;
         
         // get newly created assessor roles
@@ -350,16 +348,15 @@ class Queries extends AbstractTableGateway
                       ->from('programs')
                       ->columns(array('unit_id', 'name', 'type' => $created))
                       ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
-                      ->join('unit_privs', 'unit_privs.unit_id = programs.unit_id',array())
-                      ->join('user_roles', 'user_roles.user_id = unit_privs.user_id',array())
-                      // grab user responsible for creating assessor
-                      ->join('users', 'users.id = user_roles.created_user', array('last_name', 'first_name'))
-                      ->where($where->isNotNull('user_roles.created_ts'))
-                      ->where($where->greaterThan('user_roles.created_ts', $fromDate))
+                      ->join('assessor_privs', 'assessor_privs.unit_id = programs.unit_id',array())
+                      ->join('user_roles', 'user_roles.user_id = assessor_privs.user_id',array())
+                      // grab user responsible for deactivating assessor
+                      ->join('users', 'users.id = assessor_privs.created_user', array('last_name', 'first_name'))
+                      ->where($where->isNotNull('assessor_privs.created_ts'))
+                      ->where($where->greaterThan('assessor_privs.created_ts', $fromDate))
                       // liaison role = 4
                       ->where(array('user_roles.role' => 4))
                       ->order(array('programs.id'))
-                   
         ;
         // union results
         $select1->combine($select2);
@@ -369,5 +366,37 @@ class Queries extends AbstractTableGateway
       
         return $result;
     }   
+    
+    // gets active programs count
+    public function getActiveProgramsCount()
+    {
+        $sql = new Sql($this->adapter);
+    
+        // get count of active programs 
+        $select = $sql->select()
+                      ->from('programs')
+                      ->where(array('active_flag' => 1))
+        ; 
+        
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+        return $result->count();
+    }
+  
+    // gets total plans count for year
+    public function getPlansCountForYear($year)
+    {
+        $sql = new Sql($this->adapter);
+    
+        // get count of active programs 
+        $select = $sql->select()
+                      ->from('plans')
+                      ->where(array('year' => $year))
+        ; 
+        
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+        return $result->count();
+    }
     
 }

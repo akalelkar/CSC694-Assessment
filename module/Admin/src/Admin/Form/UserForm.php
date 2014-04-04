@@ -31,6 +31,7 @@ class UserForm extends Form
                 'id' => 'id',
             ),
         ));
+        
         $this->add(array(
             'name' => 'first_name',
             'type' => 'Zend\Form\Element\Text',
@@ -82,47 +83,7 @@ class UserForm extends Form
                 'label' => 'Last Name',
             ),
         ));
-     
-        $this->add(array(
-            'name' => 'add_role',
-            'type' => 'Zend\Form\Element\Select',
-            'attributes' => array(
-                'class'=> 'form-control user-roles',
-                'id' => 'add_role',
-            ),
-            'options' => array(
-                'empty_option' => 'Choose Role',
-                'value_options' => $args['roles'],
-            ),
-        ));  
-     
-       $this->add(array(
-            'name' => 'liaison_privs',
-            'type' => 'Zend\Form\Element\Select',
-            'attributes' => array(
-                'class'=> 'form-control hide',
-                'id' => 'liaison_privs',
-                'multiple' => 'multiple',
-                'disabled' => 'disabled'
-            ),
-            'options' => array(
-                'value_options' => $args['liaison_privs'],
-            ),
-        ));  
-        $this->add(array(
-            'name' => 'unit_privs',
-            'type' => 'Zend\Form\Element\Select',
-            'attributes' => array(
-                'class'=> 'form-control hide',
-                'id' => 'unit_privs',
-                'multiple' => 'multiple',
-                'disabled' => 'disabled'
-            ),
-            'options' => array(
-                'value_options' => $args['unit_privs'],
-            ),
-        ));  
-
+          
          
         $this->add(array(
             'name' => 'submit',

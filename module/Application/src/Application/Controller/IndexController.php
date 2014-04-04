@@ -64,7 +64,7 @@ class IndexController extends AbstractActionController
 
 // demo login
         if ($userName == 'role1') {
-            $namespace->userID = 135;
+            $namespace->userID = 2;
             $namespace->role = 1;
             $namespace->userEmail = NULL;   
             $namespace->datatelID = $userName;

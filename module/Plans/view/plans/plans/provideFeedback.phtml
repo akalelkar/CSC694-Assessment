@@ -60,12 +60,12 @@ dd {
                         <dt><h3>Enter Feedback For Plan <?php echo $planId; ?> Shown Below</h3>
                             Choose Feedback Option    
                         </dt>
-                        <dd>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <dd>
                            <?php
                                 $feedbackFlag = $plan['feedback'];
                                 $elem = $form->get('feedbackFlag');
                                 $elem->setValue($feedbackFlag);
-                                $this->formRadio()->setSeparator('</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
+                                $this->formRadio()->setSeparator('</br>');
                                 echo $this->formRadio($elem);
                              ?>
                         </dd>

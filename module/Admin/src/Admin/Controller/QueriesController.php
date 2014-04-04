@@ -62,15 +62,19 @@ class QueriesController extends AbstractActionController
       // get year from route
       $year = $this->params()->fromRoute('id', 0);
       
-      $results = $this->getUserQueries()->getProgramsMissingPlansForYear($year);
+      $results = $this->getAdminQueries()->getProgramsMissingPlansForYear($year);
       
       // iterate over database results forming a php array
       foreach ($results as $result){
           $resultsarray[] = $result;
       }
+      $totalDisplayed = $results->count();
+      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount();
 
       $partialView = new ViewModel(array('querytitle' => 'Programs Missing Plans For ' . $year,
-                                         'programs' => $resultsarray));
+                                         'programs' => $resultsarray,
+                                         'totalPrograms' => $totalPrograms,
+                                         'totalDisplayed' => $totalDisplayed));
       $partialView->setTerminal(true);
       return $partialView;
    }
@@ -83,15 +87,23 @@ class QueriesController extends AbstractActionController
       // get year from route
       $year = $this->params()->fromRoute('id', 0);
       
-      $results = $this->getUserQueries()->getProgramsMissingReportsForYear($year);
+      // reports for year 2014 (school year 2013-2014) are for plans entered 2012-2013
+      // need to subtract 1 from year to grab last year's plans
+      $year = $year - 1;
+      $results = $this->getAdminQueries()->getProgramsMissingReportsForYear($year);
       
       // iterate over database results forming a php array
       foreach ($results as $result){
           $resultsarray[] = $result;
       }
-
+      
+      $totalDisplayed = $results->count();
+      $totalPlans = $this->getAdminQueries()->getPlansCountForYear($year);
+      
       $partialView = new ViewModel(array('querytitle' => 'Programs Missing Reports For ' . $year,
-                                         'programs' => $resultsarray));
+                                         'programs' => $resultsarray,
+                                         'totalDisplayed' => $totalDisplayed,
+                                         'totalPlans' => $totalPlans));
       $partialView->setTerminal(true);
       return $partialView;
    }
@@ -104,7 +116,7 @@ class QueriesController extends AbstractActionController
       // get year from route
       $year = $this->params()->fromRoute('id', 0);
       
-      $results = $this->getUserQueries()->getProgramsDoingMetaAssessment($year);
+      $results = $this->getAdminQueries()->getProgramsDoingMetaAssessment($year);
       
       // iterate over database results forming a php array
       foreach ($results as $result){
@@ -125,7 +137,7 @@ class QueriesController extends AbstractActionController
       // get year from route
       $year = $this->params()->fromRoute('id', 0);
       
-      $results = $this->getUserQueries()->getProgramsNeedingFunding($year);
+      $results = $this->getAdminQueries()->getProgramsNeedingFunding($year);
       
       // iterate over database results forming a php array
       foreach ($results as $result){
@@ -146,7 +158,7 @@ class QueriesController extends AbstractActionController
       // get year from route
       $fromDate = $this->params()->fromRoute('id', 0);
 
-      $results = $this->getUserQueries()->getProgramsWithModifiedOutcomes($fromDate);
+      $results = $this->getAdminQueries()->getProgramsWithModifiedOutcomes($fromDate);
       
       // iterate over database results forming a php array
       foreach ($results as $result){
@@ -178,7 +190,7 @@ class QueriesController extends AbstractActionController
       if ($currentMonth > 6){
          $currentYear = $currentYear + 1;
       }
-      $results = $this->getUserQueries()->getProgramsModifiedLastYearsPlans($currentYear);
+      $results = $this->getAdminQueries()->getProgramsModifiedLastYearsPlans($currentYear);
       
       // iterate over database results forming a php array
       foreach ($results as $result){
@@ -206,7 +218,7 @@ class QueriesController extends AbstractActionController
       if ($currentMonth > 6){
          $currentYear = $currentYear + 1;
       }
-      $results = $this->getUserQueries()->getProgramsModifiedLastYearsReports($currentYear);
+      $results = $this->getAdminQueries()->getProgramsModifiedLastYearsReports($currentYear);
       
       // iterate over database results forming a php array
       foreach ($results as $result){
@@ -227,7 +239,7 @@ class QueriesController extends AbstractActionController
       // get year from route
       $year = $this->params()->fromRoute('id', 0);
       
-      $results = $this->getUserQueries()->getProgramsNeedingFeedback($year);
+      $results = $this->getAdminQueries()->getProgramsNeedingFeedback($year);
       
       // iterate over database results forming a php array
       foreach ($results as $result){
@@ -248,7 +260,7 @@ class QueriesController extends AbstractActionController
       // get year from route
       $fromDate = $this->params()->fromRoute('id', 0);
       
-      $results = $this->getUserQueries()->getProgramsWhoChangedAssessors($fromDate);
+      $results = $this->getAdminQueries()->getProgramsWhoChangedAssessors($fromDate);
       
       // iterate over database results forming a php array
       foreach ($results as $result){
@@ -267,7 +279,7 @@ class QueriesController extends AbstractActionController
    }
 
    // establishes the dbadapter link for all user queries
-    public function getUserQueries()
+    public function getAdminQueries()
     {
       if (!$this->tableResults) {
          $this->tableResults = $this->getServiceLocator()
