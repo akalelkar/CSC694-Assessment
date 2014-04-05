@@ -1,6 +1,6 @@
 <?php
-$form = $this->form;
-$form->setAttribute('action', $this->url('program', array('action' => $action,'id'=>$this->id)));
+$form = $programform;
+$form->setAttribute('action', $this->url('program', array('action' => 'addprogram')));
 $form->prepare();
 
 echo $this->form()->openTag($form);
@@ -20,7 +20,7 @@ echo $this->form()->openTag($form);
     </div>
 </div>
     <div class="form-group">
-        <?php echo $this->formSubmit($form->get('submit')); ?>
+        <?php echo $this->formSubmit($form->get('programsubmit')); ?>
     </div>
 </div>
 <?php echo $this->form()->closeTag(); ?>

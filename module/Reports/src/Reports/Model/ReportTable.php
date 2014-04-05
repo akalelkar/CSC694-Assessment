@@ -38,7 +38,7 @@ class ReportTable extends AbstractTableGateway
                               'po.outcome_id = o.id', array('text' => 'outcome_text'))
                         ->join(array('pr' => 'programs'),'o.program_id = pr.id',array('unit_id', 'name'))
                         ->where(array("p.id = $planId",
-                                      "r.deactivated_user IS NULL",
+                                      "r.active_flag = 1",
                                       "pr.active_flag = 1",
                                       "p.meta_flag = 0"))
         ;
@@ -52,7 +52,7 @@ class ReportTable extends AbstractTableGateway
                        ->join(array('pp' => 'plan_programs'),'p.id = pp.plan_id',array())
                         ->join(array('pr' => 'programs'),'pp.program_id = pr.id',array('unit_id', 'name'))
                         ->where(array("p.id = $planId",
-                                      "r.deactivated_user IS NULL",
+                                      "r.active_flag = 1",
                                       "pr.active_flag = 1",
                                       "p.meta_flag != 0",
                                 ))

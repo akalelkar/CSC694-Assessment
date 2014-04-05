@@ -4,18 +4,24 @@ $this->headTitle($title);
 ?>
 <?php echo $this->partial('admin/admin/menu.phtml',array('active'=>'program')); ?>
 <div class="col-md-12">
-    <h1><?php echo $this->escapeHtml($title); ?></h1>
+    <center><h2><?php echo $this->escapeHtml($title); ?></h2></center>
 </div>
 
 <div class="col-md-3 program-form-wrapper">
+    <h3>Add a New Unit</h3>
+    <div class="program-form" style="overflow:hidden;">
+        <?php echo $this->partial('admin/program/addunit.phtml',array('unitform'=>$this->unitform));?>
+    </div>
+</div>
+<div class="col-md-3 program-form-wrapper">
     <h3>Add a New Program</h3>
     <div class="program-form" style="overflow:hidden;">
-        <?php echo $this->partial('admin/program/form.phtml',array('form'=>$this->form,'action' =>'add','submitVal' =>'Add Program','id'=> $this->id));?>
+        <?php echo $this->partial('admin/program/addprogram.phtml',array('programform'=>$this->programform));?>
     </div>
 </div>
 
-<div class="col-md-9">
-    <h3>All Programs</h3>
+<div class="col-md-6">
+    <h3>Modify Existing Programs</h3>
     <div class="table-responsive">
             <colgroup>
                 <col class="col-xs-8">
@@ -26,26 +32,27 @@ $this->headTitle($title);
                             <th>ID</th>
                             <th>Unit ID</th>
                             <th>Name</th>
-                            <th>Created Date</th>
-                            <th>Created User</th>
-                            <th>Active</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($this->paginator as $program) : ?>
                         <tr class="active">
-                                    <td><?php echo $this->escapeHtml($program->prog_id);?></td>
+                                    <td><?php echo $this->escapeHtml($program->id);?></td>
                                    <td><?php echo $this->escapeHtml($program->unit_id);?></td>
                                     <td><?php echo $this->escapeHtml($program->name);?></td>
-                                    <td><?php echo date("M j, Y, g:i a", strtotime($program->created_ts));?></td>
-                                    <td><?php echo $this->escapeHtml($program->last_name .',  ' .$program->first_name);?></td>
-                                    <td><?php echo ($program->active_flag)? 'Yes': 'No';?></td>   
                                     <td>
-                                        <a class="btn btn-primary btn-xs" href="<?php echo $this->url('program',
-                                            array('action'=>'edit', 'id' => $program->prog_id));?>"><?php echo $this->translate ('Edit') ?> &raquo;</a>
-                                        <a class="btn btn-warning btn-xs" onclick="if (confirm('Are you sure you want to delete the program <?php echo $program->name;?>?')) { document.location = this.href; } return false;" href="<?php echo $this->url('program',
-                                            array('action'=>'delete', 'id' => $program->prog_id));?>"><?php echo $this->translate ('Delete') ?> &raquo;</a>
+                                        <a class="btn btn-primary btn-xs"
+                                           href="<?php echo $this->url('program',
+                                                                        array('action'=>'edit',
+                                                                        'id' => $program->id));?>">
+                                            <?php echo $this->translate ('Edit') ?> &raquo;
+                                        </a>
+                                        
+                                        <a class="btn btn-warning btn-xs"
+                                           onclick="if (confirm('Are you sure you want to delete the program <?php echo $program->name;?>?')) { document.location = this.href; } return false;"
+                                           href="<?php echo $this->url('program',
+                                                 array('action'=>'delete', 'id' => $program->id));?>"><?php echo $this->translate ('Delete') ?> &raquo;</a>
                                     </td>
                         </tr>
                         <?php endforeach; ?>

@@ -35,17 +35,7 @@
                      ),
                  ),
              ),
-             'update' => array(
-                 'type'    => 'literal',
-                 'options' => array(
-                     'route'    => '/admin/user',
-                     'defaults' => array(
-                         '__NAMESPACE__' => 'Admin\Controller',
-                         'controller' => 'User',
-                         'action'     => 'update',
-                     ),
-                 ),
-             ),
+          
              'user' => array(
                  'type'    => 'segment',
                  'options' => array(
@@ -65,7 +55,7 @@
              'program' => array(
                  'type'    => 'segment',
                  'options' => array(
-                     'route'    => '/admin/programs[/][page/:page][:action][/:id]',
+                     'route'    => '/admin/program[/][page/:page][:action][/:id]',
                      'constraints' => array(
                          'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
                          'id'     => '[0-9]+',
@@ -77,13 +67,13 @@
                      ),
                  ),
              ),
-          /*   'unit' => array(
+             'unit' => array(
                  'type'    => 'segment',
                  'options' => array(
-                     'route'    => '/admin/units[/][page/:page][:action][/:id]',
+                     'route'    => '/admin/unit[/][page/:page][:action][/:id]',
                      'constraints' => array(
                          'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
-                         'id'     => '[a-zA-Z][a-zA-Z0-9_-]*',
+                         'id'     => '[0-9]+',
                      ),
                      'defaults' => array(
                          '__NAMESPACE__' => 'Admin\Controller',
@@ -91,7 +81,7 @@
                          'action'     => 'index',
                      ),
                  ),
-             ),*/
+             ),
              'query' => array(
                  'type'    => 'segment',
                  'options' => array(

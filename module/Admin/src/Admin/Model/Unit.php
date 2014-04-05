@@ -32,46 +32,35 @@ class Unit implements InputFilterAwareInterface
     /*
      * create form input filter
      */
-    public function getInputFilter()
+  public function getInputFilter()
     {
+               
       if (!$this->inputFilter) {
             $inputFilter = new InputFilter();
             $factory = new InputFactory();
-
+ 
+            
             $inputFilter->add($factory->createInput(array(
-                'name' => 'id',
-                'required' => true,
-            )));
-            $inputFilter->add($factory->createInput(array(
-                'name' => 'active_flag',
-                'required' => false,
-            )));
-               $inputFilter->add($factory->createInput(array(
-                'name' => 'assessor_1',
-                'required' => false,
-            )));
-              $inputFilter->add($factory->createInput(array(
-                'name' => 'assessor_2',
-                'required' => false,
-            )));
-               $inputFilter->add($factory->createInput(array(
-                'name' => 'liaison_1',
-                'required' => false,
-            )));
-                $inputFilter->add($factory->createInput(array(
-                'name' => 'liaison_2',
-                'required' => false,
-            )));
-
-            $inputFilter->add($factory->createInput(array(
-                'name' => 'type',
+                'name' => 'unit_id',
                 'required' => true,
                 'filters' => array(
-                    array('name' => 'Int'),
+                    array('name' => 'StripTags'),
+                    array('name' => 'StringTrim'),
+                ),
+                'validators' => array(
+                    array(
+                        'name' => 'StringLength',
+                        'options' => array(
+                            'encoding' => 'UTF-8',
+                            'min' => 1,
+                            'max' => 3,
+                        ),
+                    ),
                 ),
             )));
             $this->inputFilter = $inputFilter;
         }
+
         return $this->inputFilter;
     }
 }

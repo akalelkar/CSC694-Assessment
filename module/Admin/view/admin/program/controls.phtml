@@ -1,48 +1,45 @@
 <?php if ($this->pageCount): ?>
-    <div class=" pagination pagination-centered"  style="float:right;margin-top: 0px !important;">
+    <div class="paginationControl pagination pagination-centered">
 
-            <!-- Previous page link -->
-            <?php if (isset($this->previous)): ?>
-                <li>
-                    <a href="<?php echo $this->url($this->route); ?>?page=<?php echo $this->previous; ?>">
-                        <<
-                    </a>
-                </li>
-            <?php else: ?>
-                <li class="disabled">
-                    <a href="#">
-                        <<
-                    </a>
-                </li>
-            <?php endif; ?>
-            <!-- Numbered page links -->
-            <?php foreach ($this->pagesInRange as $page): ?>
-                <?php if ($page != $this->current): ?>
-                    <li>
-                        <a href="<?php echo $this->url($this->route);?>?page=<?php echo $page; ?>">
-                            <?php echo $page; ?>
-                        </a>
-                    </li>
-                <?php else: ?>
-                    <li class="active">
-                        <a href="#"><?php echo $page; ?></a>
-                    </li>
-                <?php endif; ?>
-            <?php endforeach; ?>
+        <!-- First page link -->
+        <?php if (isset($this->previous)): ?>
+        <li> <a href="<?php echo $this->url($this->route, array('page' => $this->first)); ?>">
+                First
+            </a> </li>
+        <?php else: ?>
+            <li> <span class="disabled">First</span></li> 
+        <?php endif; ?>
 
-            <!-- Next page link -->
-            <?php if (isset($this->next)): ?>
-                <li>
-                    <a href="<?php echo $this->url($this->route); ?>?page=<?php echo $this->next; ?>">
-                        >>
-                    </a>
-                </li>
-            <?php else: ?>
-                <li class="disabled">
-                    <a href="#">
-                        >>
-                    </a>
-                </li>
-            <?php endif; ?>
+        <!-- Previous page link -->
+        <?php if (isset($this->previous)): ?>
+            <li><a href="<?php echo $this->url($this->route, array('page' => $this->previous)); ?>">
+                &lt; Previous
+            </a> </li> 
+        <?php else: ?>
+            <li><span class="disabled">&lt; Previous</span> 
+        <?php endif; ?>
+          
+       <!-- Page count -->       
+       <li><span class="disabled">  <?php echo $this->firstItemNumber; ?> - <?php echo $this->lastItemNumber; ?>
+        of <?php echo $this->totalItemCount; ?></span></li>
+  
+        <!-- Next page link -->
+        <?php if (isset($this->next)): ?>
+           <li> <a href="<?php echo $this->url($this->route, array('page' => $this->next)); ?>">
+                Next &gt;
+            </a> </li> 
+        <?php else: ?>
+           <li> <span class="disabled">Next &gt;</span></li>  
+        <?php endif; ?>
+
+        <!-- Last page link -->
+        <?php if (isset($this->next)): ?>
+          <li>  <a href="<?php echo $this->url($this->route, array('page' => $this->last)); ?>">
+                Last
+            </a></li> 
+        <?php else: ?>
+           <li> <span class="disabled">Last</span></li> 
+        <?php endif; ?>
+
     </div>
 <?php endif; ?>

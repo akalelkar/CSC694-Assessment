@@ -44,7 +44,8 @@ class ProgramForm extends Form
                 'label' => 'Active',
             ),
         ));
-         $this->add(array(
+        
+        $this->add(array(
             'name' => 'unit_id',
             'type' => 'Zend\Form\Element\Select',
             'attributes' => array(
@@ -52,16 +53,17 @@ class ProgramForm extends Form
                 'id' => 'unit_id',
             ),
             'options' => array(
-                'label' => 'Unit ID',
+                'label' => 'Unit',
                 'value_options' => $units,
             ),
         ));
+        
         $this->add(array(
-            'name' => 'submit',
+            'name' => 'programsubmit',
             'attributes' => array(
                 'type' => 'submit',
-                'value' => 'Go',
-                'id' => 'submitbutton',
+                'value' => 'Add',
+                'id' => 'programsubmit',
                 'class'=> 'btn btn-primary btn-md',
             ),
         ));

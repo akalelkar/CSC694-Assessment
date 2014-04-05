@@ -3,14 +3,16 @@
 namespace Admin\Controller;
 
 use Admin\Model\Program;
+use Admin\Model\Unit;
 use Admin\Form\ProgramForm;
+use Admin\Form\UnitForm;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 use Zend\Db\Sql\Select;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Adapter\Adapter;
 use Zend\Paginator\Paginator;
-use Zend\Paginator\Adapter\DbSelect;
+use Zend\Paginator\Adapter\ArrayAdapter;
 use Application\Authentication\AuthUser;
 use Zend\session\container;
 
@@ -41,56 +43,105 @@ class ProgramController extends AbstractActionController {
      */
 
     public function indexAction() {
+        //get page number from route, or default to age 1
+        $page = $this->params()->fromRoute('page') ? (int) $this->params()->fromRoute('page') : 1;
+   
         //Get all programs
-        $paginator = $this->getProgramQueries()->fetchAll(true);
-        // set the current page to what has been passed in query string, or to 1 if none set
-        $paginator->setCurrentPageNumber((int) $this->params()->fromQuery('page', 1));
-        // set the number of items per page to 10
-        $paginator->setItemCountPerPage(10);
+        $programs = $this->getProgramQueries()->fetchAll(true);
+        
+        //set # of items per page
+        $itemsPerPage = 10;
 
+        //create our paginator object set current page, items per page, and page range
+        $paginator = new \Zend\Paginator\Paginator(new \Zend\Paginator\Adapter\ArrayAdapter($programs));
+        $paginator->setCurrentPageNumber($page)
+                ->setItemCountPerPage($itemsPerPage);
+
+   
         //add program form
         $units = $this->getUnitQueries()->getUnitsForSelect();
-        $form = new ProgramForm($units);
-        $form->get('submit')->setValue('Add');
+        $programform = new ProgramForm($units);
 
+        //add unit form
+        $unitform = new UnitForm();
+     
         //send paginator and form to index view
         return new ViewModel(array(
+            'page' => $page,
             'paginator' => $paginator,
-            'form' => $form
+            'unitform' => $unitform,
+            'programform' => $programform
         ));
     }
 
     /*
-     *  Program Add Action
+     *  Unit Add Action
      */
 
-    public function addAction() {
-        //the add program form
-        $units = $this->getUnitQueries()->getUnitsForSelect();
-        $form = new ProgramForm($units);
-        $form->get('submit')->setValue('Add');
+    public function addunitAction() {
+        //the add unit form
+        $form = new UnitForm();
 
         //if form is returned with post
         $request = $this->getRequest();
+
         if ($request->isPost()) {
-
-            //get the form data
-            $program = new Program();
-            $form->setInputFilter($program->getInputFilter());
-            $form->setData($request->getPost());
-
-            if ($form->isValid()) {
-                $program->exchangeArray($form->getData());
-
-
-                //save the program
-                $this->getProgramQueries()->saveProgram($program);
-
+            if ($request->getPost()['unit_id'] == NULL) {
+                return $this->redirect()->toRoute('program');
+            }
+            else{
+                //get the form data
+                $unit = new Unit();
+                $form->setInputFilter($unit->getInputFilter());
+                $form->setData($request->getPost());
+                if ($form->isValid()) {
+                    
+                    $unit->exchangeArray($form->getData());
+    
+                    //save the unit
+                    $this->getUnitQueries()->saveUnit($unit);
+                }
                 // Redirect to list of programs
                 return $this->redirect()->toRoute('program');
             }
         }
-        return array('form' => $form);
+        return array('unitform' => $form);
+    }
+
+    
+    /*
+     *  Program Add Action
+     */
+
+    public function addprogramAction() {
+        //the add program form
+        $units = $this->getUnitQueries()->getUnitsForSelect();
+        $form = new ProgramForm($units);
+
+        //if form is returned with post
+        $request = $this->getRequest();
+        if ($request->isPost()){
+            if ($request->getPost()['name'] == NULL) {
+                return $this->redirect()->toRoute('program');
+            }
+            else{
+                //get the form data
+                $program = new Program();
+                $form->setInputFilter($program->getInputFilter());
+                $form->setData($request->getPost());
+    
+                if ($form->isValid()) {
+                    $program->exchangeArray($form->getData());
+    
+                    //save the program
+                    $this->getProgramQueries()->saveProgram($program);
+    
+                    // Redirect to list of programs
+                    return $this->redirect()->toRoute('program');
+                }
+            }
+        }
+        return array('programform' => $form);
     }
 
     /*
@@ -138,12 +189,14 @@ class ProgramController extends AbstractActionController {
      */
 
     public function deleteAction() {
+        
         //get id from route or redirect user to programs page if unavailable
         $id = (int) $this->params()->fromRoute('id', 0);
         if (!$id) {
             return $this->redirect()->toRoute('program');
         }
         $request = $this->getRequest();
+        
         if ($request->isPost()) {
             $del = $request->getPost('del', 'No');
 
@@ -153,7 +206,7 @@ class ProgramController extends AbstractActionController {
             }
 
             // Redirect to list of users
-            return $this->redirect()->toRoute('user');
+            return $this->redirect()->toRoute('program');
         } else {
             //delete the program and redirect user
             $this->getProgramQueries()->deleteProgram($id);

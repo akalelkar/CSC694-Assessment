@@ -21,35 +21,32 @@ class ProgramTable extends AbstractTableGateway {
         $this->table = 'programs';
         $this->initialize();
     }
-
+    
     /*
-     * Get all Programs and return in paginator or resultset
+     * Returns all programs 
      */
-    public function fetchAll($paginated = false) {
-        if ($paginated) {
-            // create a new Select object for the table album
-            $select = new Select();
-            $select->from('programs')
-                    ->columns(array('prog_id' => 'id','unit_id','name','created_ts','active_flag'))
-                    ->join(array('u' => 'users'), 'u.id = created_user');
-            // create a new result set based on the Program entity
-            $resultSetPrototype = new ResultSet();
-            $resultSetPrototype->setArrayObjectPrototype(new Program());
-            // create a new pagination adapter object
-            $paginatorAdapter = new DbSelect(
-                    // our configured select object
-                    $select,
-                    // the adapter to run it against
-                    $this->adapter,
-                    #$this->tableGateway->getAdapter(),
-                    // the result set to hydrate
-                    $resultSetPrototype
-            );
-            $paginator = new Paginator($paginatorAdapter);
-            return $paginator;
+    public function fetchAll()
+    {
+        $sql = new Sql($this->adapter);
+        $select = $sql->select()
+                      ->from($this->table)
+                      ->join('users', 'users.id = programs.created_user', array('last_name', 'first_name'))
+                      ->where(array('programs.active_flag' => 1))
+                      ->order('unit_id');
+        ;
+        
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+
+        $programs = array();
+        foreach($result as $row){
+            //create programs array to return
+            $program = new Program();
+            $program->exchangeArray($row);
+            $programs[] = $program;
+            
         }
-        $resultSet = $this->select();
-        return $resultSet;
+        return $programs;
     }
 
     /*
@@ -68,25 +65,32 @@ class ProgramTable extends AbstractTableGateway {
         return $program;
     }
 
+    
+    public function addProgram(Program $program){
+        $namespace = new Container('user');
+        
+        $data = array(
+            'unit_id' => $program->unit_id,
+            'name' => $program->name,
+            'created_ts' => date('Y-m-d h:i:s', time()),
+            'created_user' => $namespace->userID,
+            'active_flag' => 1,
+        );
+         $this->insert($data);
+
+    }
     /*
      * Save a Program
      */
     public function saveProgram(Program $program) {
         $namespace = new Container('user');
 
-        //build the save data array 
+        //build the new data array 
         $data = array(
             'unit_id' => $program->unit_id,
             'name' => $program->name,
-            #'active_flag' => ($program->active_flag) ? $program->active_flag : 0, //removed active checkbox from form
             'active_flag' => 1,
         );
-
-        //deactivating an existing program
-        if (!$program->active_flag) {
-            $data['deactivated_ts'] = date('Y-m-d h:i:s', time());
-            $data['deactivated_user'] = $namespace->userID;
-        }
 
         //get the program id
         $id = (int) $program->id;
@@ -109,7 +113,15 @@ class ProgramTable extends AbstractTableGateway {
      * Delete Program
      */
     public function deleteProgram($id) {
-        $this->delete(array('id' => $id));
+        $namespace = new Container('user');
+
+        //deactivating an existing program
+        
+        $data = array();
+        $data['deactivated_ts'] = date('Y-m-d h:i:s', time());
+        $data['deactivated_user'] = $namespace->userID;
+        $data['active_flag'] = 0;
+        $this->update($data, array('id' => $id));
     }
 
 }

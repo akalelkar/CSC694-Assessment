@@ -124,7 +124,93 @@ class UserTable extends AbstractTableGateway
         return $roles;
     }
 
+    // add privileges to various privs tables and possibly update user role
+    public function addPrivileges($id, $privs, $role){
+        // adds the privileges for that role by inserting a tuple in the
+        // corresponding privs table
+        // if new role, the role is added to the user_roles table
+        // $privs is an array of unit_ids to add
+
+        $sql = new Sql($this->adapter);
+        if ($role == 2){
+            $table = 'liaison_privs';
+        }
+        else if ($role == 3){
+            $table = 'chair_privs';
+        }
+        else{
+            $table = 'assessor_privs';
+        }
+        
+        // get user logged in        
+        $namespace = new Container('user');
+
+        // create an atomic database transaction to update roles and possibly privileges
+        $connection = $this->adapter->getDriver()->getConnection();
+	$connection->beginTransaction();
+        
+        // add privileges to appropriate table
+        foreach ($privs as $priv){
+            // add privs to table
+            $insert = $sql->insert()
+                          ->into($table)
+                          ->values(array('user_id'=>$id, 'unit_id'=>$priv,
+                                         'created_ts'=>date('Y-m-d h:i:s', time()),
+                                         'created_user'=>$namespace->userID, 'active_flag'=>1))
+            ;
+            $insertString = $sql->getSqlStringForSqlObject($insert);
+            $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);
+        }
+        
+        // check if the user has this role, if not add
+        $select = $sql->select()
+                    ->from('user_roles')
+                    ->where(array('user_id' => $id, 'role' => $role))
+        ;
+        
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+       
+        if ($result->count() == 0){
+            // need to add the role
+            $data = array(
+                'user_id' => $id,
+                'role' => $role,
+                'created_user' => $namespace->userID,
+                'created_ts' => date('Y-m-d h:i:s', time()),
+                'active_flag' => 1
+            );
+            $sql = new Sql($this->adapter);
+            $insert = $sql->insert('user_roles');
+            $insert->values($data);
+            $insertString = $sql->getSqlStringForSqlObject($insert);
+            $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);
+        }
+        else{ // check that role is active
+            foreach($result as $r){
+                if ($r['active_flag'] == 0){
+                    // reactivate role
+                    $data = array(
+                        'created_user' => $namespace->userID,
+                        'created_ts' => date('Y-m-d h:i:s', time()),
+                        'active_flag' => 1
+                    );
+                    $update = $sql->update('user_roles')
+                              ->set($data)
+                              ->where(array('user_id' => $id, 'role' => $role))
+                    ;
+                    $updateString = $sql->getSqlStringForSqlObject($update);
+                    $this->adapter->query($updateString, Adapter::QUERY_MODE_EXECUTE);
+                }
+            }
+        }
+  
+        // finish the transaction		
+	$connection->commit();
+      
+    }
     
+    // remove privileges from various privs tables and possibly update user role
     public function removePrivileges($id, $privs, $role){
         // removes the privileges for that role by inactivating the privileges
         // if none remain, then that role is also inactivated for the user
@@ -147,6 +233,7 @@ class UserTable extends AbstractTableGateway
               ->in('unit_id', $privs)
         ;
 
+        // get user logged in
         $namespace = new Container('user');
         
         $data = array(
@@ -192,109 +279,7 @@ class UserTable extends AbstractTableGateway
 	$connection->commit();
       
     }
-    
-    /*
-     * enable or disable a role
-     */
-    function updateRole($userID,$role, $action)
-    {
-        $namespace = new Container('user');
-        switch($action){
-            case 'disable':
-                $data = array(
-                        'active_flag' => 0,
-                        'deactivated_ts' =>  date('Y-m-d h:i:s', time()),
-                        'deactivated_user' =>  $namespace->userID
-                    );
-                break;
-            
-            case 'enable':
-                $data = array(
-                        'active_flag' => 1,
-                    );
-                break;
-        }
-
-        $sql = new Sql($this->adapter);
-        $update = $sql->update('user_roles')
-                      ->set($data)
-                       ->where(array('user_id = ?' => $userID, 'role = ?' => $role));
-        $updateString = $sql->getSqlStringForSqlObject($update);
-        $this->adapter->query($updateString, Adapter::QUERY_MODE_EXECUTE);
-    }
-    
-    /*
-     *  Adds roles to a user
-     * @userID - id to the user object
-     * @roles - array of role ids
-     */
-    function addRoles($userID,$roles)
-    {
-        $namespace = new Container('user');
         
-       //add role(s)
-       foreach($roles as $row => $value){
-            $role = array(
-                'user_id' => $userID,
-                'role' => $value,
-                'created_user' => $namespace->userID,
-                'created_ts' => date('Y-m-d h:i:s', time()),
-                'active_flag' => 1
-            );
-            $sql = new Sql($this->adapter);
-            $insert = $sql->insert('user_roles');
-            $insert->values($role);
-            $insertString = $sql->getSqlStringForSqlObject($insert);
-            $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);
-       }
-    }
-
-   
-    /*
-     *  Updates Users Roles
-     * @userID - id to the user object
-     * @roles - array of role ids
-     */
-    function updateRoles($userID,$roles)
-    {
-        //get the active roles the user previously had
-        $ActiveRoles = $this->getRolesById($userID, true);
-
-        
-        //get all inactive roles the user previously had
-        $InActiveRoles = $this->getRolesById($userID, false);
-
-        
-        //create a list of all the roles a previously had
-        $allRoles = array_merge($ActiveRoles,$InActiveRoles);
-
-        
-        //determines if user has been given a new role
-        $newRoles = array_diff($roles, $allRoles);
-
-        //add any new roles
-        if(!empty($newRoles)){
-           $this->addRoles($userID,$newRoles);
-        }
-        
-        //update role(s) that were re-enabled/disabled
-        $disableRoles = array_diff($ActiveRoles, $roles);
-        $reenabledRoles = array_diff($roles, $ActiveRoles);
-        
-        print_r($reenabledRoles);
-        
-        if(!empty($disableRoles)){
-            foreach($disableRoles as $key => $value){
-                $this->updateRole($userID,$value, 'disable');
-            }
-        }
-        if(!empty($reenabledRoles)){
-            foreach($reenabledRoles as $key => $value){
-                $this->updateRole($userID,$value, 'enable');
-            }
-        }
-    }
-    
     /*
      * Get user by id
      * @returns null if no user is found or the user object

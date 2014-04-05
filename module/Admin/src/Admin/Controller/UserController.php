@@ -60,8 +60,7 @@ class UserController extends AbstractActionController {
         //create our paginator object set current page, items per page, and page range
         $paginator = new \Zend\Paginator\Paginator(new \Zend\Paginator\Adapter\ArrayAdapter($users));
         $paginator->setCurrentPageNumber($page)
-                ->setItemCountPerPage($itemsPerPage)
-                ->setPageRange(7);
+                ->setItemCountPerPage($itemsPerPage);
 
         //get role terms for user form
         $args['roles'] = $this->getGenericQueries()->getRoleTerms();
@@ -102,8 +101,17 @@ class UserController extends AbstractActionController {
             if ($post->fromPost('removeAssessor') != null){
                 $this->getUserQueries()->removePrivileges($id, $post->fromPost('removeAssessor'), 4); // assessor = 4
             }
+            if ($post->fromPost('addLiaison') != null){
+                $this->getUserQueries()->addPrivileges($id, $post->fromPost('addLiaison'), 2); // liaison = 2
+            }
+            if ($post->fromPost('addChair') != null){
+                $this->getUserQueries()->addPrivileges($id, $post->fromPost('addChair'), 3); // chair = 3
+            }
+            if ($post->fromPost('addAssessor') != null){
+                $this->getUserQueries()->addPrivileges($id, $post->fromPost('addAssessor'), 4); // assessor = 4
+            }
          }
-var_dump($id);
+
         //get the user object from the database
         $user = $this->getUserQueries()->getUser($id);
 

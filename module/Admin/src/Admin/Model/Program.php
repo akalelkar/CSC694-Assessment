@@ -37,8 +37,7 @@ class Program implements InputFilterAwareInterface
      */
     public function getInputFilter()
     {
-        
-        
+               
       if (!$this->inputFilter) {
             $inputFilter = new InputFilter();
             $factory = new InputFactory();
@@ -50,6 +49,7 @@ class Program implements InputFilterAwareInterface
                     array('name' => 'Int'),
                 ),
             )));
+        
             $inputFilter->add($factory->createInput(array(
                 'name' => 'active_flag',
                 'required' => false,

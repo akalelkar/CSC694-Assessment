@@ -54,6 +54,29 @@ class UnitTable extends AbstractTableGateway
     }
 
     /*
+     * get all active units
+     */
+    public function getUnitsForSelect()
+    {
+        $sql = new Sql($this->adapter);
+        $select = $sql->select()
+                      ->from('units')
+                      ->columns(array('id'))
+                      ->where(array('active_flag' => 1))
+        ;
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $results = $statement->execute();
+    
+        $resultsArray = array();
+        // array must be created as key=>value pair where both key and value are the unit_id
+        // so when accessing values from multi select you get the unit_id and not the array subscript
+        foreach($results as $result){
+            $resultsArray[$result['id']] = $result['id'];
+        }
+        return $resultsArray;
+    }
+    
+    /*
      * get unit by id
      */
     public function getUnit($id)
@@ -228,65 +251,23 @@ class UnitTable extends AbstractTableGateway
     {
         $namespace = new Container('user');
         
-        //build save data array
         $data = array(
-            'id' => $unit->id,
-            'type' => $unit->type,
-            'active_flag' => ($unit->active_flag)? $unit->active_flag: 0,
+            'id' => strtoupper($unit->unit_id),
+            'type' => 1,
+            'active_flag' => 1,
         );
-              
-        //deactivating an existing program
-        if(!$unit->active_flag){
-            $data['deactivated_ts'] =  date('Y-m-d h:i:s', time());
-            $data['deactivated_user'] =  $namespace->userID;
-        }
-   
-        //get the user id
-        $id = $unit->id;
-        
+
+        //get the program id
+        $id = $unit->unit_id;
+  
         $exists = $this->getUnit($id);
         
-        //if program doesn't exists
+        //if unit doesn't exists
         if (!$exists) {
-            $data['created_ts'] =  date('Y-m-d h:i:s', time());
-            $data['created_user'] = $namespace->userID;     
-            
-            //insert unit
+            $data['created_ts'] = date('Y-m-d h:i:s', time());
+            $data['created_user'] = $namespace->userID;
             $this->insert($data);
-            
-            //get assessor/liaison
-            $assessor = (isset($unit->assessor_1))? $unit->assessor_1:'';
-            $liaison = (isset($unit->liaison_1))? $unit->liaison_1:'';
-            
-            //add priv records
-            if(!empty($assessor))
-            {
-                $this->addPriv($id,$assessor,'unit_privs');
-            }
-            
-            if(!empty($liaison))
-            {
-                $this->addPriv($id,$liaison,'liaison_privs');
-            }
-
-        } else {
-            if ($this->getUnit($id)) {
-                
-                //update unit
-                $this->update($data, array('id' => $id));
-                
-                //get assessor/liaison
-                $assessors[] = (isset($unit->assessor_1))? $unit->assessor_1:'';
-                $liaisons[] = (isset($unit->liaison_1))? $unit->liaison_1:'';            
-
-                //update privs
-                $this->updatePrivs($id,$liaisons,'liaison_privs');
-                $this->updatePrivs($id,$assessors,'unit_privs');
-  
-            } else {
-                throw new \Exception('Form id does not exist');
-            }
-        }
+        } 
     }
 
     /*
