@@ -10,12 +10,15 @@ class Outcome {
     protected $outcomeId;
     protected $planId;
     protected $outcomeText;
+    protected $programName;
+    protected $type;
 
-    public function __construct($programName, $outcomeId, $planId, $outcomeText) {
+    public function __construct($outcomeId, $outcomeText, $type, $planId, $programName) {
         $this->programName = $programName;
         $this->outcomeId = $outcomeId;
         $this->planId = $planId;
         $this->outcomeText = $outcomeText;
+        $this->type = $type;
     }
 
     public function getProgramName() {
@@ -32,5 +35,10 @@ class Outcome {
 
     public function getOutcomeText() {
         return $this->outcomeText;
+    }
+
+    public function getType() {
+        return $this->type;
     }  
+
 }

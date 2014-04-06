@@ -6,6 +6,7 @@ use Zend\Db\TableGateway\AbstractTableGateway;
 use Zend\Db\Adapter\Adapter;
 use Zend\DB\Sql\Select;
 use Zend\Db\Sql\Sql;
+use Zend\Db\Sql\Predicate\NotIn;
 use Zend\Db\Sql\Where;
 use Zend\Db\Sql\Update;
 use Zend\Db\Sql\Expression;
@@ -93,11 +94,35 @@ class DatabaseSql extends AbstractTableGateway
     
     
     /**
+     * Check if outcome in plan and active
+     */
+    public function isOutcomeInPlan($outcomeId, $planId)
+    {
+
+        $sql = new Sql($this->adapter);
+        $select = $sql->select()
+	              ->from('plan_outcomes')
+		      ->where(array('plan_outcomes.plan_id' => $planId,
+				    'plan_outcomes.outcome_id' => $outcomeId))
+	;
+
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+	
+        if ($result->count() > 0){
+	    return 1;
+	}
+	else{
+	    return 0;
+	}
+    }
+    
+    /**
      * Insert a tuple into the plan outcomes table
      */
     public function insertPlanOutcome($outcomeId, $planId)
     {
-
+var_dump("inserting");
         $sql = new Sql($this->adapter);
 	$data = array('outcome_id' => $outcomeId,
 		      'plan_id' => $planId);
@@ -109,6 +134,29 @@ class DatabaseSql extends AbstractTableGateway
         $statement->execute();
     }
 
+    
+    /**
+     * Inactivate outcome in plan if exists
+     */
+    public function removePlanOutcome($outcomeId, $planId)
+    {
+var_dump("removing");
+	$sql = new Sql($this->adapter);
+	$namespace = new Container('user');
+        
+	$data = array();
+        $data['deactivated_ts'] = date('Y-m-d h:i:s', time());
+        $data['deactivated_user'] = $namespace->userID;
+        $data['active_flag'] = 0;
+        
+	$update = $sql->update($data, array('outcome_id' => $outcomeId,
+				   'plan_id' => $planId));
+	
+        $statement = $sql->prepareStatementForSqlObject($update);
+        $statement->execute();
+    }
+
+    
     
     /**
      * Insert a tuple into the plan document table
@@ -237,8 +285,6 @@ class DatabaseSql extends AbstractTableGateway
 		    ;	    
 	}
 		    
-        $statement = $sql->prepareStatementForSqlObject($update);
-        $statement->execute();
     }
 
     public function insertMetaPlan($metaDescription, $year, $draftFlag, $userID, $programsArray){
@@ -482,31 +528,53 @@ class DatabaseSql extends AbstractTableGateway
      */
     public function getOutcomesByPlanId($planId, $names)
     {
-	
+	$notIn = new \Zend\Db\Sql\Predicate\Expression("'0'");
+        $in = new \Zend\Db\Sql\Predicate\Expression("'1'");
+	$planIdExp = new \zend\Db\Sql\Predicate\Expression($planId);
+    
         $sql = new Sql($this->adapter);
-        $select = $sql->select()
-                      ->columns(array('outcomeId' => new Expression('outcomes.id'),
-				      'planId' => new Expression('plans.id'),
-				      'outcomeText' => new Expression('outcomes.outcome_text'),
-				      ))
-                      ->from('outcomes')
-		      ->join('programs', 'programs.id = outcomes.program_id')
-		      ->join('plan_outcomes', 'plan_outcomes.outcome_id = outcomes.id')
-		      ->join('plans', 'plans.id = plan_outcomes.plan_id')		      
-		      ->where(array('plans.id' => $planId, 'programs.name' => $names))
+	// select outcomes in plan
+	$select1 = $sql->select()
+		      ->columns(array('outcomeId' => 'id', 'outcomeText' => 'outcome_text',
+				      'type' => $in, 'planId' => $planIdExp))
+		      ->from('outcomes')
+		      ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
+		      ->join('programs', 'programs.id = outcomes.program_id', array('programName' => 'name',))
+		      ->join('plan_outcomes', 'plan_outcomes.outcome_id = outcomes.id', array())
+		      ->where(array('programs.name' => $names,
+				    'outcomes.active_flag' => 1,
+			            'plan_outcomes.plan_id' => $planId))
+	;	      
+		      
+	// select outcomes not in plan but match programs chosen
+	$select2 = $sql->select()
+		      ->columns(array('outcomeId' => 'id', 'outcomeText' => 'outcome_text',
+				      'type' => $notIn, 'planId' => $planIdExp))
+		      ->from('outcomes')
+		      ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
+		      ->join('programs', 'programs.id = outcomes.program_id', array('programName' => 'name'))
+		      ->where(array('programs.name' => $names, 'outcomes.active_flag' => 1,))
+		      ->where(new NotIn('outcomes.id', $sql->select()
+					             ->columns(array('id'))
+						     ->from('outcomes')
+						     ->join('programs', 'programs.id = outcomes.program_id', array())
+						     ->join('plan_outcomes', 'plan_outcomes.outcome_id = outcomes.id', array())
+						     ->where(array('plan_outcomes.plan_id' => $planId, 'outcomes.active_flag' => 1))
+				        ))
 		      ->group (array('outcomeId' => new Expression('outcomes.id'),
-				     'planId' => new Expression('plans.id'),
+				     'planId',
 				     'outcomeText' => new Expression('outcomes.outcome_text'),
 				      ))
-		   ;
-
-        $statement = $sql->prepareStatementForSqlObject($select);
+	;
+	$select1->combine($select2);
+		
+	$statement = $sql->prepareStatementForSqlObject($select1);
         $resultSet = $statement->execute();
 
-        //create an array of entity objects to store the database results
+	//create an array of entity objects to store the database results
 	$entities = array();
         foreach ($resultSet as $row) {
-            $entity = new Entity\Outcome("",$row['outcomeId'],$row['planId'],$row['outcomeText']);
+            $entity = new Entity\Outcome($row['outcomeId'],$row['outcomeText'],$row['type'],$row['planId'],$row['programName']);
             $entities[] = $entity;
         }
         return $entities;
@@ -629,7 +697,7 @@ class DatabaseSql extends AbstractTableGateway
 
     $where = new \Zend\Db\Sql\Where();
 
-    // if the action is view do not return outcomes that are is a draft status
+    // if the action is view do not return outcomes that are a draft status
     if (strtolower($action) == "view") {
 	$where	
 	    ->equalTo('units.id', $unitId)
@@ -683,7 +751,7 @@ class DatabaseSql extends AbstractTableGateway
         //create an array of entity objects to store the database results
 	$entities = array();
         foreach ($resultSet as $row) {
-            $entity = new Entity\Outcome($row['program'],$row['outcomeId'],$row['planId'],$row['outcomeText']);
+	    $entity = new Entity\Outcome($row['outcomeId'],$row['outcomeText'],"",$row['planId'],$row['program']);
             $entities[] = $entity;
         }
         return $entities;
@@ -718,7 +786,8 @@ class DatabaseSql extends AbstractTableGateway
         //create an array of entity objects to store the database results
 	$entities = array();
         foreach ($resultSet as $row) {
-            $entity = new Entity\Outcome($row['program'], $row['outcomeId'], 0, $row['outcomeText']);
+	    
+            $entity = new Entity\Outcome($row['outcomeId'], 0, $row['outcomeText'], '', '', $row['program']);
             $entities[] = $entity;
         }
         return $entities;

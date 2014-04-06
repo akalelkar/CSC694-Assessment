@@ -31,20 +31,6 @@ class PlansController extends AbstractActionController
    protected $tableResultsPlans;
    protected $sessionContainer;
 
-   
-   // TODO remove these attributes.  They will be set in the loggon page.  Just setting for testing
-   // get these values from the session namespace
-//   protected $testRole = null;
-//   protected $testRole = 1; // admin
-//   protected $testRole = 2; // liaison
-//   protected $testRole = 3; // chair
-//   protected $testRole = 4; // assessor
-//   protected $testUserID = 19;   //9 = ACC, 19 = CSC, 135 = admin
-//   protected $testUserEmail = ""; 
-//   protected $testDatatelID = "GoodDatatelID";
-//   protected $testDatatelID = null;
-
-   
    /********** Constructors **********/
 
    public function __construct()
@@ -274,8 +260,6 @@ class PlansController extends AbstractActionController
     */
    public function indexAction()
    {
-      
-      
       // get the session variables
       $namespace = new Container('user');
       $userID = $namespace->userID;
@@ -743,6 +727,40 @@ class PlansController extends AbstractActionController
       
       // get all the data from the form
       $planId = trim($request->getPost('planId'));
+      
+      // modify outcomes - activate new, inactivate old
+      $outcomeCount = $request->getPost('outcomeCount');
+      $outcomesSelected = 0;
+      for ($x = 1; $x <= $outcomeCount; $x++)
+      {
+         $checkboxName = "checkboxOutcomes" . $x;
+         $checkboxValue = $request->getPost($checkboxName);
+            
+         if ($checkboxValue != null) {
+            $newoutcomeIds[] = $checkboxValue;
+         }
+         else{
+            $oldoutcomeIds[] = $checkboxValue;
+         }
+      }
+      // add new outcomes to plan
+      foreach ($newoutcomeIds as $outcomeId) :
+         // add if outcome does not already exists
+         if ($this->getDatabaseData()->isOutcomeInPlan($planId, $outcomeId) == 0){
+             // insert into the outcome table
+             $this->getDatabaseData()->insertPlanOutcome($outcomeId, $planId);
+         }
+      endforeach;
+      
+      // remove old outcomes from plan
+      foreach ($oldoutcomeIds as $outcomeId) :
+         // remove if outcomes exists in plan
+         if ($this->getDatabaseData()->isOutcomeInPlan($planId, $outcomeId) == 1){
+             // insert into the outcome table
+             $this->getDatabaseData()->removePlanOutcome($outcomeId, $planId);
+         }
+      endforeach;
+      
       $metaDescription = trim($request->getPost('textMetaDescription'));
       if ($metaDescription != NULL){
          $metaFlag = 1;

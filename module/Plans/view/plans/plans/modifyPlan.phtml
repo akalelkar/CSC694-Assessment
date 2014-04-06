@@ -63,9 +63,9 @@
                     
 		    <div class="panel-group" id="accordion">
 
-		    <!-- if there are outcomes present display the array of outcomes -->
+		    <!-- if not meta plan then display outcomes -->
 		    <?php
-			if (!empty($outcomes))
+			if ($plan['meta_flag'] == 0)
 			{
 		    ?>
 			<div class="panel panel-success">
@@ -74,25 +74,51 @@
 				    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOutcome">Outcomes</a>
 				</h4>
 			    </div>
-    
 			    <div id="collapseOutcome" class="panel-collapse collapse in">
 				<div class="panel-body">
 				    <?php							    
 					    // loop through all the outcomes
 					    $outcomeCount = 0;
 					    foreach ($outcomes as $outcome) :
-						$outcomeCount++;								
-				    ?>
-					<!-- display the counter with the outcome text -->
-					<p><?php echo $outcomeCount; ?>. <?php echo $outcome->getOutcomeText() ?></td></p>
-				    <?php
+						if ($outcomeCount == 0){
+						    $prevTitle = $outcome->getProgramName();
+						    echo $outcome->getProgramName(); 
+						}
+						if ($prevTitle != $outcome->getProgramName()){
+						    $prevTitle = $outcome->getProgramName();
+						    echo $outcome->getProgramName(); 
+						}
+						$outcomeCount++;
+						// create each outcome check box
+    				 	  	if ($outcome->getType() === '0'){
+						    // outcome is not currently in plan - leave checkbox empty
+					?>
+						    <p><input validate="true" type="checkbox" id="checkboxOutcomes<?php echo $outcomeCount ?>"
+						     name="checkboxOutcomes<?php echo $outcomeCount ?>"
+						     value="<?php echo $outcome->getOutcomeId() ?>">
+					<?php		
+					   	}
+						else{
+						    // outcome currently in plan - mark check box
+					?>
+						    <p><input validate="true" type="checkbox" id="checkboxOutcomes<?php echo $outcomeCount ?>"
+						     name="checkboxOutcomes<?php echo $outcomeCount ?>"
+						     value="<?php echo $outcome->getOutcomeId() ?>" checked>
+					<?php		
+					   	}
+					?>     
+					      <!-- add the counter with the outcome text to the row -->
+					      <?php echo $outcomeCount; ?>. <?php echo $outcome->getOutcomeText() ?></td>
+  	      				   </p>
+					<?php
 					    endforeach;
-				    ?>
+					?>
+	      		            <input type="hidden" name="outcomeCount" id="outcomeCount" value="<?php echo $outcomeCount ?>">
+
 				</div>
 			    </div>
 			</div>
     
-			<!-- listing of all the database attributes that can be updated -->
 			<div class="panel panel-success">
 			    <div class="panel-heading">
 				<h4 class="panel-title">
