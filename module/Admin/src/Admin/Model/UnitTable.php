@@ -110,7 +110,7 @@ class UnitTable extends AbstractTableGateway
                            ->from('assessor_privs')
                            ->columns(array('unit_id'))
                            ->group('unit_id')
-                           ->having(array('count(*) < 2'))
+                           ->having(array('count(*) = 2'))
             ;
             $select = $sql->select()
                           ->from('units')

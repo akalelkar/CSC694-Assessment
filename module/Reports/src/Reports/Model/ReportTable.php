@@ -164,8 +164,6 @@ class ReportTable extends AbstractTableGateway
                                 'draft_flag' => $status,
                                 'created_ts' => $now,
                                 'created_user' => $user,
-                                'modified_user' => $user,
-                                'modified_ts' => $now,
                                 'active_flag' => '1');
         
         // If status is 0, this is not a draft and merge submitted user, ts and draft flag values

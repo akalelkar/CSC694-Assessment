@@ -7,20 +7,20 @@ $this->headTitle($title);
     <center><h2><?php echo $this->escapeHtml($title); ?></h2></center>
 </div>
 
-<div class="col-md-3 program-form-wrapper">
-    <h3>Add a New Unit</h3>
+<div class="col-md-2 program-form-wrapper">
+    <h3>Add New Unit</h3>
     <div class="program-form" style="overflow:hidden;">
         <?php echo $this->partial('admin/program/addunit.phtml',array('unitform'=>$this->unitform));?>
     </div>
 </div>
 <div class="col-md-3 program-form-wrapper">
-    <h3>Add a New Program</h3>
+    <h3>Add New Program</h3>
     <div class="program-form" style="overflow:hidden;">
         <?php echo $this->partial('admin/program/addprogram.phtml',array('programform'=>$this->programform));?>
     </div>
 </div>
 
-<div class="col-md-6">
+<div class="col-md-7">
     <h3>Modify Existing Programs</h3>
     <div class="table-responsive">
             <colgroup>
