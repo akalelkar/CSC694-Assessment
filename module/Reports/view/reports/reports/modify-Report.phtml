@@ -75,7 +75,7 @@ if(!$results){
 			     </div>
 			    <div id="collapseFour" class="panel-collapse collapse">
 				<div class="panel-body">
-					    <?php echo $this->formRow($form->get('results')->setAttribute('value', $report[0]['results']))?>
+				    <?php echo $this->formRow($form->get('results')->setAttribute('value', $report[0]['results']))?>
 				</div>
 			    </div>
 			    <div class="panel-heading">
@@ -87,7 +87,7 @@ if(!$results){
 			    </div>
 			    <div id="collapseFive" class="panel-collapse collapse">
 			       <div class="panel-body">
-			  <?php echo $this->formRow($form->get('conclusions')->setAttribute('value', $report[0]['conclusions']))?>    
+				  <?php echo $this->formRow($form->get('conclusions')->setAttribute('value', $report[0]['conclusions']))?>    
 			       </div>
 			    </div>
 			    
@@ -100,23 +100,10 @@ if(!$results){
 			    </div>
 			    <div id="collapseSix" class="panel-collapse collapse">
 			       <div class="panel-body">
-			  <?php echo $this->formRow($form->get('actions')->setAttribute('value', $report[0]['actions']))?>    
+				  <?php echo $this->formRow($form->get('actions')->setAttribute('value', $report[0]['actions']))?>    
 			       </div>
 			    </div>
-			    
-			     <div id="collapseSeven" class="panel-collapse collapse">
-				<div class="panel-body">
-			      <?php
-				  
-				  $row = $form->get('actions');
-				  $row->setAttribute('value', $report[0]['feedback_text']);
-				  $row->setAttribute('readonly', $read);
-				  echo $this->formRow($row);
-						   
-				  
-				  ?>   
-				</div>
-			    </div>
+			 
 			</div>
 		    </div>
 		</div>

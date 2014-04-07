@@ -11,6 +11,7 @@ use Zend\Db\Sql\Where;
 use Zend\Db\Sql\Update;
 use Zend\Db\Sql\Expression;
 use Plans\Model\Entity;
+use Zend\session\container;
 
 class DatabaseSql extends AbstractTableGateway
 {
@@ -122,11 +123,17 @@ class DatabaseSql extends AbstractTableGateway
      */
     public function insertPlanOutcome($outcomeId, $planId)
     {
-var_dump("inserting");
-        $sql = new Sql($this->adapter);
-	$data = array('outcome_id' => $outcomeId,
-		      'plan_id' => $planId);
+        $namespace = new Container('user');
 
+	$sql = new Sql($this->adapter);
+
+	$data = array('outcome_id' => $outcomeId,
+		      'plan_id' => $planId,
+		      'created_ts' => date('Y-m-d h:i:s', time()),
+		      'created_user' => $namespace->userID,
+		      'active_flag' => 1,
+		);
+	
 	$insert = $sql->insert('plan_outcomes');
 	$insert->values($data);		    
     
@@ -138,20 +145,22 @@ var_dump("inserting");
     /**
      * Inactivate outcome in plan if exists
      */
-    public function removePlanOutcome($outcomeId, $planId)
+    public function inactivatePlanOutcome($outcomeId, $planId)
     {
-var_dump("removing");
+    
 	$sql = new Sql($this->adapter);
 	$namespace = new Container('user');
         
-	$data = array();
-        $data['deactivated_ts'] = date('Y-m-d h:i:s', time());
-        $data['deactivated_user'] = $namespace->userID;
-        $data['active_flag'] = 0;
-        
-	$update = $sql->update($data, array('outcome_id' => $outcomeId,
-				   'plan_id' => $planId));
-	
+	$data = array('deactivated_ts' => date('Y-m-d h:i:s', time()),
+		      'deactivated_user' => $namespace->userID,
+		      'active_flag' => 0);
+     
+	$update = $sql->update()
+		    ->table(plan_outcomes)
+		    ->set($data)
+		    ->where(array('outcome_id' => $outcomeId,
+	   			  'plan_id' => $planId))
+	;
         $statement = $sql->prepareStatementForSqlObject($update);
         $statement->execute();
     }
@@ -213,14 +222,35 @@ var_dump("removing");
         $statement->execute();
     }
     
-    
-/********** All update queries *********/    
-
     /**
-     * Update a tuple on the plans table by id
+     * Update a tuple on the plans table by id and corresponding plan_outcomes
      */
-    public function updatePlanById($id,$metaFlag,$metaDescription,$assessmentMethod,$population,$sampleSize,$assessmentDate,$cost,$fundingFlag,$analysisType,$administrator,$analysisMethod,$scope,$feedbackText,$feedbackFlag,$draftFlag,$userId,$dbDraftFlag)
+    public function updatePlanById($newoutcomeIds, $oldoutcomeIds, $planId, $metaFlag,$metaDescription,
+				   $assessmentMethod,$population,$sampleSize,$assessmentDate,$cost,
+				   $fundingFlag,$analysisType,$administrator,$analysisMethod,$scope,
+				   $feedbackText,$feedbackFlag,$draftFlag,$userId,$dbDraftFlag)
     {
+	// create an atomic database transaction to update plan and possibly report
+	$connection = $this->adapter->getDriver()->getConnection();
+	$connection->beginTransaction();
+
+	// add new outcomes to plan
+	foreach ($newoutcomeIds as $outcomeId) :
+	   // add if outcome does not already exists
+	   if ($this->isOutcomeInPlan($outcomeId, $planId) == 0){
+	       // insert into the outcome table
+	       $this->insertPlanOutcome($outcomeId, $planId);
+	   }
+	endforeach;
+	
+	// remove old outcomes from plan
+	foreach ($oldoutcomeIds as $outcomeId) :
+	   // remove if outcomes exists in plan
+	   if ($this->isOutcomeInPlan($outcomeId, $planId) == 1){
+	       // set plan outcome inactive
+	       $this->inactivatePlanOutcome($outcomeId, $planId);
+	   }
+	endforeach;
 	// database timestamp format    
         //"1970-01-01 00:00:01";
 	
@@ -257,7 +287,7 @@ var_dump("removing");
 				      'feedback' => trim($feedbackFlag),
 				      'draft_flag' => trim($draftFlag),
 				))
-			->where(array('id' => $id))
+			->where(array('id' => $planId))
 		    ;
 	}
 	else {
@@ -281,12 +311,46 @@ var_dump("removing");
 				      'feedback' => trim($feedbackFlag),
 				      'draft_flag' => trim($draftFlag),
 				))
-			->where(array('id' => $id))
+			->where(array('id' => $planId))
 		    ;	    
 	}
+	
+        $statement = $sql->prepareStatementForSqlObject($update);
+        $statement->execute();
+
+	// finish the transaction		
+	$connection->commit();
 		    
     }
 
+    
+    /**
+     * Update the feedback of a plan
+     */
+    public function updateFeedbackById($planId, $feedbackText,$feedbackFlag,$userId)
+    {
+	// create the sytem timestamp
+	$currentTimestamp = date("Y-m-d H:i:s", time());
+	
+	$sql = new Sql($this->adapter);
+	
+  	   
+	$update = $sql->update()
+		      ->table('plans')
+		      ->set(array('modified_ts' => $currentTimestamp,
+				  'modified_user' => $userId,				    
+				  'feedback_text' => trim($feedbackText),
+				  'feedback' => trim($feedbackFlag),
+			    ))
+		    ->where(array('id' => $planId))
+		;
+   	
+        $statement = $sql->prepareStatementForSqlObject($update);
+        $statement->execute();
+
+		    
+    }
+    
     public function insertMetaPlan($metaDescription, $year, $draftFlag, $userID, $programsArray){
 	
 	$sql = new Sql($this->adapter);
@@ -522,11 +586,45 @@ var_dump("removing");
         return $row;
     }
     
-    
     /**
      * Get all the outcomes by plan id
      */
     public function getOutcomesByPlanId($planId, $names)
+    {
+	$planIdExp = new \Zend\Db\Sql\Predicate\Expression($planId);
+    
+        $sql = new Sql($this->adapter);
+	
+	// select outcomes in plan
+	$select1 = $sql->select()
+		      ->columns(array('outcomeId' => 'id', 'outcomeText' => 'outcome_text',
+				      'planId' => $planIdExp))
+		      ->from('outcomes')
+		      ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
+		      ->join('plan_outcomes', 'plan_outcomes.outcome_id = outcomes.id', array())
+		      ->where(array('outcomes.active_flag' => 1,
+				    'plan_outcomes.active_flag' => 1,
+			            'plan_outcomes.plan_id' => $planId))
+		      ->group (array('outcomeId' => new Expression('outcomes.id'),
+				     'planId',
+				     'outcomeText' => new Expression('outcomes.outcome_text'),
+				      ))
+	;
+	$statement = $sql->prepareStatementForSqlObject($select1);
+        $resultSet = $statement->execute();
+
+	//create an array of entity objects to store the database results
+	$entities = array();
+        foreach ($resultSet as $row) {
+            $entity = new Entity\Outcome($row['outcomeId'],$row['outcomeText'],"",$row['planId'],"");
+            $entities[] = $entity;
+        }
+        return $entities;
+    }
+    /**
+     * Get all the outcomes that could be used by that plan id
+     */
+    public function getOutcomesByPlanIdForModify($planId, $names)
     {
 	$notIn = new \Zend\Db\Sql\Predicate\Expression("'0'");
         $in = new \Zend\Db\Sql\Predicate\Expression("'1'");
@@ -544,6 +642,10 @@ var_dump("removing");
 		      ->where(array('programs.name' => $names,
 				    'outcomes.active_flag' => 1,
 			            'plan_outcomes.plan_id' => $planId))
+		      ->group (array('outcomeId' => new Expression('outcomes.id'),
+				     'planId',
+				     'outcomeText' => new Expression('outcomes.outcome_text'),
+				      ))
 	;	      
 		      
 	// select outcomes not in plan but match programs chosen
@@ -559,7 +661,7 @@ var_dump("removing");
 						     ->from('outcomes')
 						     ->join('programs', 'programs.id = outcomes.program_id', array())
 						     ->join('plan_outcomes', 'plan_outcomes.outcome_id = outcomes.id', array())
-						     ->where(array('plan_outcomes.plan_id' => $planId, 'outcomes.active_flag' => 1))
+						     ->where(array('plan_outcomes.plan_id' => $planId, 'plan_outcomes.active_flag' => 1))
 				        ))
 		      ->group (array('outcomeId' => new Expression('outcomes.id'),
 				     'planId',
@@ -600,6 +702,8 @@ var_dump("removing");
 	    ->and
 	    ->equalTo('plans.year', $year)
 	    ->and
+    	    ->equalTo('plan_outcomes.active_flag', 1)
+	    ->and
     	    ->equalTo('plans.active_flag', 1)
 	    ->and
 	    ->equalTo('plans.meta_flag', 0)
@@ -636,6 +740,8 @@ var_dump("removing");
 	    ->equalTo('plans.year', $year)
 	    ->and
 	    ->equalTo('plans.meta_flag', 0)
+	    ->and
+    	    ->equalTo('plan_outcomes.active_flag', 1)
 	    ->and
     	    ->equalTo('plans.active_flag', 1);
 	    
@@ -706,6 +812,8 @@ var_dump("removing");
 	    ->and
 	    ->equalTo('plans.year', $year)
 	    ->and
+	    ->equalTo('plan_outcomes.active_flag', 1)
+	    ->and
     	    ->equalTo('plans.active_flag', 1)
 	    ->and
 	    ->nest()
@@ -721,6 +829,8 @@ var_dump("removing");
 	    ->in('programs.name', $names)
 	    ->and
 	    ->equalTo('plans.year', $year)
+	    ->and
+	    ->equalTo('plan_outcomes.active_flag', 1)
 	    ->and
 	    ->equalTo('plans.active_flag', 1);
     }
@@ -762,13 +872,12 @@ var_dump("removing");
      */
     public function getUniqueOutcomes($unitId, $names)
     {
-                
         $sql = new Sql($this->adapter);
         $select = $sql->select()
-                      ->columns(array('program' => new Expression('programs.name'),
-                                      'outcomeId' => new Expression('outcomes.id'),
+                      ->columns(array('outcomeId' => new Expression('outcomes.id'),
 				      'outcomeText' => new Expression('outcomes.outcome_text'),
-				      ))
+	                              'programName' => new Expression('programs.name'),
+                                      ))
                       ->from('units')
 		      ->join('programs', 'programs.unit_id = units.id')
 		      ->join('outcomes', 'outcomes.program_id = programs.id')
@@ -787,7 +896,7 @@ var_dump("removing");
 	$entities = array();
         foreach ($resultSet as $row) {
 	    
-            $entity = new Entity\Outcome($row['outcomeId'], 0, $row['outcomeText'], '', '', $row['program']);
+            $entity = new Entity\Outcome($row['outcomeId'], $row['outcomeText'], '', 0, $row['programName']);
             $entities[] = $entity;
         }
         return $entities;

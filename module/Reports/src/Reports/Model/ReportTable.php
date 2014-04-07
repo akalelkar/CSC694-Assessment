@@ -40,6 +40,7 @@ class ReportTable extends AbstractTableGateway
                         ->where(array("p.id = $planId",
                                       "r.active_flag = 1",
                                       "pr.active_flag = 1",
+                                      "po.active_flag = 1",
                                       "p.meta_flag = 0"))
         ;
                 
@@ -64,11 +65,35 @@ class ReportTable extends AbstractTableGateway
         return $result;
     }
     
+    // Updates Feedback Information
+    public function updateFeedback($planid, $user, $feedbackText, $feedback){
+        
+        // Get time for timestamps
+        $now = date("Y-m-d H:i:s", time());
+
+        // Add values to array that we use no matter what status
+        $values = array('modified_user' => $user,
+                            'modified_ts' => $now,
+                            'feedback_text' => $feedbackText,
+                            'feedback' => $feedback);
+        
+        // Formulate update
+        $sql = new Sql($this->adapter);
+        $update = $sql->update()
+                ->table('reports')
+                ->set($values)
+                ->where("id = $planid");
+
+        // Execute this bad boy
+        $statement = $sql->prepareStatementForSqlObject($update);
+        $statement->execute();
+    }
+    
     // Takes all report data from form needed for updating a report
     // All arguments match column names in report table except
     // $status - this is 0 for submitted, 1 for save draft, 2 for delete draft, 3 for delete submitted report
     // $user - user ID to be inserted where appropriate
-    public function updateReport($id, $population, $results, $conclusions, $actions, $status, $user, $feedbackText, $feedback){
+    public function updateReport($id, $population, $results, $conclusions, $actions, $status, $user){
         
         // Get time for timestamps
         $now = date("Y-m-d H:i:s", time());
@@ -80,8 +105,7 @@ class ReportTable extends AbstractTableGateway
                             'actions' => $actions,
                             'modified_user' => $user,
                             'modified_ts' => $now,
-                            'feedback_text' => $feedbackText,
-                            'feedback' => $feedback);
+        );
         
         if ($status == 2){ // we want to physically delete the draft report
             $this->deleteReport($id);
@@ -119,10 +143,10 @@ class ReportTable extends AbstractTableGateway
         $statement = $sql->prepareStatementForSqlObject($delete);
         $statement->execute();
     }
+    
     // Inserts a new report into the DB
     // All arguments match column names except
     // $id - plan id report is associated to
-    // $status - here is draft_flag, 0 or 1
     // $user - user Id of user adding report
     public function addReport($id, $population, $results, $conclusions, $actions, $status, $user){
         
@@ -142,12 +166,14 @@ class ReportTable extends AbstractTableGateway
                                 'created_user' => $user,
                                 'modified_user' => $user,
                                 'modified_ts' => $now,
-                                'feedback' => '1',
                                 'active_flag' => '1');
         
-        // If status is 0, this is not a draft and merge submitted user and ts to values
+        // If status is 0, this is not a draft and merge submitted user, ts and draft flag values
         if($status == 0){
-            $values = array_merge(array('submitted_ts' => $now, 'submitted_user' => $user), $values);
+            $values = array_merge(array('submitted_ts' => $now, 'submitted_user' => $user, 'draft_flag' => 0), $values);
+        }
+        else{
+            $values = array_merge(array('draft_flag' => 1), $values);
         }
         
         // Create insert statement
@@ -206,6 +232,7 @@ class ReportTable extends AbstractTableGateway
                       ->join(array('pr' => 'programs'),'o.program_id = pr.id',array('unit_id', 'name'))
                       ->where(array("p.id = $planId",
                               "pr.active_flag = 1",
+                              "po.active_flag = 1",
                               "p.draft_flag = 0",
                               "p.meta_flag = 0"))
         ;
@@ -242,7 +269,7 @@ class ReportTable extends AbstractTableGateway
         $data = json_decode($programJson, true);
 	$programs = $data['programs'];
         $year = $data['year'];
-     
+        
         // get plans with outcomes
         $select = $sql->select()
                       ->from(array('p' => 'plans'))
@@ -254,12 +281,17 @@ class ReportTable extends AbstractTableGateway
                             array('text' => 'outcome_text'))
                       ->join(array('pr' => 'programs'),
                              'o.program_id = pr.id',
-                             array('unit_id', 'name'))
+                             array('unit_id', 'name'),
+                             'left'
+                             )
                       ->where(array('p.year' => $year,
-                                      'pr.id' => $programs,
+                                     'pr.id' => $programs,
                                       'pr.active_flag = 1',
+                                      'po.active_flag = 1',
                                       "p.draft_flag = 0",
                                       'p.meta_flag = 0',
+                                      'p.active_flag = 1',
+                                      
                                    )
                                 )
                       ->order('p.id')

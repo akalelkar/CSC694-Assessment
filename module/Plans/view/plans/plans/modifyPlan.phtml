@@ -94,19 +94,22 @@
 						    // outcome is not currently in plan - leave checkbox empty
 					?>
 						    <p><input validate="true" type="checkbox" id="checkboxOutcomes<?php echo $outcomeCount ?>"
-						     name="checkboxOutcomes<?php echo $outcomeCount ?>"
-						     value="<?php echo $outcome->getOutcomeId() ?>">
+						     name="checkboxOutcomes<?php echo $outcomeCount ?>">
 					<?php		
 					   	}
 						else{
 						    // outcome currently in plan - mark check box
 					?>
 						    <p><input validate="true" type="checkbox" id="checkboxOutcomes<?php echo $outcomeCount ?>"
-						     name="checkboxOutcomes<?php echo $outcomeCount ?>"
-						     value="<?php echo $outcome->getOutcomeId() ?>" checked>
+						     name="checkboxOutcomes<?php echo $outcomeCount ?>" checked>
 					<?php		
 					   	}
-					?>     
+					?>
+					       <!-- create hidden id for each checkbox - used in modify to handle toggle of checkboxes -->
+	    				       <input type="hidden" name="checkboxOutcomesID<?php echo $outcomeCount ?>"
+								    id="checkboxOutcomesID<?php echo $outcomeCount ?>"
+								    value="<?php echo $outcome->getOutcomeId() ?>">
+		
 					      <!-- add the counter with the outcome text to the row -->
 					      <?php echo $outcomeCount; ?>. <?php echo $outcome->getOutcomeText() ?></td>
   	      				   </p>

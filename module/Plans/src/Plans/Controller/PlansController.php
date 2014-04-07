@@ -335,6 +335,7 @@ class PlansController extends AbstractActionController
          $this->getDatabaseData()->updatePlanActiveByPlanId($planId, $userID);
          
       }
+
       // create a partial view to send back to the caller
       $partialView = new ViewModel(array(
             'action' => $action,
@@ -519,6 +520,7 @@ class PlansController extends AbstractActionController
       // the outcomes array is an array of entity arrays
       foreach ($programs as $program) :
          $dbData = $this->getDatabaseData()->getUniqueOutcomes($unit, $program);
+         var_dump($dbData);
          $outcomes[] = $dbData;
       endforeach;
 
@@ -653,7 +655,7 @@ class PlansController extends AbstractActionController
          'unit' => $unit,
          'programs' => $programs,
          'year' => $year,
-         'outcomes' => $this->getDatabaseData()->getOutcomesByPlanId($planId, $programs),
+         'outcomes' => $this->getDatabaseData()->getOutcomesByPlanIdForModify($planId, $programs),
          'plan' => $this->getDatabaseData()->getPlanByPlanId($planId),
          'planDocuments' => $this->getDatabaseData()->getPlanDocumentsByPlanId($planId),
          'role' => $role,
@@ -703,6 +705,7 @@ class PlansController extends AbstractActionController
    
    /**
     * Used to update the plan in the database and upload the files to the server
+    * 
     *
     * Return is a redirect back to the main page
     */
@@ -729,38 +732,22 @@ class PlansController extends AbstractActionController
       $planId = trim($request->getPost('planId'));
       
       // modify outcomes - activate new, inactivate old
+      $newoutcomeIds = array();
+      $oldoutcomeIds = array();
       $outcomeCount = $request->getPost('outcomeCount');
-      $outcomesSelected = 0;
+      
       for ($x = 1; $x <= $outcomeCount; $x++)
       {
-         $checkboxName = "checkboxOutcomes" . $x;
-         $checkboxValue = $request->getPost($checkboxName);
-            
-         if ($checkboxValue != null) {
-            $newoutcomeIds[] = $checkboxValue;
+         $checkboxID = $request->getPost("checkboxOutcomesID" . $x);
+         $checkedValue = $request->getPost("checkboxOutcomes" . $x);   
+         if ($checkedValue != null) {
+            $newoutcomeIds[] = $checkboxID;
          }
          else{
-            $oldoutcomeIds[] = $checkboxValue;
+            $oldoutcomeIds[] = $checkboxID;
          }
       }
-      // add new outcomes to plan
-      foreach ($newoutcomeIds as $outcomeId) :
-         // add if outcome does not already exists
-         if ($this->getDatabaseData()->isOutcomeInPlan($planId, $outcomeId) == 0){
-             // insert into the outcome table
-             $this->getDatabaseData()->insertPlanOutcome($outcomeId, $planId);
-         }
-      endforeach;
-      
-      // remove old outcomes from plan
-      foreach ($oldoutcomeIds as $outcomeId) :
-         // remove if outcomes exists in plan
-         if ($this->getDatabaseData()->isOutcomeInPlan($planId, $outcomeId) == 1){
-             // insert into the outcome table
-             $this->getDatabaseData()->removePlanOutcome($outcomeId, $planId);
-         }
-      endforeach;
-      
+
       $metaDescription = trim($request->getPost('textMetaDescription'));
       if ($metaDescription != NULL){
          $metaFlag = 1;
@@ -782,7 +769,7 @@ class PlansController extends AbstractActionController
       $feedbackFlag = trim($request->getPost('feedbackFlag'));
       $dbDraftFlag = trim($request->getPost('dbDraftFlag'));
       //update the database
-      $this->getDatabaseData()->updatePlanById($planId,$metaFlag,$metaDescription,$assessmentMethod,$population,$sampleSize,$assessmentDate,$cost,$fundingFlag,$analysisType,$administrator,$analysisMethod,$scope,$feedback,$feedbackFlag,$draftFlag,$userID,$dbDraftFlag);
+      $this->getDatabaseData()->updatePlanById($newoutcomeIds, $oldoutcomeIds, $planId,$metaFlag,$metaDescription,$assessmentMethod,$population,$sampleSize,$assessmentDate,$cost,$fundingFlag,$analysisType,$administrator,$analysisMethod,$scope,$feedback,$feedbackFlag,$draftFlag,$userID,$dbDraftFlag);
 
       // upload files and save file name in DB
       $this->uploadFiles($request, $planId);
@@ -790,7 +777,39 @@ class PlansController extends AbstractActionController
        return $this->redirect()->toRoute('plans');
    }
 
-   
+   /**
+    * Used to update the feedback only in the plan 
+    *
+    * 
+    * Return is a redirect back to the main page
+    */
+   public function updatefeedbackAction()
+   {
+      
+      // get the session variables
+      $namespace = new Container('user');
+      $userID = $namespace->userID;
+      
+      // form for updating the plan
+      $form = new Plan('updatePlan');
+    
+      // get the type of request
+      $request = $this->getRequest();
+
+      // get the form data
+      $button = $request->getPost('formSubmitPlan'); // identify which button "Save" or "Draft" was pressed             
+
+      // get all the data from the form
+      $planId = trim($request->getPost('planId'));
+      
+      $feedback = trim($request->getPost('textFeedback'));
+      $feedbackFlag = trim($request->getPost('feedbackFlag'));
+      //update the database
+      $this->getDatabaseData()->updateFeedbackById($planId,$feedback,$feedbackFlag,$userID);
+
+       return $this->redirect()->toRoute('plans');
+   }
+
    /********** private functions supporting the controller **********/
 
    /**

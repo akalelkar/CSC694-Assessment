@@ -110,8 +110,8 @@ class ReportsController extends AbstractActionController
       $jsonData = $this->getRequest()->getContent();
       
       // Get the plans that have outcomes
-      $results = $this->getReports($jsonData)->getPlansWithOutcomes($jsonData);
-      $results2 = $this->getReports($jsonData)->getPlansWithMeta($jsonData);
+      $results = $this->getReports()->getPlansWithOutcomes($jsonData);
+      $results2 = $this->getReports()->getPlansWithMeta($jsonData);
       
       // if no data display page with appropriate message
       if (count($results) == 0 && count($results2) == 0){
@@ -358,7 +358,6 @@ class ReportsController extends AbstractActionController
    // wants to send it to the database
    public function updateReportAction()
    {
-      
       // get the session variables
       $namespace = new Container('user');
       $userID = $namespace->userID;
@@ -374,10 +373,9 @@ class ReportsController extends AbstractActionController
                   $this->params()->fromPost('conclusions'),
                   $this->params()->fromPost('actions'),
                   $this->params()->fromPost('status'),
-                  $userID,
-                  $this->params()->fromPost('feedbackText'),
-                  $this->params()->fromPost('feedbackFlag'));
-      
+                  $userID
+                 );
+
       $ctr = 0;
       $files = array();
       
@@ -422,8 +420,25 @@ class ReportsController extends AbstractActionController
    }
    // This is called from provide-Feedback.phtml for inserting feedback into existing report
    
-   public function addFeedback(){
+   public function addFeedbackAction(){
       
+      // get the session variables
+      $namespace = new Container('user');
+      $userID = $namespace->userID;
+      
+      // Call method to update feedback
+      // This receives a status of 0 for submit, 1 for draft, 2 for delete draft, 3 for delete report
+
+      // ReportTable object handles the difference
+      $this->getServiceLocator()->get('ReportTable')
+               ->updateFeedback($this->params()->fromPost('id'),
+                  $userID,
+                  $this->params()->fromPost('feedbackText'),
+                  $this->params()->fromPost('feedbackFlag'));
+      
+
+      // Redirect user to index if successful
+      $this->redirect()->toRoute('index');
    }
    // This is called from addReport view for inserting new report
    public function addNewReportAction()
