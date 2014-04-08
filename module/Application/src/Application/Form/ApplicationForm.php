@@ -6,8 +6,8 @@ use Zend\Form\Form;
 
 class ApplicationForm extends Form
 {
-    public function __construct($url, $name = null)
-    {
+    public function __construct($url, $admin)
+    { 
         // we want to ignore the name passed
         parent::__construct('application');
         $this->setAttribute('method', 'post');
@@ -42,15 +42,18 @@ class ApplicationForm extends Form
                 'class' => 'btn btn-primary btn-lg',
             ),
         ));
-        
-        $this->add(array(
-            'name' => 'module',
-            'attributes' => array(
-                'type' => 'submit',
-                'value' => 'Admin',
-                'id' => 'submitbutton',
-                'class' => 'btn btn-primary btn-lg',
-            ),
-        ));
+       
+        if ($admin==1){
+          
+            $this->add(array(
+                'name' => 'module',
+                'attributes' => array(
+                    'type' => 'submit',
+                    'value' => 'Admin',
+                    'id' => 'submitbutton',
+                    'class' => 'btn btn-primary btn-lg',
+                ),
+            ));   
+        }
     }
 }

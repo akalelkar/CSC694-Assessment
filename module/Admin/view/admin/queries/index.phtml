@@ -110,13 +110,13 @@ dd {
 
     <!--column 2 - this holds the partial-->
     <div class="col-md-8">
-        <div class="table-responsive">
+        <!-- create a print button -->
+	<button id="printbutton" type="button" class="btn btn-primary noprint pull-right" onclick="printPage()">Print &raquo;</button>&nbsp;  <!--window.print()-->
+	<div class="table-responsive">
             <table class="table table-bordered table-striped" id="resultsTable" name="resultsTable">
             </table>
         </div> <!-- end of table-responsive -->
-        <!-- create a print button -->
-	<button id="printbutton" type="button" class="btn btn-primary noprint" onclick="printPage()">Print &raquo;</button>&nbsp;  <!--window.print()-->
-			  
+        		  
     </div> <!-- end of col-md-8--> 
   </div>
 </div>
