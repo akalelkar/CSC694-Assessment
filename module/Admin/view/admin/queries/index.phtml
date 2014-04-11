@@ -104,7 +104,14 @@ dd {
              <button type="button" class="btn-primary" id="query9">Go</button>
             </dd>
         </dl>
-         
+        <dl>
+            <dt>Query 10:
+            </dt>
+            <dd>
+             Show programs that are missing learning outcomes.
+             <button type="button" class="btn-primary" id="query10">Go</button>
+            </dd>
+        </dl> 
     </div><!--close column-->
 
 
@@ -382,6 +389,17 @@ $(document).on('click', '#query9', function () {
     ajaxCall(urlform);
 });
 
+$(document).on('click', '#query10', function () {
+    // clear rhs of page
+    $('#resultsTable').html("");
+    
+    // reset all drop downs
+    resetDropDowns();
+    
+    // create url for redirect url(route, array(controller, action))
+    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery10')); ?>";
+    ajaxCall(urlform);
+});
 
 function ajaxCall(urlform){
             // asynchronous ajax code to populate program/degree selector

@@ -203,7 +203,7 @@ class QueriesController extends AbstractActionController
       return $partialView;
    }
    
-   // Show programs that have added or modified a report for a previous year
+   // Show programs that have added or modified a report for the previous year
    public function getQuery7Action(){
       
       $resultsarray = '';
@@ -214,7 +214,7 @@ class QueriesController extends AbstractActionController
       $currentYear = date('Y', time());
       
       // determine current school year July 1 - June 31
-      // year in plans table is spring term year (2013-2014 school year is entered as 2014)
+      // year in plans table is winter/spring term year (2013-2014 school year is entered as 2014)
       if ($currentMonth > 6){
          $currentYear = $currentYear + 1;
       }
@@ -274,6 +274,32 @@ class QueriesController extends AbstractActionController
       
       $partialView = new ViewModel(array('querytitle' => 'Programs That Changed Assessors For ' . $fromDate,
                                          'programs' => $resultsarray));
+      $partialView->setTerminal(true);
+      return $partialView;
+   }
+
+   // Show programs that have not yet submitted learning outcomes
+   public function getQuery10Action(){
+      
+      $resultsarray = '';
+      
+      // get year from route
+      $year = $this->params()->fromRoute('id', 0);
+      
+      $results = $this->getAdminQueries()->getProgramsMissingOutcomes();
+      
+      // iterate over database results forming a php array
+      foreach ($results as $result){
+          $resultsarray[] = $result;
+      }
+      $totalDisplayed = $results->count();
+      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount();
+
+      $partialView = new ViewModel(array('querytitle' => 'Programs Missing Learning Outcomes ',
+                                         'programs' => $resultsarray,
+                                         'totalDisplayed' => $totalDisplayed,
+                                         'totalPrograms' => $totalPrograms));
+      
       $partialView->setTerminal(true);
       return $partialView;
    }

@@ -25,7 +25,26 @@ class Queries extends AbstractTableGateway
     {
         $sql = new Sql($this->adapter);
         
-        // get programs that have a plan
+        // The following dates are needed since programs are created/deacctivated at various times.
+        // create date to compare created/deactivated to
+        // school year is July 1 - June 31
+        $startDate = $year-1 . '-07-01';
+        $endDate = $year . '-06-31';
+        
+        // create where clause to handle the date test
+        $whereDates = new \Zend\Db\Sql\Where();
+        $whereDates	
+	    //->greaterThanOrEqualTo(new \Zend\Db\Sql\Expression(date('programs.created_ts'), $startDate))
+	    ->greaterThanOrEqualTo('programs.created_ts', $startDate)
+	    ->and
+	    ->nest()
+	    //->lessThanOrEqualTo(new \Zend\Db\Sql\Expression(date('programs.deactivated_ts'), $startDate))
+	    ->lessThanOrEqualTo('programs.deactivated_ts', $startDate)
+	    ->or
+	    ->isNull('programs.deactivated_ts')
+	    ->unnest();
+        
+        // get programs that have a plan for the user selected year
         $select1 = $sql->select()
                       ->from('programs')
                       ->columns(array('id'))
@@ -35,15 +54,18 @@ class Queries extends AbstractTableGateway
                    
         ;
         // get programs that are not in the set above
+        // but only consider those programs that were active during that school year
+        // NOTE:  the second where clause must come after the one built above or it won't
+        // be recognized - no idea why though - perhaps a bug in zf2?
         $select2 = $sql->select()
                        ->from('programs')
                        ->columns(array('id', 'unit_id', 'name'))
+                       //->where(array('programs.active_flag' => 1))
+                       ->where($whereDates)
                        ->where(new NotIn('programs.id', $select1))
-                       ->where(array('programs.active_flag' => 1))
                        ->order(array('unit_id'))
                    
         ;
-        
         $statement = $sql->prepareStatementForSqlObject($select2);
         $result = $statement->execute();
         
@@ -64,19 +86,52 @@ class Queries extends AbstractTableGateway
                             ->columns(array('plan_id'))
         ;
   
+        // The following dates are needed since programs are created/deacctivated at various times.
+        // create date to compare created/deactivated to
+        // school year is July 1 - June 31
+        $startDate = $year-1 . '-07-01';
+        $endDate = $year . '-06-31';
+        
+        // create where clause to handle the date test
+        $whereDates = new \Zend\Db\Sql\Where();
+        $whereDates	
+	    //->greaterThanOrEqualTo(new \Zend\Db\Sql\Expression(date('programs.created_ts'), $startDate))
+	    ->greaterThanOrEqualTo('programs.created_ts', $startDate)
+	    ->and
+	    ->nest()
+	    //->lessThanOrEqualTo(new \Zend\Db\Sql\Expression(date('programs.deactivated_ts'), $startDate))
+	    ->lessThanOrEqualTo('programs.deactivated_ts', $startDate)
+	    ->or
+	    ->isNull('programs.deactivated_ts')
+	    ->unnest();
+        
+        // get programs that have a plan for the user selected year
+        $select1 = $sql->select()
+                      ->from('programs')
+                      ->columns(array('id'))
+                      ->join('plan_programs', 'plan_programs.program_id = programs.id',array())
+                      ->join('plans', 'plans.id = plan_programs.plan_id',array())
+                      ->where(array('plans.year' => $year))
+                   
+        ;
+          
         // get programs that have a plan for the selected year but are not in above set
+        // but only consider those programs that were active during that school year
+        // NOTE:  the other where clauses must come after the one built above or it won't
+        // be recognized - no idea why though - perhaps a bug in zf2?
         $select = $sql->select()
                       ->from('programs')
                       ->columns(array('unit_id', 'name'))
                       ->join('plan_programs', 'plan_programs.program_id = programs.id',array())
                       ->join('plans', 'plans.id = plan_programs.plan_id',array('id'))
+                      ->where($whereDates)
                       ->where(array('plans.year' => $year))
-                      ->where(array('programs.active_flag' => 1))
+                    //  ->where(array('programs.active_flag' => 1))
                       ->where(new NotIn('plans.id', $reportsselect))
                       ->order(array('programs.id'))
                       
         ;
-        
+
         $statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
         
@@ -96,9 +151,10 @@ class Queries extends AbstractTableGateway
                       ->join('plans', 'plans.id = plan_programs.plan_id', array())
                       ->where(array('plans.year' => $year))
                       ->where(array('plans.meta_flag' => 1))
-                      ->where(array('programs.active_flag' => 1))
+                      //->where(array('programs.active_flag' => 1))
+                      // do not add test for active flag since the plan may have been active
+                      // during the year selected - if a plan exists, then it should be shown
                       ->order(array('programs.id'))
-                   
         ;
        
         $statement = $sql->prepareStatementForSqlObject($select);
@@ -112,7 +168,9 @@ class Queries extends AbstractTableGateway
     {
         $sql = new Sql($this->adapter);
         
-        // get programs requesting funding for plans 
+        // get programs requesting funding for plans
+        // this query doesn't care about active or inactive programs since the user
+        // will likely only care if funding was requested for that plan during that year
         $select = $sql->select()
                       ->from('programs')
                       ->columns(array('unit_id', 'name'))
@@ -149,6 +207,8 @@ class Queries extends AbstractTableGateway
         $fromDate = date('Y-m-d H:i:s', strtotime($fromDate));
         
         // get programs that deactivated outcomes since fromdate
+        // this query doesn't care about active programs just those that changed
+        // an outcome after the date
         $select1 = $sql->select()
                       ->from('programs')
                       ->columns(array('unit_id', 'name', 'type' => $deactivated))
@@ -189,7 +249,10 @@ class Queries extends AbstractTableGateway
     
         $previousYear = $currentYear - 1;
         $where = new Where();
+        
         // get programs that have changed a plan this year but plan year is previous year
+        // this query doesn't care about active/inactive programs since it is looking
+        // for specific data regarding a modified ts
         $select = $sql->select()
                       ->from('programs')
                       ->columns(array('unit_id', 'name'))
@@ -219,7 +282,9 @@ class Queries extends AbstractTableGateway
         $modified = new \Zend\Db\Sql\Predicate\Expression("'Modified'");
         
         // reports for current year should match  previous year's plan
-        // this query shows reports that were entered or modified that match a plan two year's ago
+        // this query shows reports that were entered or modified that match a plan two years ago
+        // this query doesn't care about active/inactive programs since it is looking
+        // for specific data per timestamps
         $previousYear = $currentYear - 2;
         $where = new Where();
          // get programs that have a created timestamp of this year but plan year is past two years
@@ -261,8 +326,7 @@ class Queries extends AbstractTableGateway
     public function getProgramsNeedingFeedback($year)
     {
         $sql = new Sql($this->adapter);
-        $where = new Where();
-        
+                
         // creates constants to display in queries - note use of quotes
         // this forces this to appear as string constant in select clause
         $plan = new \Zend\Db\Sql\Predicate\Expression("'Plan'");
@@ -270,6 +334,7 @@ class Queries extends AbstractTableGateway
     
          // get programs that have a plan missing feedback
          // make sure plan is not a draft and feedback is 0
+         // this query doesn't care about active flag since an added plan is only important
         $select1 = $sql->select()
                       ->from('programs')
                       ->columns(array('unit_id', 'name', 'type' => $plan))
@@ -366,6 +431,34 @@ class Queries extends AbstractTableGateway
       
         return $result;
     }   
+
+    // query 10
+    public function getProgramsMissingOutcomes()
+    {
+        $sql = new Sql($this->adapter);
+
+        $select1 = $sql->select()
+                       ->columns(array('program_id'))
+                       ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
+                       ->from('outcomes')
+                       ->where(array('active_flag' => 1))
+        ;       
+                       
+        
+        // get programs requesting funding for plans 
+        $select2 = $sql->select()
+                      ->from('programs')
+                      ->columns(array('unit_id', 'name'))
+                      ->where(array('programs.active_flag' => 1))
+                      ->where(new NotIn('programs.id', $select1))
+                      ->order(array('programs.id'))
+        ;
+        
+        $statement = $sql->prepareStatementForSqlObject($select2);
+        $result = $statement->execute();
+      
+        return $result;
+    }
     
     // gets active programs count
     public function getActiveProgramsCount()

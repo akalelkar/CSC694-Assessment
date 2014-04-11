@@ -6,7 +6,6 @@
  * @copyright Copyright (c) 2005-2013 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
-
 return array(
     'modules' => array(
         'Application',
@@ -14,9 +13,7 @@ return array(
         'Outcomes',
         'Plans',
         'Reports',
-        'Review',
-        'Mock',
-    ),
+     ),
     'module_listener_options' => array(
             'config_glob_paths'    => array(
                 'config/autoload/{,*.}{global,local}.php',

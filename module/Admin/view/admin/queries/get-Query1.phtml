@@ -1,6 +1,9 @@
 <!-- partial file to display results of query 1 -->
 
-    <caption><h4><?php echo $querytitle . ' (' . $totalDisplayed . ' out of ' . $totalPrograms . ')';  ?></h4></caption>
+    <caption><h4><?php echo $querytitle; ?></h4>
+             <h5><?php echo '(' . $totalDisplayed . ' missing, ' . ($totalPrograms-$totalDisplayed) .
+                            ' out of ' . $totalPrograms . ' submitted)'; ?></h5>
+    </caption>
     <tr>
          <th>Department</th>
          <th>Program</th>
