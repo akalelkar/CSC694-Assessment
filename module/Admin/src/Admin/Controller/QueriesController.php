@@ -69,7 +69,7 @@ class QueriesController extends AbstractActionController
           $resultsarray[] = $result;
       }
       $totalDisplayed = $results->count();
-      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount();
+      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount($year);
 
       $partialView = new ViewModel(array('querytitle' => 'Programs Missing Plans For ' . $year,
                                          'programs' => $resultsarray,
@@ -90,19 +90,28 @@ class QueriesController extends AbstractActionController
       // reports for year 2014 (school year 2013-2014) are for plans entered 2012-2013
       // need to subtract 1 from year to grab last year's plans
       $year = $year - 1;
-      $results = $this->getAdminQueries()->getProgramsMissingReportsForYear($year);
+      // Get a tuple for each report missing
+      $results = $this->getAdminQueries()->getMissingReportsForYear($year);
       
       // iterate over database results forming a php array
       foreach ($results as $result){
           $resultsarray[] = $result;
       }
-      
+      // get a tuple for each program missing a report - used to display counts to user
+      $totalMissingPrograms = $this->getAdminQueries()->getProgramsMissingReportsForYear($year)->count();
+      // get count of missing reports 
       $totalDisplayed = $results->count();
+      // get total number of active programs for year
+      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount($year);
+
+      // get total number of plans submitted for year
       $totalPlans = $this->getAdminQueries()->getPlansCountForYear($year);
       
       $partialView = new ViewModel(array('querytitle' => 'Programs Missing Reports For ' . $year,
                                          'programs' => $resultsarray,
                                          'totalDisplayed' => $totalDisplayed,
+                                         'totalMissingPrograms' => $totalMissingPrograms,
+                                         'totalPrograms' => $totalPrograms,
                                          'totalPlans' => $totalPlans));
       $partialView->setTerminal(true);
       return $partialView;
@@ -293,7 +302,7 @@ class QueriesController extends AbstractActionController
           $resultsarray[] = $result;
       }
       $totalDisplayed = $results->count();
-      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount();
+      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount($year);
 
       $partialView = new ViewModel(array('querytitle' => 'Programs Missing Learning Outcomes ',
                                          'programs' => $resultsarray,

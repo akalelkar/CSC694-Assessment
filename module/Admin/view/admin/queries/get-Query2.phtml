@@ -1,8 +1,10 @@
 <!-- partial file to display results of query 2 -->
 
      <caption><h4><?php echo $querytitle;?></h4>
-              <h5><?php echo '(' . $totalDisplayed . ' missing, ' . ($totalPlans-$totalDisplayed) .
-                            ' out of ' . $totalPlans . ' submitted)'; ?></h5>
+            <h5><?php echo '(' . $totalDisplayed . ' reports missing, ' . ($totalPlans-$totalDisplayed) .
+                            ' out of ' . $totalPlans . ' reports submitted)'; ?></h5>
+            <h5><?php echo '(' . $totalMissingPrograms . ' programs missing reports, ' . ($totalPrograms-$totalMissingPrograms) .
+                            ' out of ' . $totalPrograms . ' programs submitted reports)'; ?></h5>
      </caption>
      <tr>
          <th>Department</th>
