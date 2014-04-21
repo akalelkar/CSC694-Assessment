@@ -22,6 +22,7 @@ class LoginForm extends Form
             'options' => array(
                 'label' => 'User ID ',                
             ),
+          
         ));
         
         $this->add(array(

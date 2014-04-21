@@ -177,7 +177,7 @@ $(document).on('change', '#unit-menu', function () {
 $(document).on('change', '#prog-menu', function () {
     
     // startyear for dropdowns set in session namespace variables
-    var startyear = <?php echo $startyear ?>;
+    var startYear = <?php echo $startYear ?>;
 	    
     // create the list of years the user can select
     // identify today's date and adjust to the current school year
@@ -202,7 +202,7 @@ $(document).on('change', '#prog-menu', function () {
     }
 	    
     // set the complete number of years to display in the year selector 
-    var yearsToDisplay = year - startyear + 1; // add one since the last entry needs to be the (year before the low year) to the (low year)
+    var yearsToDisplay = year - startYear + 1; // add one since the last entry needs to be the (year before the low year) to the (low year)
 
     $('#year-menu').append('<option  data-hidden="true"></option>');
     for (var i = 0; i < yearsToDisplay; i++){	    
@@ -225,8 +225,8 @@ $(document).on('click', '#submitButton', function () {
 });
 
 $(document).on('click', '#draftButton', function () { 
-    var conf = confirm("You are saving a draft of the report");
-    
+    var conf = confirm("Caution! You are saving a draft not submitting a final report.");
+                    
     document.getElementById('status').value = 1;  //save draft
     document.getElementById('data').submit();  // calls action set in .phtml view
 });

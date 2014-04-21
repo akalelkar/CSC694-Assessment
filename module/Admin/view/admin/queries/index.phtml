@@ -138,7 +138,7 @@ $(document).ready(function () {
     // set years for year dropdowns
     var currentYear = new Date().getFullYear();
     // startyear for dropdowns set in session namespace variables
-    var startyear = <?php echo $startyear ?>;
+    var startYear = <?php echo $startYear ?>;
 	    
     // create the list of years the user can select
     // identify today's date and adjust to the current school year
@@ -160,7 +160,7 @@ $(document).ready(function () {
     }
 	    
     // set the complete number of years to display in the year selector 
-    var yearsToDisplay = year - startyear + 1; // add one since the last entry needs to be the (year before the low year) to the (low year)
+    var yearsToDisplay = year - startYear + 1; // add one since the last entry needs to be the (year before the low year) to the (low year)
 
     var resetyear = year;
     $('#q1year').append('<option  data-hidden="true"></option>');
@@ -429,7 +429,9 @@ function resetDropDowns(){
     $('select[name=q8year]').val(1);
     $('#dp5').val('');
     $('#dp9').val('');
-    // scrollTop: $("#topofpage").offset().top}, 0);
+    //$('html, body').animate((
+    //scrollTop: $("#topofpage").offset().top}, 0);
+    
     $(window).scrollTop($("#topofpage").offset().top);
     $('.selectpicker').selectpicker('refresh');
 }

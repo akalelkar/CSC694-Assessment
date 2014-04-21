@@ -151,6 +151,7 @@ class UserTable extends AbstractTableGateway
         
         // add privileges to appropriate table
         foreach ($privs as $priv){
+    var_dump($priv);
             // add privs to table
             $insert = $sql->insert()
                           ->into($table)

@@ -9,7 +9,7 @@
     $form->setAttribute('class', 'form-horizontal');
     $form->setAttribute('name', 'addPlan');
     $form->setAttribute('enctype', 'multipart/form-data');
-    $form->setAttribute('action', $this->url('plans',array('action'=>'insertplan')));
+    $form->setAttribute('action', $this->url('plans',array('action'=>'insertPlan')));
     $form->prepare();
 ?>
 	
@@ -285,7 +285,7 @@
 		</div> <!-- controls -->    
 
 		<!-- use partials to load the upload buttons -->
-		<?php echo $this->partial('plans/plans/plansUploadButtonPartial.phtml', array('form' => $form,)); ?>
+		<?php echo $this->partial('plans/plans/plans-upload-button-partial.phtml', array('form' => $form,)); ?>
 		    
 		<!-- create the save draft and submit buttons -->
 		<?php

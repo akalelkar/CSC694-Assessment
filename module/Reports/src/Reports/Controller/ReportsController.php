@@ -43,7 +43,7 @@ class ReportsController extends AbstractActionController
       $namespace = new Container('user');
       $userID = $namespace->userID;
       $role = $namespace->role;
-      $startyear = $namespace->startyear;
+      $startYear = $namespace->startYear;
       
       // Get select form for passing selected data
       $sl = $this->getServiceLocator();
@@ -59,21 +59,21 @@ class ReportsController extends AbstractActionController
          return new ViewModel(array(
              'useractions' => array('View'),
              'units' => $unitarray,
-             'startyear' => $startyear,
+             'startYear' => $startYear,
          ));
       }
       else if ($role == 1 or $role == 2) // liaison or admin
       {
          return new ViewModel(array(
             'useractions' => array('View', 'Add', 'Modify', 'Provide Feedback'),
-            'startyear' => $startyear,
+            'startYear' => $startYear,
             'role' => $role,
          ));
       }
       else{ // chair or assessor
          return new ViewModel(array(
             'useractions' => array('View', 'Add', 'Modify'),
-            'startyear' => $startyear,));
+            'startYear' => $startYear,));
       }
    }
 
@@ -148,7 +148,8 @@ class ReportsController extends AbstractActionController
    
    }
     
-   // Display addReport view
+   // Display addReport view - This is the view where the user enters the report data to add
+   // See addNewReportAction for the code that grabs the user entered data and adds the report
    public function addReportAction()
    {
       // Get plan id from post data
@@ -361,7 +362,7 @@ class ReportsController extends AbstractActionController
       // get the session variables
       $namespace = new Container('user');
       $userID = $namespace->userID;
-      
+    
       // Call method to update report, give arguments from post data
       // This receives a status of 0 for submit, 1 for draft, 2 for delete draft, 3 for delete report
 
@@ -418,14 +419,15 @@ class ReportsController extends AbstractActionController
       // Redirect user to index if successful
       $this->redirect()->toRoute('index');
    }
-   // This is called from provide-Feedback.phtml for inserting feedback into existing report
    
-   public function addFeedbackAction(){
+   
+   // This is called from provide-Feedback.phtml for inserting feedback into existing report
+      public function addFeedbackAction(){
       
       // get the session variables
       $namespace = new Container('user');
       $userID = $namespace->userID;
-      
+   
       // Call method to update feedback
       // This receives a status of 0 for submit, 1 for draft, 2 for delete draft, 3 for delete report
 
@@ -445,6 +447,7 @@ class ReportsController extends AbstractActionController
    {
       $namespace = new Container('user');
       $userID = $namespace->userID;
+   
       // Call addReport method in ReportTable and give arguments from post data
       // Status goes to draft flag, 0 for no, 1 for draft
       $id = $this->getServiceLocator()->get('ReportTable')

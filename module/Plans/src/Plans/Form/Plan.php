@@ -365,6 +365,7 @@ class Plan extends Form
                 'type'  => 'submit',
                 'value' => 'formSaveDraft',
                 'id' => 'formSavePlan',
+                'onclick' => 'confirm("Caution! You are saving a draft not submitting a final plan.")',
                 'class' => 'btn btn-primary btn-md pull-left',
             ),
             'options' => array(

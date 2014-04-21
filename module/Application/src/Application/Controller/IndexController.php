@@ -43,7 +43,14 @@ class IndexController extends AbstractActionController
         // adding global startyear
         // this variable used for determining earliest year in year dropdowns
         // currently 2006 earliest year in database
-        $namespace->startyear = 2006;
+        $namespace->startYear = 2006;
+        
+        // adding global appstartyear
+        // this variable set to year this application went live
+        // this matters because the old application did not track the same
+        // (timestamps, etc.) and some features do not apply to old data
+        // this mostly affects queries
+        $namespace->appStartYear = 2014;
         
         //Get POST data
         $request = $this->getRequest();
@@ -62,7 +69,7 @@ class IndexController extends AbstractActionController
         }
 
 
-// demo login
+        // demo login
         if ($userName == 'role1') {
             $namespace->userID = 2;
             $namespace->role = 1;

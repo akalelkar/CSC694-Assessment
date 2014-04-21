@@ -124,6 +124,7 @@ class UnitTable extends AbstractTableGateway
         $results = $statement->execute();
     
         $resultsArray = array();
+        $resultsArray['None'] = ' ';
         // array must be created as key=>value pair where both key and value are the unit_id
         // so when accessing values from multi select you get the unit_id and not the array subscript
         foreach($results as $result){

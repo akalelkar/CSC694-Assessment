@@ -202,7 +202,7 @@ class PlansController extends AbstractActionController
     *
     * Returns a json object containing the dynamic HTML
     */
-   public function deletefileAction()
+   public function deleteFileAction()
    {
       // get the data from the request using json    
       $id = $_POST['id'];
@@ -266,7 +266,8 @@ class PlansController extends AbstractActionController
       $userEmail = $namespace->userEmail;
       $role = $namespace->role;
       $datatelID = $namespace->datatelID;
-      $startyear = $namespace->startyear;
+      $startYear = $namespace->startYear;
+   
       // check to make sure the user is properly logged into the system
       if ($datatelID == null) {
           return $this->redirect()->toRoute('application');
@@ -281,7 +282,7 @@ class PlansController extends AbstractActionController
       {        
          return new ViewModel(array(
             'useractions' => array('View'),
-            'startyear' => $startyear,
+            'startYear' => $startYear,
             'role' => $role,
          ));
       }
@@ -289,7 +290,7 @@ class PlansController extends AbstractActionController
       {
          return new ViewModel(array(
             'useractions' => array('View', 'Add', 'Modify', 'Provide Feedback'),
-            'startyear' => $startyear,
+            'startYear' => $startYear,
             'role' => $role,
          ));
       }
@@ -297,7 +298,7 @@ class PlansController extends AbstractActionController
       {
          return new ViewModel(array(
             'useractions' => array('View', 'Add', 'Modify'),
-            'startyear' => $startyear,
+            'startYear' => $startYear,
             'role' => $role,
          ));
       }
@@ -398,11 +399,11 @@ class PlansController extends AbstractActionController
     *
     * Returns a partial view
     */
-   public function addplanbaseAction()
+   public function addPlanBaseAction()
    {
       // form for add plan base
       $form = new Plan('addPlan');
-        
+
       // get the data from the request using json      
       $action = $_POST['action'];
       $unit = $_POST['unit'];
@@ -431,7 +432,7 @@ class PlansController extends AbstractActionController
     *
     * Returns a partial view
     */
-   public function addplanmetaAction()
+   public function addPlanMetaAction()
    {
       // form for add meta page
       $form = new Plan('addPlanMeta');
@@ -461,7 +462,7 @@ class PlansController extends AbstractActionController
     *
     * Return is a redirect back to the main page
     */
-   public function insertmetaAction()
+   public function insertMetaAction()
    {
       // get the session variables
       $namespace = new Container('user');
@@ -491,7 +492,7 @@ class PlansController extends AbstractActionController
       $draftFlag = $this->getDraftFlag($button);
       
       // add meta plan
-      $this->getDatabaseData()->insertMetaPlan($metaDescription, $year, $draftFlag, $userID, $programsArray);
+      $planId = $this->getDatabaseData()->insertMetaPlan($metaDescription, $year, $draftFlag, $userID, $programsArray);
 
       // upload files and save file name in DB
       $this->uploadFiles($request, $planId);
@@ -505,7 +506,7 @@ class PlansController extends AbstractActionController
     *
     * Returns a partial view
     */
-   public function addplanAction()
+   public function addPlanAction()
    {
       // form for adding a plan
       $form = new Plan('addPlan');
@@ -520,7 +521,6 @@ class PlansController extends AbstractActionController
       // the outcomes array is an array of entity arrays
       foreach ($programs as $program) :
          $dbData = $this->getDatabaseData()->getUniqueOutcomes($unit, $program);
-         var_dump($dbData);
          $outcomes[] = $dbData;
       endforeach;
 
@@ -544,7 +544,7 @@ class PlansController extends AbstractActionController
     *
     * Return is a redirect back to the main page
     */
-   public function insertplanAction()
+   public function insertPlanAction()
    {
       // get the session variables
       $namespace = new Container('user');
@@ -648,7 +648,7 @@ class PlansController extends AbstractActionController
       $unit = $_POST['unit'];
       $programs = $_POST['programs'];
       $year = $_POST['year'];
-   
+
       // create a partial view to send back to the caller
       $partialView = new ViewModel(array(
          'planId' => $planId,
@@ -709,7 +709,7 @@ class PlansController extends AbstractActionController
     *
     * Return is a redirect back to the main page
     */
-   public function updateplanAction()
+   public function updatePlanAction()
    {
       
       // get the session variables
@@ -783,7 +783,7 @@ class PlansController extends AbstractActionController
     * 
     * Return is a redirect back to the main page
     */
-   public function updatefeedbackAction()
+   public function updateFeedbackAction()
    {
       
       // get the session variables

@@ -134,6 +134,7 @@ class UserController extends AbstractActionController {
         $args['liaison_privs'] = $this->getUnitQueries()->getPrivsForSelect('2');//unlimited liaisons
         $args['chair_privs'] = $this->getUnitQueries()->getPrivsForSelect('3');//unlimited chairs
         $args['assessor_privs'] = $this->getUnitQueries()->getPrivsForSelect('4');//two assessors
+        
         $form = new EditForm($this->url()->fromRoute('user'), $args);
         
         $request = $this->getRequest();

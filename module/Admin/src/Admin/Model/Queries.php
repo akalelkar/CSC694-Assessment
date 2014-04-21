@@ -18,24 +18,40 @@ class Queries extends AbstractTableGateway
     public function __construct(Adapter $adapter)
     {
         $this->adapter = $adapter;
+     
     }
     
     // query 1
-    public function getProgramsMissingPlansForYear($year)
+    // Only considers programs if they were created prior to the start of
+    // the user requested ending school year, and if they were not deactivated
+    // during the school year.
+    public function getProgramsMissingPlansForYear($year, $appStartYear)
     {
         $sql = new Sql($this->adapter);
         
         // The following dates are needed since programs are created/deacctivated at various times.
-        // create date to compare created/deactivated to
-        // school year is July 1 - June 31
+        // This creates the dates to compare to created/deactivated timestamps
+        // User entered year (parameter $year) is school ending year.
+        // School year is July 1 - June 31 
         $startDate = $year-1 . '-07-01';
         $endDate = $year . '-06-31';
         
+        // The data was migrated during the school year ending by the appStartYear
+        // This query should show all plans missing for that school year, but the programs
+        // will look like they were added during that school year.  This variable will
+        // be used to adjust for this fact. 
+        $appStartDate = $appStartYear . '-07-01';
+        
         // create where clause to handle the date test
+        // only count programs that were created before start of current school year
         $whereDates = new \Zend\Db\Sql\Where();
         $whereDates	
-	    ->lessThanOrEqualTo('programs.created_ts', $endDate)
-	    ->and
+	    ->nest()
+	    ->lessThanOrEqualTo('programs.created_ts', $startDate)
+	    ->or
+            ->lessThanOrEqualTo('programs.created_ts', $appStartDate)
+            ->unnest()
+            ->and
 	    ->nest()
 	    ->greaterThan('programs.deactivated_ts', $endDate)
 	    ->or
@@ -52,6 +68,7 @@ class Queries extends AbstractTableGateway
                       ->where(array('plans.year' => $year))
                    
         ;
+        
         // get programs that are not in the set above
         // but only consider those programs that were active during that school year
         // NOTE:  the second where clause must come after the one built above or it won't
@@ -76,10 +93,15 @@ class Queries extends AbstractTableGateway
     }
     
     // query 2
-    public function getMissingReportsForYear($year)
+    public function getMissingReportsForYear($year, $appStartYear)
     {
         // This program returns a row for each plan that has a missing report.
         
+        // The data was migrated during the school year ending by the appStartYear
+        // This query should show all plans missing for that school year, but the programs
+        // will look like they were added during that school year.  This variable will
+        // be used to adjust for this fact. 
+        $appStartDate = $appStartYear . '-07-01';
         
         // The following dates are needed since programs are created/deacctivated at various times.
         // create date to compare created/deactivated to
@@ -103,7 +125,11 @@ class Queries extends AbstractTableGateway
         // create where clause to handle the date test
         $whereDates = new \Zend\Db\Sql\Where();
         $whereDates	
-	    ->lessThanOrEqualTo('programs.created_ts', $endDate)
+	    ->nest()
+	    ->lessThanOrEqualTo('programs.created_ts', $startDate)
+	    ->or
+            ->lessThanOrEqualTo('programs.created_ts', $appStartDate)
+            ->unnest()
 	    ->and
 	    ->nest()
 	    ->greaterThan('programs.deactivated_ts', $endDate)
@@ -139,11 +165,17 @@ class Queries extends AbstractTableGateway
     }
     
     // part 2 for query 2
-    public function getProgramsMissingReportsForYear($year)
+    public function getProgramsMissingReportsForYear($year, $appStartYear)
     {
         // This program returns the programs that are missing a report for the year.
         // Each program is represented once, regardless of how many reports it is missing.
         
+        // The data was migrated during the school year ending by the appStartYear
+        // This query should show all plans missing for that school year, but the programs
+        // will look like they were added during that school year.  This variable will
+        // be used to adjust for this fact. 
+        $appStartDate = $appStartYear . '-07-01';
+
         // The following dates are needed since programs are created/deacctivated at various times.
         // create date to compare created/deactivated to
         // school year is July 1 - June 31
@@ -163,8 +195,12 @@ class Queries extends AbstractTableGateway
         // create where clause to handle the date test
         $whereDates = new \Zend\Db\Sql\Where();
         $whereDates	
-	    ->lessThanOrEqualTo('programs.created_ts', $endDate)
-	    ->and
+   	    ->nest()
+	    ->lessThanOrEqualTo('programs.created_ts', $startDate)
+	    ->or
+            ->lessThanOrEqualTo('programs.created_ts', $appStartDate)
+            ->unnest()
+            ->and
 	    ->nest()
 	    ->greaterThan('programs.deactivated_ts', $endDate)
 	    ->or
@@ -521,9 +557,15 @@ class Queries extends AbstractTableGateway
     // gets active programs count
     // must take into consideration the year this is requested
     // and look at the dates the program was created/possibly deactivated
-    public function getActiveProgramsCount($year)
+    public function getActiveProgramsCount($year, $appStartYear)
     {
         $sql = new Sql($this->adapter);
+        
+        // The data was migrated during the school year ending by the appStartYear
+        // This query should show all plans missing for that school year, but the programs
+        // will look like they were added during that school year.  This variable will
+        // be used to adjust for this fact. 
+        $appStartDate = $appStartYear . '-07-01';
 
         // The following dates are needed since programs are created/deacctivated at various times.
         // create date to compare created/deactivated to
@@ -534,8 +576,12 @@ class Queries extends AbstractTableGateway
         // create where clause to handle the date test
         $whereDates = new \Zend\Db\Sql\Where();
         $whereDates	
-	    ->lessThanOrEqualTo('programs.created_ts', $endDate)
-	    ->and
+	    ->nest()
+	    ->lessThanOrEqualTo('programs.created_ts', $startDate)
+	    ->or
+            ->lessThanOrEqualTo('programs.created_ts', $appStartDate)
+            ->unnest()
+            ->and
 	    ->nest()
 	    ->greaterThan('programs.deactivated_ts', $endDate)
 	    ->or

@@ -39,6 +39,10 @@ class DatabaseSql extends AbstractTableGateway
     public function insertPlan($metaFlag,$metaDescription,$year,$assessmentMethod,$population,$sampleSize,$assessmentDate,$cost,$fundingFlag,$analysisType,$administrator,$analysisMethod,$scope,$feedbackText,$feedbackFlag,$draftFlag,$userId)
     {
 
+	// create an atomic database transaction to update plan and possibly report
+	$connection = $this->adapter->getDriver()->getConnection();
+	$connection->beginTransaction();
+
 	// database timestamp format    
         //"1970-01-01 00:00:01";
       
@@ -90,6 +94,9 @@ class DatabaseSql extends AbstractTableGateway
 	// get the primary key id
 	$rowId = $this->adapter->getDriver()->getConnection()->getLastGeneratedValue();
 		
+	// finish the transaction		
+	$connection->commit();
+
 	return $rowId;
     }    
     
@@ -353,16 +360,49 @@ class DatabaseSql extends AbstractTableGateway
     
     public function insertMetaPlan($metaDescription, $year, $draftFlag, $userID, $programsArray){
 	
-	$sql = new Sql($this->adapter);
-
 	// create an atomic database transaction to update plan and possibly report
 	$connection = $this->adapter->getDriver()->getConnection();
 	$connection->beginTransaction();
 
-	// insert into plan table and obtain the primary key of the insert
-        $planId = $this->insertPlan(1, $metaDescription, $year, "","","","","","","","","","","","",$draftFlag, $userID);
+	$sql = new Sql($this->adapter);
+
+	// database timestamp format    
+        //"1970-01-01 00:00:01";
+      
+	// create the sytem timestamp
+	$currentTimestamp = date("Y-m-d H:i:s", time());
+	
+	// set the submitted timestamp and user id for submitted plans only
+	$submittedTimestamp = null;
+	$submittedUserId = null;
+	if ($draftFlag == "0") {
+	    $submittedTimestamp = $currentTimestamp;
+	    $submittedUserId = $userID;
+	}
+      
+	$sql = new Sql($this->adapter);
+	$data = array('created_ts' => $currentTimestamp,
+		      'submitted_ts' => $submittedTimestamp,
+		      'created_user' => $userID,
+		      'submitted_user' => $submittedUserId,
+		      'meta_flag' => 1,
+		      'meta_description' => trim($metaDescription),
+		      'year' => trim($year),
+		      'draft_flag' => trim($draftFlag),
+		      'active_flag' => 1,
+		    );
+		
+	$insert = $sql->insert('plans');
+	$insert->values($data);		    
+		
+	// perform the insert
+        $statement = $sql->prepareStatementForSqlObject($insert);
+        $statement->execute();
      
-        // get all the program ids based on the array of program
+        // get the primary key id
+	$planId = $this->adapter->getDriver()->getConnection()->getLastGeneratedValue();
+	
+	// get all the program ids based on the array of program
 	$programIds = $this->getProgramIdsByProgram($programsArray);
 
 	 // loop through the array of programs inserting each value into the meta plans table
@@ -370,8 +410,11 @@ class DatabaseSql extends AbstractTableGateway
 	   $this->insertPlanPrograms($program['programId'], $planId);
 	 endforeach;
 
+		
 	// finish the transaction		
 	$connection->commit();
+
+	return $planId;
       
     }
     /*

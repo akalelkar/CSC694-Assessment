@@ -7,7 +7,7 @@
     $form = $this->form;
     $form->setAttribute('class', 'form-horizontal');
     $form->setAttribute('enctype', 'multipart/form-data');
-    $form->setAttribute('action', $this->url('plans',array('action'=>'insertmeta')));
+    $form->setAttribute('action', $this->url('plans',array('action'=>'insertMeta')));
     $form->prepare();
 ?>	
 
@@ -57,15 +57,13 @@
 			<h4>Describe the Meta Assessment Plan & Rationale</h4>
 			<p></p>
 			    
-			
 			    <?php
 				$elem = $form->get('textMetaDescription');
 				echo $this->formTextarea($elem);
 			    ?>
-		    
 			
 	    		<!-- use partials to load the upload buttons -->
-			<?php echo $this->partial('plans/plans/plansUploadButtonPartial.phtml', array('form' => $form,)); ?>
+			<?php echo $this->partial('plans/plans/plans-upload-button-partial.phtml', array('form' => $form,)); ?>
     
 			<!-- add the save draft and submit buttons -->
 			<?php

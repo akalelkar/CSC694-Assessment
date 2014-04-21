@@ -1,6 +1,7 @@
 <?php
     $title = 'Add Modify Assessment Plan';
     $this->headTitle($title);
+
 ?>
 
 <?php
@@ -8,7 +9,7 @@
     $form = $this->form;
     $form->setAttribute('enctype', 'multipart/form-data');
     $form->setAttribute('class', 'form-horizontal');
-    $form->setAttribute('action', $this->url('plans',array('action'=>'updateplan')));
+    $form->setAttribute('action', $this->url('plans',array('action'=>'updatePlan')));
     $form->prepare();
 ?>
 
@@ -115,6 +116,7 @@
   	      				   </p>
 					<?php
 					    endforeach;
+					           
 					?>
 	      		            <input type="hidden" name="outcomeCount" id="outcomeCount" value="<?php echo $outcomeCount ?>">
 
@@ -382,7 +384,7 @@
 		</div>		
 
 		<!-- use partials to load the upload buttons -->
-		<?php echo $this->partial('plans/plans/plansUploadButtonPartial.phtml', array('form' => $form,)); ?>
+		<?php echo $this->partial('plans/plans/plans-upload-button-partial.phtml', array('form' => $form,)); ?>
 		
 		<!-- display the save draft and submit buttons -->
 		<?php

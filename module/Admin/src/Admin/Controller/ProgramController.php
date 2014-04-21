@@ -78,7 +78,7 @@ class ProgramController extends AbstractActionController {
      *  Unit Add Action
      */
 
-    public function addunitAction() {
+    public function addUnitAction() {
         //the add unit form
         $form = new UnitForm();
 
@@ -113,7 +113,7 @@ class ProgramController extends AbstractActionController {
      *  Program Add Action
      */
 
-    public function addprogramAction() {
+    public function addProgramAction() {
         //the add program form
         $units = $this->getUnitQueries()->getUnitsForSelect();
         $form = new ProgramForm($units);

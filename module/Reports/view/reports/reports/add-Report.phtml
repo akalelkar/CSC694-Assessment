@@ -3,17 +3,6 @@
     if($results){
 	echo '</br></br></br></br>There is already a report for this plan';
     }else{
-?>
-    <div class="col-md-8">
-       <div class="table-responsive">
-	    <table class="table table-bordered table-striped">
-	      <colgroup>
-		<col class="col-xs-8">
-	
-	      </colgroup>
-     
-	    <div class="bs-example">
-	      <?php
 	      $form->setAttribute('action', $this->url('reports', array('action' => 'addNewReport')));
 	      $form->setAttribute('name', 'data');
 	      $form->setAttribute('id', 'data');
@@ -24,7 +13,16 @@
 	      echo $this->formHidden($form->get('id')->setAttribute('value', $planData[0]['id']));
 	      echo $this->formHidden($form->get('status')->setAttribute('value', '0'));
 	  
-	      ?>
+?>
+    <div class="col-md-8">
+       <div class="table-responsive">
+	    <table class="table table-bordered table-striped">
+	      <colgroup>
+		<col class="col-xs-8">
+	
+	      </colgroup>
+     
+	    <div class="bs-example">
 	    <table class="table">
 	      
 	      <h6>Add New Report</h6>
@@ -60,8 +58,11 @@
 		  </div>
 		  <div id="collapseThree" class="panel-collapse collapse">
 		    <div class="panel-body">
-			<?php echo $this->formRow($form->get('population'))?>    
-		    </div>
+		       <?php
+		        $elem = $form->get('population');
+		        echo $this->formRow($elem);
+		       ?>	 
+		     </div>
 		  </div>
 		  <div class="panel-heading">
 		    <h4 class="panel-title">
@@ -72,8 +73,11 @@
 		  </div>
 		  <div id="collapseFour" class="panel-collapse collapse">
 		    <div class="panel-body">
-		    <?php echo $this->formRow($form->get('results'))?>      
-	    	    </div>
+			<?php
+			    $elem = $form->get('results');
+			    echo $this->formRow($elem);
+		       ?>	 
+		     </div>
 		  </div>
 		  <div class="panel-heading">
 		    <h4 class="panel-title">
@@ -84,8 +88,11 @@
 		  </div>
 		  <div id="collapseFive" class="panel-collapse collapse">
 		    <div class="panel-body">
-		    <?php echo $this->formRow($form->get('conclusions'))?>     
-		    </div>
+			<?php
+			    $elem = $form->get('conclusions');
+			    echo $this->formRow($elem);
+		       ?>	 
+		     </div>
 		  </div>
 		  <div class="panel-heading">
 		    <h4 class="panel-title">
@@ -96,7 +103,11 @@
 		  </div>
 		  <div id="collapseSix" class="panel-collapse collapse">
 		    <div class="panel-body">
-		    <?php echo $this->formRow($form->get('actions'))?>   
+			<?php
+			    $elem = $form->get('actions');
+			    echo $this->formRow($elem);
+		       ?>	 
+		     
 		    </div>
 		  </div>
 		

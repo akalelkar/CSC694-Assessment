@@ -49,27 +49,31 @@ class QueriesController extends AbstractActionController
       $namespace = new Container('user');
       $userID = $namespace->userID;
       $role = $namespace->role;
-      $startyear = $namespace->startyear;
-      return new ViewModel(array('startyear' => $startyear,
+      $startYear = $namespace->startYear;
+      return new ViewModel(array('startYear' => $startYear,
                                  'role' => $role));
    }
  
    // Show programs that don't have any plans for a specific year 
    public function getQuery1Action()
    {
+      
+      $namespace = new Container('user');
+      $appStartYear = $namespace->appStartYear;
+    
       $resultsarray = '';
       
       // get year from route
       $year = $this->params()->fromRoute('id', 0);
       
-      $results = $this->getAdminQueries()->getProgramsMissingPlansForYear($year);
+      $results = $this->getAdminQueries()->getProgramsMissingPlansForYear($year, $appStartYear);
       
       // iterate over database results forming a php array
       foreach ($results as $result){
           $resultsarray[] = $result;
       }
       $totalDisplayed = $results->count();
-      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount($year);
+      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount($year, $appStartYear);
 
       $partialView = new ViewModel(array('querytitle' => 'Programs Missing Plans For ' . $year,
                                          'programs' => $resultsarray,
@@ -82,6 +86,9 @@ class QueriesController extends AbstractActionController
    // Show programs that don't have any reports for a specific year 
    public function getQuery2Action(){
       
+      $namespace = new Container('user');
+      $appStartYear = $namespace->appStartYear;
+      
       $resultsarray = '';
       
       // get year from route
@@ -91,18 +98,21 @@ class QueriesController extends AbstractActionController
       // need to subtract 1 from year to grab last year's plans
       $year = $year - 1;
       // Get a tuple for each report missing
-      $results = $this->getAdminQueries()->getMissingReportsForYear($year);
+      // This information is what is displayed in the view
+      $results = $this->getAdminQueries()->getMissingReportsForYear($year, $appStartYear);
       
       // iterate over database results forming a php array
       foreach ($results as $result){
           $resultsarray[] = $result;
       }
-      // get a tuple for each program missing a report - used to display counts to user
-      $totalMissingPrograms = $this->getAdminQueries()->getProgramsMissingReportsForYear($year)->count();
+      
+      // get a count of the # of programs missing reports - counts program only once regardless
+      // of # of missing reports - this is used to display the counts shown at top of report
+      $totalMissingPrograms = $this->getAdminQueries()->getProgramsMissingReportsForYear($year, $appStartYear)->count();
       // get count of missing reports 
       $totalDisplayed = $results->count();
       // get total number of active programs for year
-      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount($year);
+      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount($year, $appStartYear);
 
       // get total number of plans submitted for year
       $totalPlans = $this->getAdminQueries()->getPlansCountForYear($year);
@@ -288,8 +298,11 @@ class QueriesController extends AbstractActionController
    }
 
    // Show programs that have not yet submitted learning outcomes
-   public function getQuery10Action(){
-      
+   public function getQuery10Action()
+   {      
+      $namespace = new Container('user');
+      $appStartYear = $namespace->appStartYear;
+          
       $resultsarray = '';
       
       // get year from route
@@ -302,7 +315,7 @@ class QueriesController extends AbstractActionController
           $resultsarray[] = $result;
       }
       $totalDisplayed = $results->count();
-      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount($year);
+      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount($year, $appStartYear);
 
       $partialView = new ViewModel(array('querytitle' => 'Programs Missing Learning Outcomes ',
                                          'programs' => $resultsarray,

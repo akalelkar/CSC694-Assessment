@@ -4,6 +4,16 @@
 if(!$results){
     echo '</br></br></br></br>There are no reports associated with this plan';
 }else{
+    // get form
+    $form->setAttribute('action', $this->url('reports', array('action' => 'updateReport')));
+    $form->setAttribute('name', 'data');
+    $form->setAttribute('id', 'data');
+    $form->setAttribute('enctype', 'multipart/form-data');
+
+    $form->prepare();
+    echo $this->form()->openTag($form);
+    echo $this->formHidden($form->get('id')->setAttribute('value', $report[0]['id']));
+    echo $this->formHidden($form->get('status')->setAttribute('value', '0'));
 
 ?>
 <div class="col-md-8">
@@ -13,19 +23,6 @@ if(!$results){
 		<col class="col-xs-8">
 	    </colgroup>
 	    <div class="bs-example">
-		<!-- Set up form -->
-		<?php
-		$form->setAttribute('action', $this->url('reports', array('action' => 'updateReport')));
-		$form->setAttribute('name', 'data');
-		$form->setAttribute('id', 'data');
-		$form->setAttribute('enctype', 'multipart/form-data');
-	    
-		$form->prepare();
-		echo $this->form()->openTag($form);
-		echo $this->formHidden($form->get('id')->setAttribute('value', $report[0]['id']));
-		echo $this->formHidden($form->get('status')->setAttribute('value', '0'));
-	    
-		?>
 		<table class="table">
 		    <!-- Show form info -->
 		    <h4><?php echo $report[0]['unit_id'] . ' - ' . $report[0]['name'] . ' - ' . $report[0]['year'];?></h4>
@@ -46,6 +43,7 @@ if(!$results){
 				    <?php foreach($descriptions as $description) : ?>
 					<?php $ctr++;?>
 					 <?php echo($ctr); ?>.<?php echo $description;?>
+					 					 
 					</br>
 					
 					<?php endforeach; ?>
@@ -62,7 +60,12 @@ if(!$results){
 			    </div>
 			    <div id="collapseThree" class="panel-collapse collapse">
 			      <div class="panel-body">
-					  <?php echo $this->formRow($form->get('population')->setAttribute('value', $report[0]['population']))?>     
+				<?php
+				    $elem = $form->get('population');
+				    $elem->setValue($report[0]['population']);
+				    echo $this->formRow($elem);
+				?>	 
+					
 			      </div>
 			    </div>
       
@@ -75,7 +78,11 @@ if(!$results){
 			     </div>
 			    <div id="collapseFour" class="panel-collapse collapse">
 				<div class="panel-body">
-				    <?php echo $this->formRow($form->get('results')->setAttribute('value', $report[0]['results']))?>
+				<?php
+				    $elem = $form->get('results');
+				    $elem->setValue($report[0]['results']);
+				    echo $this->formRow($elem);
+				?>	 
 				</div>
 			    </div>
 			    <div class="panel-heading">
@@ -87,8 +94,12 @@ if(!$results){
 			    </div>
 			    <div id="collapseFive" class="panel-collapse collapse">
 			       <div class="panel-body">
-				  <?php echo $this->formRow($form->get('conclusions')->setAttribute('value', $report[0]['conclusions']))?>    
-			       </div>
+				<?php
+				    $elem = $form->get('conclusions');
+				    $elem->setValue($report[0]['conclusions']);
+				    echo $this->formRow($elem);
+				?>	 
+				</div>
 			    </div>
 			    
 			    <div class="panel-heading">
@@ -100,7 +111,11 @@ if(!$results){
 			    </div>
 			    <div id="collapseSix" class="panel-collapse collapse">
 			       <div class="panel-body">
-				  <?php echo $this->formRow($form->get('actions')->setAttribute('value', $report[0]['actions']))?>    
+				<?php
+				    $elem = $form->get('actions');
+				    $elem->setValue($report[0]['actions']);
+				    echo $this->formRow($elem);
+				?>	 
 			       </div>
 			    </div>
 			 
