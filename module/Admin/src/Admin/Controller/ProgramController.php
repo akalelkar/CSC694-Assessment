@@ -129,10 +129,10 @@ class ProgramController extends AbstractActionController {
                 $program = new Program();
                 $form->setInputFilter($program->getInputFilter());
                 $form->setData($request->getPost());
-    
+       var_dump($request->getPost());          
                 if ($form->isValid()) {
                     $program->exchangeArray($form->getData());
-    
+       
                     //save the program
                     $this->getProgramQueries()->saveProgram($program);
     
@@ -164,12 +164,13 @@ class ProgramController extends AbstractActionController {
         $units = $this->getUnitQueries()->getUnitsForSelect();
         $form = new ProgramForm($units);
         $form->bind($program);
-        $form->get('submit')->setAttribute('value', 'Save');
+        $form->get('programsubmit')->setAttribute('value', 'Save');
 
         $request = $this->getRequest();
         if ($request->isPost()) {
             $form->setInputFilter($program->getInputFilter());
             $form->setData($request->getPost());
+
 
             if ($form->isValid()) {
                 $this->getProgramQueries()->saveProgram($form->getData());
@@ -178,10 +179,12 @@ class ProgramController extends AbstractActionController {
                 return $this->redirect()->toRoute('program');
             }
         }
+
         return array(
             'id' => $id,
             'form' => $form,
         );
+    
     }
 
     /*

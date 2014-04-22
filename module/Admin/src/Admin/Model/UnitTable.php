@@ -124,7 +124,7 @@ class UnitTable extends AbstractTableGateway
         $results = $statement->execute();
     
         $resultsArray = array();
-        $resultsArray['None'] = ' ';
+        $resultsArray['None'] = 'None';
         // array must be created as key=>value pair where both key and value are the unit_id
         // so when accessing values from multi select you get the unit_id and not the array subscript
         foreach($results as $result){
@@ -135,24 +135,46 @@ class UnitTable extends AbstractTableGateway
     
        
     /*
-     * Add a record to one of the two priv tables, liaison_priv or unit_priv
+     * Add a record to one of the priv tables: assessor_priv, liaison_priv or chair_priv
      */
     function addPriv($id,$user,$table)
     {
         $namespace = new Container('user');
         
-        $data = array(
-            'user_id' => $user,
-            'unit_id' => $id,
-            'created_user' => $namespace->userID,
-            'created_ts' => date('Y-m-d h:i:s', time()),
-            'active_flag' => 1
-        );
-        $sql = new Sql($this->adapter);
-        $insert = $sql->insert($table);
-        $insert->values($data);
-        $insertString = $sql->getSqlStringForSqlObject($insert);
-        $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);
+        // create an atomic database transaction to update plan and possibly report
+	$connection = $this->adapter->getDriver()->getConnection();
+	$connection->beginTransaction();
+
+        // check that active priv does not exist
+        $select = $sql->select()
+                 ->from($table)
+                 ->columns(array('id'))
+                 ->where(array('active_flag' =>'1'))
+                 ->where(array('user_id' => $user))
+                 ->where(array('unit_id' => $id))
+        ;
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $results = $statement->execute();
+    var_dump($results->count());
+    exit();
+        if ($results->count() == 0){
+            $data = array(
+                'user_id' => $user,
+                'unit_id' => $id,
+                'created_user' => $namespace->userID,
+                'created_ts' => date('Y-m-d h:i:s', time()),
+                'active_flag' => 1
+            );
+            $sql = new Sql($this->adapter);
+            $insert = $sql->insert($table);
+            $insert->values($data);
+            $insertString = $sql->getSqlStringForSqlObject($insert);
+            $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);    
+        }
+        
+        // finish the transaction		
+	$connection->commit();
+        
     }
     
     /*
@@ -168,81 +190,6 @@ class UnitTable extends AbstractTableGateway
        $this->adapter->query($deleteString, Adapter::QUERY_MODE_EXECUTE);   
     }
     
-    
-    /*
-     *  Update an existsing priv record, disable or enable
-     */
-    public function updatePriv($id,$user,$action,$table)
-    {
-        $namespace = new Container('user');
-        switch($action){
-            case 'disable':
-                $data = array(
-                        'active_flag' => 0,
-                        'deactivated_ts' =>  date('Y-m-d h:i:s', time()),
-                        'deactivated_user' =>  $namespace->userID
-                    );
-                break;
-            
-            case 'enable':
-                $data = array(
-                        'active_flag' => 1,
-                    );
-                break;
-        }
-
-        $sql = new Sql($this->adapter);
-        $update = $sql->update($table)
-                      ->set($data)
-                       ->where(array('user_id = ?' => $user, 'unit_id = ?' => $id));
-        $updateString = $sql->getSqlStringForSqlObject($update);
-        $this->adapter->query($updateString, Adapter::QUERY_MODE_EXECUTE);
-    }
-    
-    /*
-     * Update privs when Unit is updated
-     */
-    public function updatePrivs($id,$users,$table)
-    {
-        foreach($users as $key => $value)
-        {     
-            //get existing active liason ids
-            $previousActivePrivs = $this->getUnitPrivs($id,$table,1);
-            
-            //get existing inactive liason ids
-            $previousInactivePrivs = $this->getUnitPrivs($id,$table,0);
-            
-             //get all previous inactive liason ids
-            $previousPrivs = $this->getUnitPrivs($id,$table,array(1,0));
-            
-            $newPrivs = array_diff(array($value),$previousPrivs);
-            
-            
-            if(!empty($newPrivs)){
-                foreach($newPrivs as $key => $value)
-                {
-                     $this->addPriv($id,$value,$table);
-                }
-            }
-            
-            //update role(s) that were re-enabled/disabled
-            $disablePrivs = array_diff($previousActivePrivs, array($value));
-            $reenabledPrivs = array_diff(array($value), $previousActivePrivs);
-            
-            if(!empty($disablePrivs)){
-                //disable priv
-                foreach($disablePrivs as $key => $value){
-                    $this->updatePriv($id,$value, 'disable',$table);
-                }
-            }
-            //reenable priv
-            if(!empty($reenabledPrivs)){
-                foreach($reenabledPrivs as $key => $value){
-                    $this->updatePriv($id,$value, 'enable',$table);
-                }
-            }
-        } 
-    }
     
     
     /*
@@ -271,11 +218,4 @@ class UnitTable extends AbstractTableGateway
         } 
     }
 
-    /*
-     * Delete a unit
-     */
-    public function deleteUnit($id)
-    {
-        $this->delete(array('id' => $id));
-    }
 }

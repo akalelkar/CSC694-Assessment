@@ -67,21 +67,7 @@
                      ),
                  ),
              ),
-             'unit' => array(
-                 'type'    => 'segment',
-                 'options' => array(
-                     'route'    => '/admin/unit[/][page/:page][:action][/:id]',
-                     'constraints' => array(
-                         'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
-                         'id'     => '[0-9]+',
-                     ),
-                     'defaults' => array(
-                         '__NAMESPACE__' => 'Admin\Controller',
-                         'controller' => 'Unit',
-                         'action'     => 'index',
-                     ),
-                 ),
-             ),
+           
              'query' => array(
                  'type'    => 'segment',
                  'options' => array(

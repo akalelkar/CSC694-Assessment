@@ -151,18 +151,30 @@ class UserTable extends AbstractTableGateway
         
         // add privileges to appropriate table
         foreach ($privs as $priv){
-    var_dump($priv);
-            // add privs to table
-            $insert = $sql->insert()
-                          ->into($table)
-                          ->values(array('user_id'=>$id, 'unit_id'=>$priv,
-                                         'created_ts'=>date('Y-m-d h:i:s', time()),
-                                         'created_user'=>$namespace->userID, 'active_flag'=>1))
-            ;
-            $insertString = $sql->getSqlStringForSqlObject($insert);
-            $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);
+            if ($priv != 'None'){
+                // check that active priv does not exist
+                $select = $sql->select()
+                         ->from($table)
+                         ->columns(array('id'))
+                         ->where(array('active_flag' =>'1'))
+                         ->where(array('user_id' => $id))
+                         ->where(array('unit_id' => $priv))
+                ;
+                $statement = $sql->prepareStatementForSqlObject($select);
+                $results = $statement->execute();
+                if ($results->count() == 0){
+                   // add privs to table 
+                    $insert = $sql->insert()
+                                  ->into($table)
+                                  ->values(array('user_id'=>$id, 'unit_id'=>$priv,
+                                                 'created_ts'=>date('Y-m-d h:i:s', time()),
+                                                 'created_user'=>$namespace->userID, 'active_flag'=>1))
+                    ;
+                    $insertString = $sql->getSqlStringForSqlObject($insert);
+                    $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);
+                }
+            }
         }
-        
         // check if the user has this role, if not add
         $select = $sql->select()
                     ->from('user_roles')
