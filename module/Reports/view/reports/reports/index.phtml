@@ -55,16 +55,16 @@
     
 <script>
 function getReports(action, id) {
-    
+   
     if (action == "Provide Feedback")
     {
         // create the url to redirect to the provide feedback plan page
-        var urlform = "<?php echo $this->url('default', array('controller'=>'reports','action'=>'provideFeedback')); ?>";
+        var urlform = "<?php echo $this->url('default', array('controller'=>'reports','action'=>'providefeedback')); ?>";
     }
     else
     {
         var urlform = "<?php echo $this->url('default', array('controller'=>'reports')); ?>";
-        urlform = urlform + action + 'Report';
+        urlform = urlform + action.toLowerCase() + 'report';
     }
     // asynchronous ajax code to get Report
     $.ajax({
@@ -114,7 +114,7 @@ $(document).on('change', '#action-menu', function () {
     // create url for redirect
     var urlform = "<?php echo $this->url('default', array(
                                     'controller'=>'reports',
-                                    'action'=>'getUnits')); ?>";
+                                    'action'=>'getunits')); ?>";
 
     urlform = urlform + '/' + $action;
     // asynchronous ajax code to populate unit/department selector
@@ -146,7 +146,7 @@ $(document).on('change', '#unit-menu', function () {
     // create url for redirect
     var urlform = "<?php echo $this->url('default', array(
                                     'controller'=>'reports',
-                                    'action'=>'getPrograms')); ?>";
+                                    'action'=>'getprograms')); ?>";
     urlform = urlform + '/' + $unit;
     // asynchronous ajax code to populate program/degree selector
     // build stuff here and make it work
@@ -279,7 +279,7 @@ $(document).on('click', '#submit', function () {
     // create the url to redirect to the view plan page
     var urlform = "<?php echo $this->url('default', array(
                             'controller'=>'reports',
-                            'action'=>'viewPlans')); ?>";
+                            'action'=>'viewplans')); ?>";
     
    
     $.ajax({

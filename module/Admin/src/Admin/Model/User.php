@@ -123,11 +123,16 @@ class User implements InputFilterAwareInterface
                 'required' => false,
                )));
          }  
+           
            $inputFilter->add($factory->createInput(array(
-                'name' => 'unit_privs',
+                'name' => 'chair_privs',
                 'required' => false,
                )));
-                    
+           
+           $inputFilter->add($factory->createInput(array(
+                'name' => 'assessor_privs',
+                'required' => false,
+               )));
            $inputFilter->add($factory->createInput(array(
                 'name' => 'liaison_privs',
                 'required' => false,

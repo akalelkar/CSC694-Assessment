@@ -25,23 +25,20 @@ class QueriesController extends AbstractActionController
 {
    protected $tableResults;
    
-   public function onDispatch(\Zend\Mvc\MvcEvent $e) {
-       /* $validUser = new AuthUser();
-        if (!$validUser->Validate())
-        {
-            return $this->redirect()->toRoute('application');
+   /********** Security supporting functions **********/
+   
+   /**
+    * Make sure the user is valid
+    */
+   public function onDispatch(\Zend\Mvc\MvcEvent $e) 
+   {
+        $validUser = new AuthUser();
+        if (!$validUser->Validate()) {
+            return $this->redirect()->toRoute('home');
         }
-        else {
-            $namespace = new Container('user');
-            if($namespace->role != 1)
-            {
-              return $this->redirect()->toRoute('application');
-            }
-       */
-            return parent::onDispatch($e);
-       // }
-               
-    }
+        return parent::onDispatch($e);
+   }
+   
 
    public function indexAction()
    {
@@ -49,13 +46,13 @@ class QueriesController extends AbstractActionController
       $namespace = new Container('user');
       $userID = $namespace->userID;
       $role = $namespace->role;
-      $startYear = $namespace->startYear;
+      $startYear = $namespace->appStartYear;
       return new ViewModel(array('startYear' => $startYear,
                                  'role' => $role));
    }
  
    // Show programs that don't have any plans for a specific year 
-   public function getQuery1Action()
+   public function getquery1Action()
    {
       
       $namespace = new Container('user');
@@ -84,7 +81,7 @@ class QueriesController extends AbstractActionController
    }
    
    // Show programs that don't have any reports for a specific year 
-   public function getQuery2Action(){
+   public function getquery2Action(){
       
       $namespace = new Container('user');
       $appStartYear = $namespace->appStartYear;
@@ -128,7 +125,7 @@ class QueriesController extends AbstractActionController
    }
    
    // Show programs that are conducting meta assessment
-   public function getQuery3Action(){
+   public function getquery3Action(){
       
       $resultsarray = '';
       
@@ -149,7 +146,7 @@ class QueriesController extends AbstractActionController
    }
    
    // Show programs that are requesting funding
-   public function getQuery4Action(){
+   public function getquery4Action(){
       
       $resultsarray = '';
       
@@ -170,7 +167,7 @@ class QueriesController extends AbstractActionController
    }
    
    // Show programs with modified outcomes
-   public function getQuery5Action(){
+   public function getquery5Action(){
       
       $resultsarray = '';
       
@@ -195,7 +192,7 @@ class QueriesController extends AbstractActionController
    }
    
    // Show programs that have added or modified a report for a previous year
-   public function getQuery6Action(){
+   public function getquery6Action(){
       
       $resultsarray = '';
       
@@ -223,7 +220,7 @@ class QueriesController extends AbstractActionController
    }
    
    // Show programs that have added or modified a report for the previous year
-   public function getQuery7Action(){
+   public function getquery7Action(){
       
       $resultsarray = '';
       
@@ -251,7 +248,7 @@ class QueriesController extends AbstractActionController
    }
    
    // Show programs that have not yet been reviewed by liaisons
-   public function getQuery8Action(){
+   public function getquery8Action(){
       
       $resultsarray = '';
       
@@ -272,7 +269,7 @@ class QueriesController extends AbstractActionController
    }
    
    // Show programs that have changed their assessors
-   public function getQuery9Action(){
+   public function getquery9Action(){
       
       $resultsarray = '';
       
@@ -298,16 +295,22 @@ class QueriesController extends AbstractActionController
    }
 
    // Show programs that have not yet submitted learning outcomes
-   public function getQuery10Action()
+   public function getquery10Action()
    {      
       $namespace = new Container('user');
       $appStartYear = $namespace->appStartYear;
           
       $resultsarray = '';
       
-      // get year from route
-      $year = $this->params()->fromRoute('id', 0);
-      
+      // get current school year
+      $nowYear = date("Y", time());
+      $nowMonth = date('m', time());
+        
+      // adjust current year so it reflects the ending school year 
+      if ($nowMonth > 6){  // in the start of a school year, need to adjust
+         $nowYear++;
+      }
+        
       $results = $this->getAdminQueries()->getProgramsMissingOutcomes();
       
       // iterate over database results forming a php array
@@ -315,7 +318,7 @@ class QueriesController extends AbstractActionController
           $resultsarray[] = $result;
       }
       $totalDisplayed = $results->count();
-      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount($year, $appStartYear);
+      $totalPrograms = $this->getAdminQueries()->getActiveProgramsCount($nowYear, $appStartYear);
 
       $partialView = new ViewModel(array('querytitle' => 'Programs Missing Learning Outcomes ',
                                          'programs' => $resultsarray,

@@ -8,7 +8,7 @@
     <p></p>  
     <div class="row">
 	<!-- Build the left hand side of the page -->
-        <?php echo $this->partial('plans/plans/plans-left-side-partial.phtml', array()); ?>
+        <?php echo $this->partial('plans/plans/plansleftsidepartial.phtml', array()); ?>
 
 	    <!--Build the right side of the acreen using an ajax call -->
 	    <div id="content">
@@ -61,7 +61,7 @@ $(document).on('change', '#action-menu', function () {
     // create url for redirect
     var urlform = "<?php echo $this->url('plans', array(
                                      'controller'=>'plans',
-                                     'action'=>'getUnits')); ?>";
+                                     'action'=>'getunits')); ?>";
     urlform = urlform + '/' + $action;
     
     // asynchronous ajax code to populate unit/department selector
@@ -98,7 +98,7 @@ $(document).on('change', '#unit-menu', function () {
     // create url for redirect
     var urlform = "<?php echo $this->url('plans', array(
                                     'controller'=>'plans',
-                                    'action'=>'getPrograms')); ?>";
+                                    'action'=>'getprograms')); ?>";
     urlform = urlform + '/' + unit;
    
     // asynchronous ajax code to populate program/degree selector
@@ -207,13 +207,13 @@ $(document).on('click', '#formListPlans', function () {
         // create url for redirect to the add plan page
         var urlform = "<?php echo $this->url('plans', array(
                                     'controller'=>'plans',
-                                    'action'=>'addPlanBase')); ?>";	
+                                    'action'=>'addplanbase')); ?>";	
     }
     else {
     // create url for redirect to the list plans page
 	var urlform = "<?php echo $this->url('plans', array(
                                     'controller'=>'plans',
-                                    'action'=>'listPlans')); ?>";
+                                    'action'=>'listplans')); ?>";
     }			    
    
    // asynchronous ajax code to generate the partial list plans page
@@ -254,7 +254,7 @@ $(document).on('click', '#modifyDelete', function () {
 	// create the url to redirect back to the list plans page
 	var urlform = "<?php echo $this->url('plans', array(
 					'controller'=>'plans',
-					'action'=>'listPlans')); ?>";
+					'action'=>'listplans')); ?>";
     
        // asynchronous ajax code to re-generate the partial list plans page
        $.ajax({
@@ -292,21 +292,21 @@ $(document).on('click', '#viewModifySelect', function () {
         // create the url to redirect to the view plan page
         var urlform = "<?php echo $this->url('plans', array(
                                     'controller'=>'plans',
-                                    'action'=>'viewPlan')); ?>";
+                                    'action'=>'viewplan')); ?>";
     }
     else if (action == "Provide Feedback")
     {
         // create the url to redirect to the provide feedback plan page
         var urlform = "<?php echo $this->url('plans', array(
                                     'controller'=>'plans',
-                                    'action'=>'provideFeedback')); ?>";
+                                    'action'=>'providefeedback')); ?>";
     }
     else
     {
 	// create the url to redirect to the modify plans page
         var urlform = "<?php echo $this->url('plans', array(
                                     'controller'=>'plans',
-                                    'action'=>'modifyPlan')); ?>";
+                                    'action'=>'modifyplan')); ?>";
     }
 
    // asynchronous ajax code generate the partial view plan or modify plan page
@@ -344,7 +344,7 @@ $(document).on('change', '#metaFlag', function () {
     // defaulting the url to the add plan page
     var urlform = "<?php echo $this->url('plans', array(
                                 'controller'=>'plans',
-                                'action'=>'addPlan')); ?>";
+                                'action'=>'addplan')); ?>";
 				    
     // over ride the url if a valid meta plan is required
     if (option.toLowerCase() == "yes") {
@@ -361,7 +361,7 @@ $(document).on('change', '#metaFlag', function () {
 	if (year - dbMetaYear >= numMetaYears) {
 	    var urlform = "<?php echo $this->url('plans', array(
 	                                'controller'=>'plans',
-	                                'action'=>'addPlanMeta')); ?>";
+	                                'action'=>'addplanmeta')); ?>";
 	}
 	else {
 	    alert("A meta plan exists within the last " + numMetaYears + " years, a new meta plan cannot be entered.  Re-directing to the add plans page.");
@@ -402,7 +402,7 @@ $(document).on('click', '#deleteDocument', function () {
 	// create the url to redirect back to the modify plan page
 	var urlform = "<?php echo $this->url('plans', array(
 					'controller'=>'plans',
-					'action'=>'deleteFile')); ?>";
+					'action'=>'deletefile')); ?>";
     
 	// asynchronous ajax code re-generate the partial mpdify plans page with the document removed
 	$.ajax({
@@ -435,7 +435,7 @@ $(document).on('click', '#downloadFile', function () {
 	// create the url to redirect to the downloadfile controller
 	var urlform = "<?php echo $this->url('plans', array(
 					'controller'=>'plans',
-					'action'=>'downloadFile',
+					'action'=>'downloadfile',
 					)); ?>";
 	
 	// append the id of the plan document to download					

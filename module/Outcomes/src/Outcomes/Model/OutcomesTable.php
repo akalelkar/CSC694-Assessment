@@ -60,6 +60,7 @@ class OutcomesTable extends AbstractTableGateway
         $insert = $sql->insert('outcomes');
         $insert->values($data);
         $statement = $sql->prepareStatementForSqlObject($insert);
+     
         $statement->execute();
     } 
     

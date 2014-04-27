@@ -21,23 +21,20 @@ class ProgramController extends AbstractActionController {
     protected $tableResults;
     protected $unittableResults;
 
-    public function onDispatch(\Zend\Mvc\MvcEvent $e) {
-        /*$validUser = new AuthUser();
-        if (!$validUser->Validate())
-        {
-            return $this->redirect()->toRoute('application');
+    /********** Security supporting functions **********/
+   
+   /**
+    * Make sure the user is valid
+    */
+   public function onDispatch(\Zend\Mvc\MvcEvent $e) 
+   {
+        $validUser = new AuthUser();
+        if (!$validUser->Validate()) {
+            return $this->redirect()->toRoute('home');
         }
-        else {
-            $namespace = new Container('user');
-            if($namespace->role != 1)
-            {
-              return $this->redirect()->toRoute('application');
-            }
-        */
-            return parent::onDispatch($e);
-        //}
-    }
-
+        return parent::onDispatch($e);
+   }
+   
     /*
      * Program Index Action
      */
@@ -45,7 +42,8 @@ class ProgramController extends AbstractActionController {
     public function indexAction() {
         //get page number from route, or default to age 1
         $page = $this->params()->fromRoute('page') ? (int) $this->params()->fromRoute('page') : 1;
-   
+        $errorMsg = $this->params()->fromRoute('errorMsg');
+       
         //Get all programs
         $programs = $this->getProgramQueries()->fetchAll(true);
         
@@ -63,12 +61,13 @@ class ProgramController extends AbstractActionController {
         $programform = new ProgramForm($units);
 
         //add unit form
-        $unitform = new UnitForm();
-     
+        $divisions = $this->getUnitQueries()->getDivisionsForSelect();
+        $unitform = new UnitForm($divisions);
+      
         //send paginator and form to index view
         return new ViewModel(array(
             'page' => $page,
-            'paginator' => $paginator,
+            'paginator' => $paginator, // handles sending programs
             'unitform' => $unitform,
             'programform' => $programform
         ));
@@ -78,12 +77,14 @@ class ProgramController extends AbstractActionController {
      *  Unit Add Action
      */
 
-    public function addUnitAction() {
-        //the add unit form
-        $form = new UnitForm();
-
+    public function addunitAction() {
+        //add unit form
+        $divisions = $this->getUnitQueries()->getDivisionsForSelect();
+        $form = new UnitForm($divisions);
+      
         //if form is returned with post
         $request = $this->getRequest();
+        $form->setData($request->getPost());
 
         if ($request->isPost()) {
             if ($request->getPost()['unit_id'] == NULL) {
@@ -95,17 +96,17 @@ class ProgramController extends AbstractActionController {
                 $form->setInputFilter($unit->getInputFilter());
                 $form->setData($request->getPost());
                 if ($form->isValid()) {
-                    
                     $unit->exchangeArray($form->getData());
-    
                     //save the unit
-                    $this->getUnitQueries()->saveUnit($unit);
+                    $this->getUnitQueries()->addUnit($unit);
                 }
                 // Redirect to list of programs
                 return $this->redirect()->toRoute('program');
             }
         }
-        return array('unitform' => $form);
+        return array('unitform' => $form,
+                     'errorMsg' => '',
+                    );
     }
 
     
@@ -113,7 +114,7 @@ class ProgramController extends AbstractActionController {
      *  Program Add Action
      */
 
-    public function addProgramAction() {
+    public function addprogramAction() {
         //the add program form
         $units = $this->getUnitQueries()->getUnitsForSelect();
         $form = new ProgramForm($units);
@@ -129,7 +130,6 @@ class ProgramController extends AbstractActionController {
                 $program = new Program();
                 $form->setInputFilter($program->getInputFilter());
                 $form->setData($request->getPost());
-       var_dump($request->getPost());          
                 if ($form->isValid()) {
                     $program->exchangeArray($form->getData());
        
@@ -162,6 +162,7 @@ class ProgramController extends AbstractActionController {
 
         //the program edit form, bind with values from database
         $units = $this->getUnitQueries()->getUnitsForSelect();
+        $divisions - $this->getUnitQueries->getDivisionsForSelect();
         $form = new ProgramForm($units);
         $form->bind($program);
         $form->get('programsubmit')->setAttribute('value', 'Save');

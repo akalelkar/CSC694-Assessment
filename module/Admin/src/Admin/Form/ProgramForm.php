@@ -29,7 +29,7 @@ class ProgramForm extends Form
                 'id' => 'name',
             ),
             'options' => array(
-                'label' => 'Name',
+                'label' => 'Program Name',
             ),
         ));
 
@@ -53,7 +53,7 @@ class ProgramForm extends Form
                 'id' => 'unit_id',
             ),
             'options' => array(
-                'label' => 'Unit',
+                'label' => 'Unit Name',
                 'value_options' => $units,
             ),
         ));

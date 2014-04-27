@@ -75,7 +75,7 @@ $(document).ready(function()
         // create url for redirect
         var urlform = "<?php echo $this->url('outcomes', array(
                                     'controller'=>'outcomes',
-                                    'action'=>'getPrograms')); ?>";
+                                    'action'=>'getprograms')); ?>";
         urlform = urlform + '/' + unit;
    
         $.ajax({
@@ -111,7 +111,7 @@ $(document).ready(function()
         // create url for redirect
         var urlform = "<?php echo $this->url('outcomes', array(
                                     'controller'=>'outcomes',
-                                    'action'=>'getOutcomes')); ?>";
+                                    'action'=>'getoutcomes')); ?>";
         urlform = urlform + '/' + program;
       
         // asynchronous ajax code to populate program/degree selector

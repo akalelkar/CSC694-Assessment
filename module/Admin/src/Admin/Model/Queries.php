@@ -76,10 +76,11 @@ class Queries extends AbstractTableGateway
         $select2 = $sql->select()
                        ->from('programs')
                        ->columns(array('id', 'unit_id', 'name'))
+                       ->join('units', 'programs.unit_id = units.id', array('division'))
                        //->where(array('programs.active_flag' => 1))
                        ->where($whereDates)
                        ->where(new NotIn('programs.id', $select1))
-                       ->order(array('unit_id'))
+                       ->order(array('division', 'unit_id'))
                    
         ;
 
@@ -149,13 +150,13 @@ class Queries extends AbstractTableGateway
                       //->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
                       ->join('plan_programs', 'plan_programs.program_id = programs.id',array())
                       ->join('plans', 'plans.id = plan_programs.plan_id',array('id'))
-                      //->join('plans', 'plans.id = plan_programs.plan_id', array())
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       ->where($whereDates)
                       ->where(array('plans.year' => $year))
                       // don't test active_flag, rather use deactivated dates
                       // ->where(array('programs.active_flag' => 1))
                       ->where(new NotIn('plans.id', $reportsselect))
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
                       
         ;
         $statement = $sql->prepareStatementForSqlObject($select);
@@ -243,12 +244,13 @@ class Queries extends AbstractTableGateway
                       ->columns(array('unit_id', 'name'))
                       ->join('plan_programs', 'plan_programs.program_id = programs.id', array())
                       ->join('plans', 'plans.id = plan_programs.plan_id', array())
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       ->where(array('plans.year' => $year))
                       ->where(array('plans.meta_flag' => 1))
                       //->where(array('programs.active_flag' => 1))
                       // do not add test for active flag since the plan may have been active
                       // during the year selected - if a plan exists, then it should be shown
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
         ;
        
         $statement = $sql->prepareStatementForSqlObject($select);
@@ -270,10 +272,11 @@ class Queries extends AbstractTableGateway
                       ->columns(array('unit_id', 'name'))
                       ->join('plan_programs', 'plan_programs.program_id = programs.id',array())
                       ->join('plans', 'plans.id = plan_programs.plan_id',array())
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       ->where(array('programs.active_flag' => 1))
                       ->where(array('plans.year' => $year))
                       ->where(array('plans.funding_flag' => 1))
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
         ;
         
         $statement = $sql->prepareStatementForSqlObject($select);
@@ -309,10 +312,11 @@ class Queries extends AbstractTableGateway
                       ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
                       ->join('outcomes', 'outcomes.program_id = programs.id',array())
                       ->join('users', 'users.id = outcomes.deactivated_user', array('last_name', 'first_name'))
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       ->where(array('outcomes.active_flag' => 0))
                       ->where($where->isNotNull('outcomes.deactivated_ts'))
                       ->where($where->greaterThan('outcomes.deactivated_ts', $fromDate))
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
         ;
         
         // get programs that added outcomes since fromdate
@@ -322,9 +326,10 @@ class Queries extends AbstractTableGateway
                       ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
                       ->join('outcomes', 'outcomes.program_id = programs.id',array())
                       ->join('users', 'users.id = outcomes.created_user', array('last_name', 'first_name'))
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       ->where($where->isNotNull('outcomes.created_ts'))
                       ->where($where->greaterThan('outcomes.created_ts', $fromDate))
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
                    
         ;
         // union results
@@ -353,10 +358,11 @@ class Queries extends AbstractTableGateway
                       ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
                       ->join('plan_programs', 'plan_programs.program_id = programs.id',array())
                       ->join('plans', 'plans.id = plan_programs.plan_id',array('id'))
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       // instantiating new where must come first
                       ->where($where->like('plans.modified_ts', $currentYear . '%'))
                       ->where(array('plans.year' => $previousYear))
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
                    
         ; 
         
@@ -389,10 +395,11 @@ class Queries extends AbstractTableGateway
                       ->join('plan_programs', 'plan_programs.program_id = programs.id',array())
                       ->join('plans', 'plans.id = plan_programs.plan_id',array())
                       ->join('reports', 'reports.plan_id = plans.id',array('id'))
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       // instantiating new where must come first
                       ->where($where->like('reports.created_ts', $currentYear . '%'))
                       ->where(array('plans.year' => $previousYear))
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
                    
         ; 
         // get programs that have a modified timestamp of this year but plan year is past two years
@@ -403,10 +410,11 @@ class Queries extends AbstractTableGateway
                       ->join('plan_programs', 'plan_programs.program_id = programs.id',array())
                       ->join('plans', 'plans.id = plan_programs.plan_id',array())
                       ->join('reports', 'reports.plan_id = plans.id',array('id'))
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       // instantiating new where must come first
                       ->where($where->like('reports.modified_ts', $currentYear . '%'))
                       ->where(array('plans.year' => $previousYear))
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
                    
         ;
         $select1->combine($select2);
@@ -437,10 +445,11 @@ class Queries extends AbstractTableGateway
                       ->join('plans', 'plans.id = plan_programs.plan_id',array())
                       ->join('liaison_privs', 'liaison_privs.unit_id = programs.unit_id', array())
                       ->join('users', 'users.id = liaison_privs.user_id', array('first_name', 'last_name'))
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       ->where(array('plans.year' => $year))
                       ->where(array('plans.draft_flag' => 0))
                       ->where(array('plans.feedback' => 0))
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
                    
         ; 
         // get programs with a report needing feedback
@@ -454,10 +463,11 @@ class Queries extends AbstractTableGateway
                       ->join('liaison_privs', 'liaison_privs.unit_id = programs.unit_id', array())
                       ->join('users', 'users.id = liaison_privs.user_id', array('first_name', 'last_name'))
                       ->join('reports', 'reports.plan_id = plans.id', array())
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       ->where(array('plans.year' => $year))
                       ->where(array('reports.draft_flag' => 0))
                       ->where(array('reports.feedback' => 0))
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
                    
         ;
         
@@ -495,11 +505,12 @@ class Queries extends AbstractTableGateway
                       ->join('user_roles', 'user_roles.user_id = assessor_privs.user_id',array())
                       // grab user responsible for deactivating assessor
                       ->join('users', 'users.id = assessor_privs.deactivated_user', array('last_name', 'first_name'))
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       ->where($where->isNotNull('assessor_privs.deactivated_ts'))
                       ->where($where->greaterThan('assessor_privs.deactivated_ts', $fromDate))
                       // liaison role = 4
                       ->where(array('user_roles.role' => 4))
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
         ;
         
         // get newly created assessor roles
@@ -511,11 +522,12 @@ class Queries extends AbstractTableGateway
                       ->join('user_roles', 'user_roles.user_id = assessor_privs.user_id',array())
                       // grab user responsible for deactivating assessor
                       ->join('users', 'users.id = assessor_privs.created_user', array('last_name', 'first_name'))
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       ->where($where->isNotNull('assessor_privs.created_ts'))
                       ->where($where->greaterThan('assessor_privs.created_ts', $fromDate))
                       // liaison role = 4
                       ->where(array('user_roles.role' => 4))
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
         ;
         // union results
         $select1->combine($select2);
@@ -531,21 +543,60 @@ class Queries extends AbstractTableGateway
     {
         $sql = new Sql($this->adapter);
 
+        // The following dates are needed since programs are created/deacctivated at various times.
+        // create date to compare created/deactivated to
+        // school year is July 1 - June 31
+        // Get current year and month
+        $nowYear = date("Y", time());
+        $nowMonth = date('m', time());
+        
+        // adjust current year so it reflects the ending school year 
+        if ($nowMonth > 6){  // in the start of a school year, need to adjust
+           $nowYear++;
+        }
+        
+        $endDate = $nowYear . '-06-31';
+     
+        // create where clause to handle the date test
+        // consider all programs that have not been deactivated
+        // include newly created programs (those created during the current school year))
+        
+        $programsWhereDates = new \Zend\Db\Sql\Where();
+        $programsWhereDates	
+	    ->nest()
+	    ->greaterThan('programs.deactivated_ts', $endDate)
+	    ->or
+	    ->isNull('programs.deactivated_ts')
+	    ->unnest();
+            
+        $outcomesWhereDates = new \Zend\Db\Sql\Where();
+        $outcomesWhereDates	
+	    ->nest()
+	    ->greaterThan('outcomes.deactivated_ts', $endDate)
+	    ->or
+	    ->isNull('outcomes.deactivated_ts')
+	    ->unnest();
+        
+
         $select1 = $sql->select()
                        ->columns(array('program_id'))
                        ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
                        ->from('outcomes')
-                       ->where(array('active_flag' => 1))
-        ;       
+                      // ->where(array('active_flag' => 1))
+                       ->where($outcomesWhereDates)
+                   
+       ;       
                        
         
-        // get programs requesting funding for plans 
+        // get programs not in set above 
         $select2 = $sql->select()
                       ->from('programs')
                       ->columns(array('unit_id', 'name'))
-                      ->where(array('programs.active_flag' => 1))
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
+                      ->where($programsWhereDates)
+                      //->where(array('programs.active_flag' => 1))
                       ->where(new NotIn('programs.id', $select1))
-                      ->order(array('programs.unit_id'))
+                      ->order(array('division', 'programs.unit_id'))
         ;
         
         $statement = $sql->prepareStatementForSqlObject($select2);

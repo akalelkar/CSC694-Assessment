@@ -3,6 +3,7 @@
 namespace Application\Form;
 
 use Zend\Form\Form;
+use Zend\Validator\Regex;
 
 class LoginForm extends Form
 {
@@ -22,7 +23,16 @@ class LoginForm extends Form
             'options' => array(
                 'label' => 'User ID ',                
             ),
-          
+            'validators' => array(
+                     array(
+                           'name' => 'Regex',
+                           'options' => array(
+                                'pattern'   =>  '[a-zA-Z][a-zA-Z0-9]*',
+                         ))
+            ),
+            'filters' => array(
+                         array('StringTrim')
+            ),
         ));
         
         $this->add(array(

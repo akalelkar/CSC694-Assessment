@@ -8,12 +8,12 @@ use Zend\Form\Form;
 
 class UnitForm extends Form
 {
-    public function __construct()     
+    public function __construct($divisions)     
     {
 
         parent::__construct('unit');
         $this->setAttribute('method', 'post');
-        
+       
         $this->add(array(
             'name' => 'id',
             'type' => 'Zend\Form\Element\Hidden',
@@ -22,8 +22,22 @@ class UnitForm extends Form
                 'id' => 'id',
             ),
         ));
+
+        $this->add(array(
+            'name' => 'division',
+            'type' => 'Zend\Form\Element\Select',
+            'attributes' => array(
+                'class'=> 'form-control',
+                'id' => 'division',
+            ),
+            'options' => array(
+                'label' => 'Division',
+                'value_options' => $divisions,
+            ),
+        ));
         
-         $this->add(array(
+
+        $this->add(array(
             'name' => 'unit_id',
             'type' => 'Zend\Form\Element\Text',
             'attributes' => array(
@@ -33,17 +47,6 @@ class UnitForm extends Form
             'options' => array(
                 'label' => 'Unit Name',
             ),
-           
-            'validators' => array(
-                    array(
-                        'name' => 'StringLength',
-                        'options' => array(
-                            'encoding' => 'UTF-8',
-                            'min' => 3,
-                            'max' => 3,
-                        ),
-                    ),
-                ),
         ));
         
         

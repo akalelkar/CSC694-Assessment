@@ -38,6 +38,19 @@ class PlansController extends AbstractActionController
       $this->sessionContainer = new Container('fileUpload');
    }
 
+   /********** Security supporting functions **********/
+   
+   /**
+    * Make sure the user is valid
+    */
+   public function onDispatch(\Zend\Mvc\MvcEvent $e) 
+   {
+        $validUser = new AuthUser();
+        if (!$validUser->Validate()) {
+            return $this->redirect()->toRoute('home');
+        }
+        return parent::onDispatch($e);
+   }
    
    /********** Database connection functions **********/
 
@@ -67,21 +80,6 @@ class PlansController extends AbstractActionController
    }
       
       
-   /********** Security supporting functions **********/
-   
-   /**
-    * Make sure the user is valid
-    */
-   public function onDispatch(\Zend\Mvc\MvcEvent $e) 
-   {
-      $validUser = new AuthUser();
-        if (!$validUser->Validate()){
-            return $this->redirect()->toRoute('application');
-        }
-        else{
-            return parent::onDispatch( $e );
-        }
-   }
    
    
    /********** Ajax supporting functions **********/      
@@ -89,7 +87,7 @@ class PlansController extends AbstractActionController
    /**
     * Download the file from the server and create a response to send back to the client
     */
-   public function downloadFileAction()
+   public function downloadfileAction()
    {
 
       $id = $this->params()->fromRoute('id', '');
@@ -119,7 +117,7 @@ class PlansController extends AbstractActionController
     *
     * Returns a Json object
     */
-   public function getUnitsAction()
+   public function getunitsAction()
    {
       // get the session variables
       $namespace = new Container('user');
@@ -154,7 +152,7 @@ class PlansController extends AbstractActionController
     *
     * Returns a Json object
     */
-   public function getProgramsAction()
+   public function getprogramsAction()
    {
       // get unit from id in url
       $unitChosen = $this->params()->fromRoute('id', 0);
@@ -202,7 +200,7 @@ class PlansController extends AbstractActionController
     *
     * Returns a json object containing the dynamic HTML
     */
-   public function deleteFileAction()
+   public function deletefileAction()
    {
       // get the data from the request using json    
       $id = $_POST['id'];
@@ -310,7 +308,7 @@ class PlansController extends AbstractActionController
     *
     * Returns a partial view
     */
-   public function listPlansAction()
+   public function listplansAction()
    {
       // get the session variables
       $namespace = new Container('user');
@@ -318,7 +316,7 @@ class PlansController extends AbstractActionController
       $role = $namespace->role;
       
       // form for listing the plans
-      $form = new Plan('listPlans');
+      $form = new Plan('listplans');
       
       // get the data from the request using json 
       $action = $_POST['action'];
@@ -344,7 +342,8 @@ class PlansController extends AbstractActionController
             'programs' => $programs,
             'year' => $year,
             'outcomes' => $this->getDatabaseData()->getOutcomes($unit, $programs, $year, $action),
-            'plans' => $this->getDatabaseData()->getPlans($unit, $programs, $year, $action),
+            'plans1' => $this->getDatabaseData()->getPlansWithOutcomes($unit, $programs, $year, $action),
+            'plans2' => $this->getDatabaseData()->getPlansWithMeta($unit, $programs, $year, $action),
             'role'=> $role,
             'form'=>$form,
      ));
@@ -359,10 +358,10 @@ class PlansController extends AbstractActionController
     * 
     * Returns a partial view
     */
-   public function viewPlanAction()
+   public function viewplanAction()
    {
       // form for view only page
-      $form = new Plan('viewPlan');
+      $form = new Plan('viewplan');
         
        // get the session variables
       $namespace = new Container('user');
@@ -374,9 +373,10 @@ class PlansController extends AbstractActionController
       $unit = $_POST['unit'];
       $programs = $_POST['programs'];
       $year = $_POST['year'];
-  
-    
+
       // create a partial view to send back to the caller
+      // These queries will use the entity outcome.php to create objects passed to the view.
+      // This is a different method than what is used in listplansAction
       $partialView = new ViewModel(array(
          'planId' => $planId,
          'unit' => $unit,
@@ -399,10 +399,10 @@ class PlansController extends AbstractActionController
     *
     * Returns a partial view
     */
-   public function addPlanBaseAction()
+   public function addplanbaseAction()
    {
       // form for add plan base
-      $form = new Plan('addPlan');
+      $form = new Plan('addplan');
 
       // get the data from the request using json      
       $action = $_POST['action'];
@@ -432,10 +432,10 @@ class PlansController extends AbstractActionController
     *
     * Returns a partial view
     */
-   public function addPlanMetaAction()
+   public function addplanmetaAction()
    {
       // form for add meta page
-      $form = new Plan('addPlanMeta');
+      $form = new Plan('addplanmeta');
       
       // get the data from the request using json    
       $action = $_POST['action'];
@@ -462,14 +462,14 @@ class PlansController extends AbstractActionController
     *
     * Return is a redirect back to the main page
     */
-   public function insertMetaAction()
+   public function insertmetaAction()
    {
       // get the session variables
       $namespace = new Container('user');
       $userID = $namespace->userID;
       
       // form for inserting the meta 
-      $form = new Plan('insertMetaPlan');
+      $form = new Plan('insertmetaplan');
       
       // get the type of request
       $request = $this->getRequest();
@@ -506,10 +506,10 @@ class PlansController extends AbstractActionController
     *
     * Returns a partial view
     */
-   public function addPlanAction()
+   public function addplanAction()
    {
       // form for adding a plan
-      $form = new Plan('addPlan');
+      $form = new Plan('addplan');
       
       // get the data from the request using json    
       $action = $_POST['action'];
@@ -544,14 +544,14 @@ class PlansController extends AbstractActionController
     *
     * Return is a redirect back to the main page
     */
-   public function insertPlanAction()
+   public function insertplanAction()
    {
       // get the session variables
       $namespace = new Container('user');
       $userID = $namespace->userID;
       
       // form for uploading documents
-      $form = new Plan('insertPlan');
+      $form = new Plan('insertplan');
     
       // get the type of request
       $request = $this->getRequest();
@@ -634,14 +634,14 @@ class PlansController extends AbstractActionController
     *
     * Returns a partial view
     */
-   public function modifyPlanAction()
+   public function modifyplanAction()
    {
       // get the session variables
       $namespace = new Container('user');
       $role = $namespace->role;
       
       // form for modifly page
-      $form = new Plan('modifyPlan');
+      $form = new Plan('modifyplan');
         
       // get the data from the request using json            
       $planId = $_POST['planId'];
@@ -650,12 +650,15 @@ class PlansController extends AbstractActionController
       $year = $_POST['year'];
 
       // create a partial view to send back to the caller
+      // See query documentation for getOutcomesByPlanIdForModify1 for an explanation
+      // why getting outcomes was split into two calls
       $partialView = new ViewModel(array(
          'planId' => $planId,
          'unit' => $unit,
          'programs' => $programs,
          'year' => $year,
-         'outcomes' => $this->getDatabaseData()->getOutcomesByPlanIdForModify($planId, $programs),
+         'outcomes1' => $this->getDatabaseData()->getOutcomesByPlanIdForModify1($planId),
+         'outcomes2' => $this->getDatabaseData()->getOutcomesByPlanIdForModify2($planId),
          'plan' => $this->getDatabaseData()->getPlanByPlanId($planId),
          'planDocuments' => $this->getDatabaseData()->getPlanDocumentsByPlanId($planId),
          'role' => $role,
@@ -671,14 +674,14 @@ class PlansController extends AbstractActionController
     *
     * Returns a partial view
     */
-   public function provideFeedbackAction()
+   public function providefeedbackAction()
    {
       // get the session variables
       $namespace = new Container('user');
       $role = $namespace->role;
       
       // form for modify page
-      $form = new Plan('provideFeedback');
+      $form = new Plan('providefeedback');
         
       // get the data from the request using json            
       $planId = $_POST['planId'];
@@ -709,7 +712,7 @@ class PlansController extends AbstractActionController
     *
     * Return is a redirect back to the main page
     */
-   public function updatePlanAction()
+   public function updateplanAction()
    {
       
       // get the session variables
@@ -717,7 +720,7 @@ class PlansController extends AbstractActionController
       $userID = $namespace->userID;
       
       // form for updating the plan
-      $form = new Plan('updatePlan');
+      $form = new Plan('updateplan');
     
       // get the type of request
       $request = $this->getRequest();
@@ -783,7 +786,7 @@ class PlansController extends AbstractActionController
     * 
     * Return is a redirect back to the main page
     */
-   public function updateFeedbackAction()
+   public function updatefeedbackAction()
    {
       
       // get the session variables
@@ -791,7 +794,7 @@ class PlansController extends AbstractActionController
       $userID = $namespace->userID;
       
       // form for updating the plan
-      $form = new Plan('updatePlan');
+      $form = new Plan('updateplan');
     
       // get the type of request
       $request = $this->getRequest();
@@ -840,7 +843,7 @@ class PlansController extends AbstractActionController
             $content = fread($fp, filesize($tmpName));
             fclose($fp);
                  
-               var_dump($planId);        
+           //    var_dump($planId);        
             //get the file description
             $fileDescription = trim($request->getPost('textFileDescription' . $x));
                

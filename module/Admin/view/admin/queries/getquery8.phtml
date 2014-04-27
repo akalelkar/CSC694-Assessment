@@ -1,14 +1,20 @@
-<!-- partial file to display results of query 4 -->
+<!-- partial file to display results of query 8 -->
 
     <caption><h4><?php echo $querytitle; ?></h4></caption>
     <tr>
+         <th>Division</th>
          <th>Department</th>
          <th>Program</th>
+         <th>Plan/Report</th>
+         <th>Liaison</th>
     </tr>
     <?php
         if ($programs==''){ ?>
             <tr>
             <td><?php echo "No records found."; ?></td>
+            <td></td>
+            <td></td>
+            <td></td>
             <td></td>
             </tr>
         <?php
@@ -16,8 +22,10 @@
         else{
             foreach ($programs as $program) : ?>
             <tr>
+                <td><?php echo $this->escapeHtml($program['division']);?></td>
                 <td><?php echo $this->escapeHtml($program['unit_id']);?></td>
                 <td><?php echo $this->escapeHtml($program['name']);?></td>
+                <td><?php echo $this->escapeHtml($program['type']);?></td>
+                <td><?php echo $this->escapeHtml($program['first_name']) . " " . $this->escapeHtml($program['last_name']);?></td>
             </tr>
             <?php endforeach; }?>
-       

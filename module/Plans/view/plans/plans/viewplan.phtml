@@ -13,7 +13,7 @@
 <!-- create the right side of the page -->
 <div class="container">
     <center><h3>Assessment Plans - View Specific Plan</h3></center>
-   
+
     <p></p>  
     <div class="row">
 
@@ -58,14 +58,12 @@
 						<div class="panel-body">
 						    <?php
 							// loop through all the outcomes
-							$outcomeCount = 0;
-								foreach ($outcomes as $outcome) :
-								    $outcomeCount++;
-						    ?>
-								    <!-- display the outcome information -->
-								    <p><?php echo $outcomeCount;?>. <?php echo $outcome->getOutcomeText() ?></p>
-						    <?php
-								endforeach;
+							foreach ($outcomes as $outcome) :
+							    echo "<p>";
+							    // display the outcome information -->
+							    echo $outcome->getProgramName() . ": " . $outcome->getOutcomeText();
+							    echo "</p>";
+						    	endforeach;
 						    ?>
 						</div>
 					    </div>
@@ -308,7 +306,7 @@
 						<p><?php echo $planDocumentsCount;?>.
 						
 						<a  href="<?php echo $this->url('plans',
-										 array('action'=>'downloadFile',
+										 array('action'=>'downloadfile',
 										'id' => $id,
 										));
 							  ?>"

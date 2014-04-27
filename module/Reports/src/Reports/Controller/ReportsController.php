@@ -25,14 +25,16 @@ class ReportsController extends AbstractActionController
    // This holds table results for certain methods
    protected $tableResults;  
    
+   /**
+    * Make sure the user is valid
+    */
    public function onDispatch(\Zend\Mvc\MvcEvent $e) 
-   {   $validUser = new AuthUser();
-        if (!$validUser->Validate()){
-            return $this->redirect()->toRoute('application');
+   {
+        $validUser = new AuthUser();
+        if (!$validUser->Validate()) {
+            return $this->redirect()->toRoute('home');
         }
-        else{
-            return parent::onDispatch( $e );
-        }
+        return parent::onDispatch($e);
    }
    
    // Returns main index with left select options and blank right side
@@ -104,7 +106,7 @@ class ReportsController extends AbstractActionController
    }
 
    // Called to show all matching plans after selection is made on left nav
-   public function viewPlansAction()
+   public function viewplansAction()
    {
       // Get post data which is json
       $jsonData = $this->getRequest()->getContent();
@@ -150,7 +152,7 @@ class ReportsController extends AbstractActionController
     
    // Display addReport view - This is the view where the user enters the report data to add
    // See addNewReportAction for the code that grabs the user entered data and adds the report
-   public function addReportAction()
+   public function addreportAction()
    {
       // Get plan id from post data
       $planId = $this->params()->fromPost('id');
@@ -193,7 +195,7 @@ class ReportsController extends AbstractActionController
     
    // Gets individual report details when user selects a plan they wish
    // to view the report for
-   public function viewReportAction()
+   public function viewreportAction()
    {
       // get the session variables
       $namespace = new Container('user');
@@ -222,7 +224,7 @@ class ReportsController extends AbstractActionController
          foreach ($results as $result){
             $documentArray[] = $result;
          }
-       
+
          // Make view and give it data
          $partialView = new ViewModel(array(
             'role' => $role,
@@ -241,7 +243,7 @@ class ReportsController extends AbstractActionController
     
    // Called after user selects a plan they want to modify the report for
    // Displays report data associated with user selected plan 
-   public function modifyReportAction()
+   public function modifyreportAction()
    {
       
       // get the session variables
@@ -300,7 +302,7 @@ class ReportsController extends AbstractActionController
     
    // Called after user selects a report they want to provide feedback for
    // Displays report data associated with user selected plan 
-   public function provideFeedbackAction()
+   public function providefeedbackAction()
    {
       // get the session variables
       $namespace = new Container('user');
@@ -357,7 +359,7 @@ class ReportsController extends AbstractActionController
     
    // This is called after user makes modifications to the report data and
    // wants to send it to the database
-   public function updateReportAction()
+   public function updatereportAction()
    {
       // get the session variables
       $namespace = new Container('user');
@@ -422,7 +424,7 @@ class ReportsController extends AbstractActionController
    
    
    // This is called from provide-Feedback.phtml for inserting feedback into existing report
-      public function addFeedbackAction(){
+      public function addfeedbackAction(){
       
       // get the session variables
       $namespace = new Container('user');
@@ -442,8 +444,10 @@ class ReportsController extends AbstractActionController
       // Redirect user to index if successful
       $this->redirect()->toRoute('index');
    }
-   // This is called from addReport view for inserting new report
-   public function addNewReportAction()
+   
+   
+   // This is called from addreport.phtml view for inserting new report
+   public function addnewreportAction()
    {
       $namespace = new Container('user');
       $userID = $namespace->userID;

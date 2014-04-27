@@ -54,6 +54,10 @@ if(!$results){
 			    echo " <span class='pull-right'>Report Does Not Exist</span>";
 			    $showButton = 0;
 			}
+			else if ($plan->hasReport == 1)  // draft exists
+			{
+			    echo " <span> (Draft)</span>";
+			}
 		    }
 		    if ($showButton == 1){	
 		?>	    <input class="btn btn-primary btn-sm pull-right"

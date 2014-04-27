@@ -1,0 +1,184 @@
+<?php
+    $title = 'Add List Assessment Plan';
+    $this->headTitle($title);
+
+    // Init Form
+    $form = $this->form;
+    $form->setAttribute('class', 'form-horizontal');
+    $form->prepare();
+?>
+
+<!-- create the right side of the page -->
+<p></p>
+<center><h3>Assessment Plans - List All Plans</h3></center>
+<div class="col-md-8">
+    <?php
+	// set the label accordingly
+	if (sizeof($plans1) == 0 && sizeof($plans2) == 0) {
+	    $label="There are no plans for: ";
+	}
+	else{
+	    $label="Select a plan to modify for: ";
+	    if ($action == "View"){
+		$label="Select a plan to view for: ";
+	    }
+	    else if ($action == "Provide Feedback"){
+		$label="Select a plan to provide feedback for: ";
+	    }
+	}
+ 
+	// create a string out of the programs array to use as a hidden element to pass between the pages
+	$allPrograms = "";
+	if (!empty($this->programs)) {
+	    foreach ($this->programs as $program) :
+		$allPrograms = $allPrograms . $program . ", ";
+	    endforeach;
+	    
+	    // remove the last ", " added on after the last loop above
+	    $allPrograms = substr($allPrograms, 0, -2);
+	}
+	echo "<h4>" . $label . $this->unit . ": " . $allPrograms . ": " . $this->year . "</h4>";
+  	
+	// prepare hidden elements to pass data between pages	
+	$elem = $form->get('action');
+	$elem->setValue($action);					    
+	echo $this->formInput($elem);
+
+	$elem = $form->get('unit');
+	$elem->setValue($unit);					    
+	echo $this->formInput($elem);
+
+	$elem = $form->get('programs');
+	$elem->setValue($allPrograms);					    
+	echo $this->formInput($elem);
+	
+	$elem = $form->get('year');
+	$elem->setValue($year);					    
+	echo $this->formInput($elem);
+    ?>	    
+    
+     <div class="input-group">
+	<div class="panel-group" id="accordion">
+	    <div class="panel panel-success">
+		<?php					    			
+		    // Loop through all the returned outcome plans
+		    if (!empty($plans1)) {
+			// A plan may be represented more than one time if multiple outcomes associated
+			// with plan.  Need to grab outcome text from multiple listings.
+			$prevPlan = 0;
+			$prevEnding = '';
+			foreach ($plans1 as $plan) :
+			    // if new plan, create new row
+			    if ($plan['planId'] != $prevPlan){
+				$prevPlan = $plan['planId'];
+				echo $prevEnding;
+				$prevEnding = "</table></div></div></div>";  // a bit redundant
+				// Create the plan row
+				echo '<div class="panel-heading">';
+				    echo '<h4 class="title">';
+					    echo "Plan # " . $plan['planId'];
+					    echo " Outcomes Plan";
+					    // query only returns drafts if modified selected
+					    if ($plan['draft_flag'] == 1){
+						echo " &nbsp;(Draft)";
+					    }
+					
+					// Create a delete button for each row
+					// Assessors (role = 4) are not allowed to delete a plan
+					// Delete and Select buttons pull right, so delete is listed first
+					//	so it pulls furthest to the right 
+					    if ($action == "Modify" && $role != 4) {
+						echo "<a ";
+						$elem = $form->get('modifyDelete');
+						$elem->setValue($plan['planId']);					    
+						echo $this->formButton($elem);
+						echo "&raquo </a>";
+				 	    }
+					    // Create a select button for each row 
+					    echo "<a ";
+					    $elem = $form->get('viewModifySelect');
+					    $elem->setValue($plan['planId']);
+					    if ($action=="View"){
+					        $elem->setLabel($action . ' Plan');
+					    }
+					    else{
+					        $elem->setLabel($action);
+					    }
+					    echo $this->formButton($elem);
+					    echo "&raquo </a>";
+				    echo "</h4> </div>";
+			    	
+			    // Create the outcome data for each row 
+			    echo '<div class="panel-body">
+				  <div class="control-group">
+				    <div class="controls">
+					<table class="table">';
+			    }
+			    echo "<tr>";
+		      	    echo  $plan['program_name'] . ": " . $plan['text'];
+			    echo "</tr></br></br>";
+			endforeach;
+		    }
+		    // Loop through all the returned meta plans
+		    if (!empty($plans2)) {
+			// A plan may be represented more than one time if multiple outcomes associated
+			// with plan.  Need to grab outcome text from multiple listings.
+			$prevPlan = 0;
+			$prevEnding = '';
+			foreach ($plans2 as $plan) :
+			    // if new plan, create new row
+			    if ($plan['planId'] != $prevPlan){
+				$prevPlan = $plan['planId'];
+				echo $prevEnding;
+				$prevEnding = "</table></div></div></div>";  // a bit redundant
+				// Create the plan row
+				echo '<div class="panel-heading">';
+				    echo '<h4 class="title">';
+					    echo "Plan # " . $plan['planId'];
+					    echo " Meta Plan";
+					    // query only returns drafts if modified selected
+					    if ($plan['draft_flag'] == 1){
+						echo " &nbsp;(Draft)";
+					    }
+					
+					// Create a delete button for each row
+					// Assessors (role = 4) are not allowed to delete a plan
+					// Delete and Select buttons pull right, so delete is listed first
+					//	so it pulls furthest to the right 
+					    if ($action == "Modify" && $role != 4) {
+						echo "<a ";
+						$elem = $form->get('modifyDelete');
+						$elem->setValue($plan['planId']);					    
+						echo $this->formButton($elem);
+						echo "&raquo </a>";
+				 	    }
+					    // Create a select button for each row 
+					    echo "<a ";
+					    $elem = $form->get('viewModifySelect');
+					    $elem->setValue($plan['planId']);
+					    if ($action=="View"){
+					        $elem->setLabel($action . ' Plan');
+					    }
+					    else{
+					        $elem->setLabel($action);
+					    }
+					    echo $this->formButton($elem);
+					    echo "&raquo </a>";
+				    echo "</h4> </div>";
+			    	
+			    // Create the outcome data for each row 
+			    echo '<div class="panel-body">
+				  <div class="control-group">
+				    <div class="controls">
+					<table class="table">';
+			    }
+			    echo "<tr>";
+		      	    echo  $plan['program_name'] . ": " . $plan['text'];
+			    echo "</tr></br></br>";
+			endforeach;
+		    }
+		?>
+	    </div>
+	</div>
+    </div>
+</div>

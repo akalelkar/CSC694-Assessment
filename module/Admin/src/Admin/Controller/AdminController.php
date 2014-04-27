@@ -10,27 +10,22 @@ class AdminController extends AbstractActionController
 {
    protected $adminTable;
 
-   public function onDispatch(\Zend\Mvc\MvcEvent $e) {
-       /* $validUser = new AuthUser();
-        if (!$validUser->Validate())
-        {
-            return $this->redirect()->toRoute('application');
+   /********** Security supporting functions **********/
+   
+   /**
+    * Make sure the user is valid
+    */
+   public function onDispatch(\Zend\Mvc\MvcEvent $e) 
+   {
+        $validUser = new AuthUser();
+        if (!$validUser->Validate()) {
+            return $this->redirect()->toRoute('home');
         }
-        else {
-            $namespace = new Container('user');
-            if($namespace->role != 1)
-          
-            {
-              return $this->redirect()->toRoute('application');
-            }
-       */
-            return parent::onDispatch($e);
-       // }
-   }        
+        return parent::onDispatch($e);
+   }
    
    public function indexAction()
    {
-         
       
    }
 

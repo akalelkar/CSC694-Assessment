@@ -25,6 +25,7 @@ class UserTable extends AbstractTableGateway
     /*
      * Returns all users in the user database
      */
+    // Called from UserController indexAction method
     public function fetchAll()
     {
         $sql = new Sql($this->adapter);
@@ -51,35 +52,10 @@ class UserTable extends AbstractTableGateway
     }
     
     /*
-     *  Get users by roles 
-     *  return array user_id=> first_name . last_name
-     */
-    public function fetchUsersByRole($roles)
-    {
-
-        $sql = new Sql($this->adapter);
-        $select = $sql->select()
-                      ->columns(array('id','first_name','last_name'))
-                      ->from(array('u' =>$this->table))
-                      ->join(array('ur' =>'user_roles'), 'u.id = ur.user_id')
-                      ->where(array('role'=>$roles))
-                      ->where(array('users.active_flag' => 1))
-                      ->where(array('user_roles.active_flag' => 1))
-        ;
-                      
-        $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
-        $results = array();
-        foreach($result as $key => $value){
-            $results[$value['full_name']] = $value['first_name'] .' '.$value['last_name'];
-        }
-        return $results;
-    }
-    
-    /*
      *  Get all roles by user id
      *  @id - the user id
      */
+    // Called from getUser
     public function getRoles($id)
     {
         $sql = new Sql($this->adapter);
@@ -100,30 +76,7 @@ class UserTable extends AbstractTableGateway
         return $roles;
     }
     
-    /*
-     * gets roles by user id
-     */
-    public function getRolesById($id, $active = true)
-    {
-        $sql = new Sql($this->adapter);
-        $select = $sql->select()
-                    ->from('user_roles')
-                    ->columns(array('role' => 'role'));
-        if($active){
-            $select->where(array('user_id' => $id,'active_flag' => 1));
-        }else{
-            $select->where(array('user_id' => $id,'active_flag' => 0));
-        }
-                
-        $statement = $sql->prepareStatementForSqlObject($select);
-        $result = $statement->execute();
-        $roles = array();
-        foreach($result as $key => $value){
-            $roles[] = $value['role'];
-        }
-        return $roles;
-    }
-
+    // Called from ProgramController editAction method
     // add privileges to various privs tables and possibly update user role
     public function addPrivileges($id, $privs, $role){
         // adds the privileges for that role by inserting a tuple in the
@@ -223,6 +176,7 @@ class UserTable extends AbstractTableGateway
       
     }
     
+    // Called from ProgramController editAction method
     // remove privileges from various privs tables and possibly update user role
     public function removePrivileges($id, $privs, $role){
         // removes the privileges for that role by inactivating the privileges
@@ -297,6 +251,7 @@ class UserTable extends AbstractTableGateway
      * Get user by id
      * @returns null if no user is found or the user object
      */
+    // Called from ProgramController editAction method
     public function getUser($id)
     {
         $id = (int) $id;
@@ -313,28 +268,11 @@ class UserTable extends AbstractTableGateway
         return $user;
     }
     
-    /*
-     * Gets user by email address
-     * @returns null if no user is found or the user object
-     */
-    public function getUserByEmail($email)
-    {
-        $rowset = $this->select(array('email' => $email));
-        
-        $row = $rowset->current();
-        if (!$row) {
-            return null;
-        }
-        $roles = $this->getRoles($row['id']);
-        $row['user_roles'] = $roles;
-        $user = new User();
-        $user->exchangeArray($row);
-        return $user;
-    }
     
     /*
      * Get user's privileges based on a role
      */
+    // Called from ProgramController editAction method
     public function getUserPrivs($user, $role)
     {
         $sql = new Sql($this->adapter);

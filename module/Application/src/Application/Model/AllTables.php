@@ -52,17 +52,29 @@ class AllTables extends AbstractTableGateway
         // get units available for user from unit_privs and liaison_privs
         $sql = new Sql($this->adapter);
         $select1 = $sql->select()
-                    ->from('unit_privs')
+                    ->from('chair_privs')
                     ->columns(array('id' => 'unit_id'))
-                    ->where(array('unit_privs.user_id' => $userID));
+                    ->where(array('chair_privs.user_id' => $userID, 'active_flag' => 1));
                     
         $select2 = $sql->select()
                     ->from('liaison_privs')
                     ->columns(array('id' => 'unit_id'))
-                    ->where(array('liaison_privs.user_id' => $userID));
+                    ->where(array('liaison_privs.user_id' => $userID, 'active_flag' => 1));
         
-        // union results from both selects
+        // combine first two
         $select1->combine($select2);
+        
+        // get third
+        $select3 = $sql->select()
+                    ->from('assessor_privs')
+                    ->columns(array('id' => 'unit_id'))
+                    ->where(array('assessor_privs.user_id' => $userID, 'active_flag' => 1));
+
+        // union results from all three selects
+        $select = $sql->select()
+                      ->from(array('select1and2' => $select1));
+        $select->combine($select3);
+        
 
 
         $statement = $sql->prepareStatementForSqlObject($select1);

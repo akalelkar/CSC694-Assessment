@@ -25,33 +25,35 @@ class ProgramTable extends AbstractTableGateway {
     /*
      * Returns all programs 
      */
+    // Called from ProgramController indexAction method
     public function fetchAll()
     {
         $sql = new Sql($this->adapter);
         $select = $sql->select()
                       ->from($this->table)
                       ->join('users', 'users.id = programs.created_user', array('last_name', 'first_name'))
+                      ->join('units', 'programs.unit_id = units.id', array('division'))
                       ->where(array('programs.active_flag' => 1))
-                      ->order('unit_id');
+                      ->order(array('division', 'programs.unit_id'))
         ;
         
         $statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
-
         $programs = array();
         foreach($result as $row){
             //create programs array to return
             $program = new Program();
             $program->exchangeArray($row);
             $programs[] = $program;
-            
         }
+
         return $programs;
     }
 
     /*
      * Get program by id
      */
+    // Called from ProgramController editAction method
     public function getProgram($id) {
         $id = (int) $id;
         $rowset = $this->select(array('id' => $id));
@@ -65,23 +67,10 @@ class ProgramTable extends AbstractTableGateway {
         return $program;
     }
 
-    
-    public function addProgram(Program $program){
-        $namespace = new Container('user');
-        
-        $data = array(
-            'unit_id' => $program->unit_id,
-            'name' => $program->name,
-            'created_ts' => date('Y-m-d h:i:s', time()),
-            'created_user' => $namespace->userID,
-            'active_flag' => 1,
-        );
-         $this->insert($data);
-
-    }
     /*
      * Save a Program
      */
+    // Called from ProgramController addprogramAction, editAction method
     public function saveProgram(Program $program) {
         $namespace = new Container('user');
 
@@ -112,6 +101,7 @@ class ProgramTable extends AbstractTableGateway {
     /*
      * Delete Program
      */
+    // Called from ProgramController deleteAction method
     public function deleteProgram($id) {
         $namespace = new Container('user');
 

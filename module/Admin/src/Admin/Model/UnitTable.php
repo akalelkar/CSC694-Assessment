@@ -25,37 +25,50 @@ class UnitTable extends AbstractTableGateway
         $this->initialize();
     }
 
-    /*
-     * get all Units and either paginate or return result set
+     /*
+     * get unit by id
      */
-    public function fetchAll($paginated=false)
+     // called by addUnit
+    public function getUnit($id)
     {
-         if($paginated) {
-            // create a new Select object for the table album
-            $select = new Select('units');
-            // create a new result set based on the Album entity
-            $resultSetPrototype = new ResultSet();
-            $resultSetPrototype->setArrayObjectPrototype(new Unit());
-            // create a new pagination adapter object
-            $paginatorAdapter = new DbSelect(
-                // our configured select object
-                $select,
-                // the adapter to run it against
-                $this->adapter,    
-                #$this->tableGateway->getAdapter(),
-                // the result set to hydrate
-                $resultSetPrototype
-            );
-            $paginator = new Paginator($paginatorAdapter);
-            return $paginator;
+        $rowset = $this->select(array('id' => $id));
+        
+        $row = $rowset->current();
+        if (!$row) {
+            return false;
         }
-        $resultSet = $this->select();
-        return $resultSet;   
+        $unit = new Unit();
+        $unit->exchangeArray($row);
+        return $unit;
     }
-
+    
+    /*
+     * get all divisions
+     */
+    // Called from ProgramController editAction, addUnit methods
+    public function getDivisionsForSelect()
+    {
+        $sql = new Sql($this->adapter);
+        $select = $sql->select()
+                      ->from('divisions')
+                      ->columns(array('division'))
+        ;
+        $statement = $sql->prepareStatementForSqlObject($select);
+        $results = $statement->execute();
+    
+        $resultsArray = array();
+        // array must be created as key=>value pair where both key and value are the unit_id
+        // so when accessing values from multi select you get the division and not the array subscript
+        foreach($results as $result){
+            $resultsArray[$result['division']] = $result['division'];
+        }
+        return $resultsArray;
+    }
+    
     /*
      * get all active units
      */
+    // Called from ProgramController editAction, addProgram methods
     public function getUnitsForSelect()
     {
         $sql = new Sql($this->adapter);
@@ -76,25 +89,11 @@ class UnitTable extends AbstractTableGateway
         return $resultsArray;
     }
     
-    /*
-     * get unit by id
-     */
-    public function getUnit($id)
-    {
-        $rowset = $this->select(array('id' => $id));
-        
-        $row = $rowset->current();
-        if (!$row) {
-            return false;
-        }
-        $unit = new Unit();
-        $unit->exchangeArray($row);
-        return $unit;
-    }
     
     /*
      * get units for privileges select
      */
+    // Called from ProgramController editAction method
     public function getPrivsForSelect($role)
     {
         $sql = new Sql($this->adapter);
@@ -133,76 +132,20 @@ class UnitTable extends AbstractTableGateway
         return $resultsArray;
     }
     
-       
+    
     /*
-     * Add a record to one of the priv tables: assessor_priv, liaison_priv or chair_priv
+     * Adds a new unit - called from addunitAction in program controller
      */
-    function addPriv($id,$user,$table)
+    // Called from ProgramController addunitAction method
+    public function addUnit(Unit $unit)
     {
         $namespace = new Container('user');
-        
-        // create an atomic database transaction to update plan and possibly report
-	$connection = $this->adapter->getDriver()->getConnection();
-	$connection->beginTransaction();
 
-        // check that active priv does not exist
-        $select = $sql->select()
-                 ->from($table)
-                 ->columns(array('id'))
-                 ->where(array('active_flag' =>'1'))
-                 ->where(array('user_id' => $user))
-                 ->where(array('unit_id' => $id))
-        ;
-        $statement = $sql->prepareStatementForSqlObject($select);
-        $results = $statement->execute();
-    var_dump($results->count());
-    exit();
-        if ($results->count() == 0){
-            $data = array(
-                'user_id' => $user,
-                'unit_id' => $id,
-                'created_user' => $namespace->userID,
-                'created_ts' => date('Y-m-d h:i:s', time()),
-                'active_flag' => 1
-            );
-            $sql = new Sql($this->adapter);
-            $insert = $sql->insert($table);
-            $insert->values($data);
-            $insertString = $sql->getSqlStringForSqlObject($insert);
-            $this->adapter->query($insertString, Adapter::QUERY_MODE_EXECUTE);    
-        }
-        
-        // finish the transaction		
-	$connection->commit();
-        
-    }
-    
-    /*
-     * remove privs
-     */
-    function deletePriv($user,$table)
-    {
-       //delete the user
-       $sql = new Sql($this->adapter);
-       $delete = $sql->delete($table)
-                       ->where(array('user_id = ?' => $user));
-       $deleteString = $sql->getSqlStringForSqlObject($delete);
-       $this->adapter->query($deleteString, Adapter::QUERY_MODE_EXECUTE);   
-    }
-    
-    
-    
-    /*
-     * Saves a unit
-     */
-    public function saveUnit(Unit $unit)
-    {
-        $namespace = new Container('user');
-        
         $data = array(
             'id' => strtoupper($unit->unit_id),
             'type' => 1,
             'active_flag' => 1,
+            'division' => $unit->division,
         );
 
         //get the program id

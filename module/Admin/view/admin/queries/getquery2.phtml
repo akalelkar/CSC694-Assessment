@@ -7,6 +7,7 @@
                             ' out of ' . $totalPrograms . ' programs submitted reports)'; ?></h5>
      </caption>
      <tr>
+         <th>Division</th>
          <th>Department</th>
          <th>Program</th>
          <th>Plan ID</th>
@@ -17,12 +18,14 @@
             <td><?php echo "No records found."; ?></td>
             <td></td>
             <td></td>
+            <td></td>
             </tr>
         <?php
         }
         else{
             foreach ($programs as $program) : ?>
             <tr>
+                <td><?php echo $this->escapeHtml($program['division']);?></td>
                 <td><?php echo $this->escapeHtml($program['unit_id']);?></td>
                 <td><?php echo $this->escapeHtml($program['name']);?></td>
                 <td><?php echo $this->escapeHtml($program['id']);?></td>

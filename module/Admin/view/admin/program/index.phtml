@@ -10,13 +10,13 @@ $this->headTitle($title);
 <div class="col-md-2 program-form-wrapper">
     <h3>Add New Unit</h3>
     <div class="program-form" style="overflow:hidden;">
-        <?php echo $this->partial('admin/program/add-unit.phtml',array('unitform'=>$this->unitform));?>
+        <?php echo $this->partial('admin/program/addunit.phtml',array('unitform'=>$this->unitform));?>
     </div>
 </div>
 <div class="col-md-3 program-form-wrapper">
     <h3>Add New Program</h3>
     <div class="program-form" style="overflow:hidden;">
-        <?php echo $this->partial('admin/program/add-program.phtml',array('programform'=>$this->programform));?>
+        <?php echo $this->partial('admin/program/addprogram.phtml',array('programform'=>$this->programform));?>
     </div>
 </div>
 
@@ -30,7 +30,8 @@ $this->headTitle($title);
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Unit ID</th>
+                            <th>Division</th>
+                            <th>Unit Name</th>
                             <th>Name</th>
                             <th>Action</th>
                         </tr>
@@ -39,7 +40,8 @@ $this->headTitle($title);
                         <?php foreach ($this->paginator as $program) : ?>
                         <tr class="active">
                                     <td><?php echo $this->escapeHtml($program->id);?></td>
-                                   <td><?php echo $this->escapeHtml($program->unit_id);?></td>
+                                    <td><?php echo $this->escapeHtml($program->division);?></td>
+                                    <td><?php echo $this->escapeHtml($program->unit_id);?></td>
                                     <td><?php echo $this->escapeHtml($program->name);?></td>
                                     <td>
                                         <a class="btn btn-primary btn-xs"

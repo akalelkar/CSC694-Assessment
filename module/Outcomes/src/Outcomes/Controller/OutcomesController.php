@@ -22,7 +22,16 @@ use Application\Authentication\AuthUser;
 class OutcomesController extends AbstractActionController
 { 
    protected $tableResults;
-           
+
+   public function onDispatch(\Zend\Mvc\MvcEvent $e) 
+   {
+        $validUser = new AuthUser();
+        if (!$validUser->Validate()) {
+            return $this->redirect()->toRoute('home');
+        }
+        return parent::onDispatch($e);
+   }
+   
    public function indexAction()
    {
       $results = $this->getGenericQueries()->getUnits();
@@ -37,7 +46,7 @@ class OutcomesController extends AbstractActionController
       ));      
    }
     
-   // Creates list of available units (departments/programs)
+   // Gets list of available units (departments)
    // based on user role and privileges.
    public function getUnitsAction()
    {      
@@ -60,7 +69,8 @@ class OutcomesController extends AbstractActionController
       $jsonData = new JsonModel($unitData);
       return $jsonData;
    }
-    
+   
+   // Gets list of active programs based on the unit selected.
    public function getProgramsAction()
    {
       // get unit from id in url
@@ -76,9 +86,12 @@ class OutcomesController extends AbstractActionController
       $jsonData = new JsonModel($programData);
       return $jsonData;
    }
-    
-      public function getOutcomesAction()
-   {
+ 
+    // Gets list of outcomes based on the unit/program selected.
+    // Also handles processing user request.  This way, after the request is processed
+    // the getOutcomes view is rendered showing the change.
+    public function getOutcomesAction()
+    {
       // get the session variables
       $namespace = new Container('user');
       $userID = $namespace->userID;
@@ -93,7 +106,7 @@ class OutcomesController extends AbstractActionController
       // this gets flipped to 0 if no permissions are found when 'Submit' is clicked on the left side
       $adminFlag = 1;
       $userAction = $request->getPost('action');
-      
+   
       // different code needs to run depending on how this action is being called
       switch($userAction){
          
@@ -140,6 +153,10 @@ class OutcomesController extends AbstractActionController
       return $partialView;
    }
    
+   
+   // Called when the user selects the add button.
+   // The getOutcomes.phtml file uses an ajax call to invoke this method.
+   // This method will render the addOutcomes.phtml file.
    public function addOutcomeAction()
    {
       // get programs from id in url
@@ -154,6 +171,9 @@ class OutcomesController extends AbstractActionController
       return $partialView;
    }
    
+   // Called when the user selects the modify button.
+   // The getOutcomes.phtml file uses an ajax call to invoke this method.
+   // This method will render the editOutcomes.phtml file.
    public function editOutcomeAction()
    {
       // get programs from id in url
@@ -178,18 +198,7 @@ class OutcomesController extends AbstractActionController
       $partialView->setTerminal(true);
       return $partialView;
    }
-   
-   public function onDispatch(\Zend\Mvc\MvcEvent $e) 
-   {
-      $validUser = new AuthUser();
-      if (!$validUser->Validate()){
-         return $this->redirect()->toRoute('application');
-      }
-      else{
-         return parent::onDispatch( $e );
-      }
-   }
-   
+      
    public function getGenericQueries()
    {
       if (!$this->tableResults){

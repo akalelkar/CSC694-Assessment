@@ -9,7 +9,7 @@
     $form = $this->form;
     $form->setAttribute('enctype', 'multipart/form-data');
     $form->setAttribute('class', 'form-horizontal');
-    $form->setAttribute('action', $this->url('plans',array('action'=>'updatePlan')));
+    $form->setAttribute('action', $this->url('plans',array('action'=>'updateplan')));
     $form->prepare();
 ?>
 
@@ -77,50 +77,62 @@
 			    </div>
 			    <div id="collapseOutcome" class="panel-collapse collapse in">
 				<div class="panel-body">
+				    <h5><b>Outcomes assigned to plan - uncheck to delete from plan</b></h5>
 				    <?php							    
-					    // loop through all the outcomes
-					    $outcomeCount = 0;
-					    foreach ($outcomes as $outcome) :
-						if ($outcomeCount == 0){
-						    $prevTitle = $outcome->getProgramName();
-						    echo $outcome->getProgramName(); 
-						}
-						if ($prevTitle != $outcome->getProgramName()){
-						    $prevTitle = $outcome->getProgramName();
-						    echo $outcome->getProgramName(); 
-						}
-						$outcomeCount++;
-						// create each outcome check box
-    				 	  	if ($outcome->getType() === '0'){
-						    // outcome is not currently in plan - leave checkbox empty
-					?>
-						    <p><input validate="true" type="checkbox" id="checkboxOutcomes<?php echo $outcomeCount ?>"
+					// loop through all the outcomes that have been chosen for this plan
+					$prevTitle = '';
+					$outcomeCount = 1;
+					foreach ($outcomes1 as $outcome) :
+					    if ($prevTitle != $outcome->getProgramName()){
+						$prevTitle = $outcome->getProgramName();
+						echo $outcome->getProgramName(); 
+					    }
+					    
+					    // create each outcome check box
+				    ?>
+				            <p><input validate="true" type="checkbox" id="checkboxOutcomes<?php echo $outcomeCount ?>"
+						 name="checkboxOutcomes<?php echo $outcomeCount ?>" checked>
+					     <!-- create hidden id for each checkbox - used in modify to handle toggle of checkboxes -->
+					     <input type="hidden" name="checkboxOutcomesID<?php echo $outcomeCount ?>"
+								id="checkboxOutcomesID<?php echo $outcomeCount ?>"
+								value="<?php echo $outcome->getOutcomeId() ?>">
+	    
+					  <!-- add the outcome text to the row -->
+					   <?php echo $outcome->getOutcomeText() ?></td>
+ </p>
+					   
+				    <?php
+				        $outcomeCount++;
+				        endforeach;
+					echo " <h5><b>Outcomes not assigned to plan - check to add to plan</b></h5> ";
+				    
+					// loop through all the outcomes that have NOT been chosen for this plan
+					$prevTitle = '';
+					foreach ($outcomes2 as $outcome) :
+					    if ($prevTitle != $outcome->getProgramName()){
+						$prevTitle = $outcome->getProgramName();
+						echo $outcome->getProgramName(); 
+					    }
+					    
+					    // create each outcome check box
+				    ?>
+					    <p><input validate="true" type="checkbox" id="checkboxOutcomes<?php echo $outcomeCount ?>"
 						     name="checkboxOutcomes<?php echo $outcomeCount ?>">
-					<?php		
-					   	}
-						else{
-						    // outcome currently in plan - mark check box
-					?>
-						    <p><input validate="true" type="checkbox" id="checkboxOutcomes<?php echo $outcomeCount ?>"
-						     name="checkboxOutcomes<?php echo $outcomeCount ?>" checked>
-					<?php		
-					   	}
-					?>
-					       <!-- create hidden id for each checkbox - used in modify to handle toggle of checkboxes -->
-	    				       <input type="hidden" name="checkboxOutcomesID<?php echo $outcomeCount ?>"
-								    id="checkboxOutcomesID<?php echo $outcomeCount ?>"
-								    value="<?php echo $outcome->getOutcomeId() ?>">
-		
-					      <!-- add the counter with the outcome text to the row -->
-					      <?php echo $outcomeCount; ?>. <?php echo $outcome->getOutcomeText() ?></td>
-  	      				   </p>
-					<?php
-					    endforeach;
-					           
-					?>
-	      		            <input type="hidden" name="outcomeCount" id="outcomeCount" value="<?php echo $outcomeCount ?>">
+					     <!-- create hidden id for each checkbox - used in modify to handle toggle of checkboxes -->
+					     <input type="hidden" name="checkboxOutcomesID<?php echo $outcomeCount ?>"
+								id="checkboxOutcomesID<?php echo $outcomeCount ?>"
+								value="<?php echo $outcome->getOutcomeId() ?>">
+	    
+  					    <!-- add the outcome text to the row -->
+					    <?php echo $outcome->getOutcomeText() ?></td>
 
-				</div>
+				           </p>
+				    <?php
+					$outcomeCount++;
+				        endforeach;
+				    ?>
+				     <input type="hidden" name="outcomeCount" id="outcomeCount" value="<?php echo $outcomeCount ?>">
+	      		    </div>
 			    </div>
 			</div>
     
@@ -384,7 +396,7 @@
 		</div>		
 
 		<!-- use partials to load the upload buttons -->
-		<?php echo $this->partial('plans/plans/plans-upload-button-partial.phtml', array('form' => $form,)); ?>
+		<?php echo $this->partial('plans/plans/plansuploadbuttonpartial.phtml', array('form' => $form,)); ?>
 		
 		<!-- display the save draft and submit buttons -->
 		<?php

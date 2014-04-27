@@ -7,6 +7,7 @@ use Zend\Db\Adapter\Adapter;
 use Zend\DB\Sql\Select;
 use Zend\Db\Sql\Sql;
 use Zend\Db\Sql\Predicate\NotIn;
+use Zend\Db\Sql\Predicate\In;
 use Zend\Db\Sql\Where;
 use Zend\Db\Sql\Update;
 use Zend\Db\Sql\Expression;
@@ -60,10 +61,8 @@ class DatabaseSql extends AbstractTableGateway
 	$sql = new Sql($this->adapter);
 	$data = array('created_ts' => $currentTimestamp,
 		      'submitted_ts' => $submittedTimestamp,
-		      'modified_ts' => $currentTimestamp,		      
 		      'created_user' => $userId,
 		      'submitted_user' => $submittedUserId,
-		      'modified_user' => $userId,
 		      'meta_flag' => $metaFlag,
 		      'meta_description' => trim($metaDescription),
 		      'year' => trim($year),
@@ -410,7 +409,6 @@ class DatabaseSql extends AbstractTableGateway
 	   $this->insertPlanPrograms($program['programId'], $planId);
 	 endforeach;
 
-		
 	// finish the transaction		
 	$connection->commit();
 
@@ -463,7 +461,7 @@ class DatabaseSql extends AbstractTableGateway
 		$statement = $sql->prepareStatementForSqlObject($update);
 	        $statement->execute();
 		
-		// next delete plan from plan_programstable
+		// next delete plan from plan_programs table
 		$update = $sql->delete()
 			      ->from('plan_programs')
 			      ->where(array('plan_id' => $id))
@@ -638,20 +636,23 @@ class DatabaseSql extends AbstractTableGateway
     
         $sql = new Sql($this->adapter);
 	
-	// select outcomes in plan
+	// select outcomes in plan - even show outcomes if marked inactive as long as they are
+	// associated with the plan (plan_outcomes.active_flag = 1)
 	$select1 = $sql->select()
 		      ->columns(array('outcomeId' => 'id', 'outcomeText' => 'outcome_text',
 				      'planId' => $planIdExp))
 		      ->from('outcomes')
 		      ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
+		      ->join('programs', 'programs.id = outcomes.program_id', array('programName' => 'name',))
 		      ->join('plan_outcomes', 'plan_outcomes.outcome_id = outcomes.id', array())
-		      ->where(array('outcomes.active_flag' => 1,
-				    'plan_outcomes.active_flag' => 1,
+		      ->where(array('plan_outcomes.active_flag' => 1,
 			            'plan_outcomes.plan_id' => $planId))
-		      ->group (array('outcomeId' => new Expression('outcomes.id'),
-				     'planId',
-				     'outcomeText' => new Expression('outcomes.outcome_text'),
-				      ))
+		    // ->group (array('outcomeId' => new Expression('outcomes.id'),
+		    //	     'planId',
+		    //		     'outcomeText' => new Expression('outcomes.outcome_text'),
+		    //		      ))
+		      ->order(array('programs.name'))
+
 	;
 	$statement = $sql->prepareStatementForSqlObject($select1);
         $resultSet = $statement->execute();
@@ -659,21 +660,35 @@ class DatabaseSql extends AbstractTableGateway
 	//create an array of entity objects to store the database results
 	$entities = array();
         foreach ($resultSet as $row) {
-            $entity = new Entity\Outcome($row['outcomeId'],$row['outcomeText'],"",$row['planId'],"");
+            $entity = new Entity\Outcome($row['outcomeId'],$row['outcomeText'],"",$row['planId'],$row['programName']);
             $entities[] = $entity;
         }
         return $entities;
     }
     /**
      * Get all the outcomes that could be used by that plan id
+     * A program may assign multiple programs to a plan.  This makes this tricky because
+     * the user may have only selected one of the programs associated with the plan.  To
+     * make this as user friendly as possible, this is allowed.  However, this query then needs
+     * to make sure it shows all the outcomes associated with all the programs on this plan.
+     * Also, since ZF2 contains a bug when trying to apply an order by on a combine, this is
+     * broken into two queries.
      */
-    public function getOutcomesByPlanIdForModify($planId, $names)
+    public function getOutcomesByPlanIdForModify1($planId)
     {
-	$notIn = new \Zend\Db\Sql\Predicate\Expression("'0'");
         $in = new \Zend\Db\Sql\Predicate\Expression("'1'");
 	$planIdExp = new \zend\Db\Sql\Predicate\Expression($planId);
-    
-        $sql = new Sql($this->adapter);
+	$sql = new Sql($this->adapter);
+	
+	
+	// get all programs associated with this plan
+	$select = $sql->select()
+		      ->from('plan_programs')
+		      ->columns(array())
+		      ->join('programs', 'programs.id = plan_programs.program_id', array('program_name' => 'name'))
+		      ->where(array('plan_programs.plan_id' => $planId))		     
+	;
+
 	// select outcomes in plan
 	$select1 = $sql->select()
 		      ->columns(array('outcomeId' => 'id', 'outcomeText' => 'outcome_text',
@@ -682,23 +697,53 @@ class DatabaseSql extends AbstractTableGateway
 		      ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
 		      ->join('programs', 'programs.id = outcomes.program_id', array('programName' => 'name',))
 		      ->join('plan_outcomes', 'plan_outcomes.outcome_id = outcomes.id', array())
-		      ->where(array('programs.name' => $names,
-				    'outcomes.active_flag' => 1,
+		      ->where(array('plan_outcomes.active_flag' => 1,
 			            'plan_outcomes.plan_id' => $planId))
-		      ->group (array('outcomeId' => new Expression('outcomes.id'),
-				     'planId',
-				     'outcomeText' => new Expression('outcomes.outcome_text'),
-				      ))
+		      ->where(new In('programs.name', $select))
+		    //  ->group (array('outcomeId' => new Expression('outcomes.id'),
+		    //	     'planId',
+		    //	     'outcomeText' => new Expression('outcomes.outcome_text'),
+		    //	      ))
+		      ->order(array('programs.name'))
 	;	      
+	$statement = $sql->prepareStatementForSqlObject($select1);
+        $resultSet = $statement->execute();
+
+	//create an array of entity objects to store the database results
+	$entities = array();
+        foreach ($resultSet as $row) {
+            $entity = new Entity\Outcome($row['outcomeId'],$row['outcomeText'],$row['type'],$row['planId'],$row['programName']);
+            $entities[] = $entity;
+        }
+        return $entities;
+    }
+    
+    // see above query for explanation of this query
+    public function getOutcomesByPlanIdForModify2($planId)
+    {
+	$notIn = new \Zend\Db\Sql\Predicate\Expression("'0'");
+	$planIdExp = new \zend\Db\Sql\Predicate\Expression($planId);
+	$sql = new Sql($this->adapter);
+	
+	
+	// get all programs associated with this plan
+	$select = $sql->select()
+		      ->from('plan_programs')
+		      ->columns(array())
+		      ->join('programs', 'programs.id = plan_programs.program_id', array('program_name' => 'name'))
+		      ->where(array('plan_programs.plan_id' => $planId))		     
+	;
+
 		      
 	// select outcomes not in plan but match programs chosen
-	$select2 = $sql->select()
+	$select1 = $sql->select()
 		      ->columns(array('outcomeId' => 'id', 'outcomeText' => 'outcome_text',
 				      'type' => $notIn, 'planId' => $planIdExp))
 		      ->from('outcomes')
 		      ->quantifier(\Zend\Db\Sql\Select::QUANTIFIER_DISTINCT)
 		      ->join('programs', 'programs.id = outcomes.program_id', array('programName' => 'name'))
-		      ->where(array('programs.name' => $names, 'outcomes.active_flag' => 1,))
+		      ->where(array('outcomes.active_flag' => 1))
+		      ->where(new In('programs.name', $select))
 		      ->where(new NotIn('outcomes.id', $sql->select()
 					             ->columns(array('id'))
 						     ->from('outcomes')
@@ -706,12 +751,12 @@ class DatabaseSql extends AbstractTableGateway
 						     ->join('plan_outcomes', 'plan_outcomes.outcome_id = outcomes.id', array())
 						     ->where(array('plan_outcomes.plan_id' => $planId, 'plan_outcomes.active_flag' => 1))
 				        ))
-		      ->group (array('outcomeId' => new Expression('outcomes.id'),
-				     'planId',
-				     'outcomeText' => new Expression('outcomes.outcome_text'),
-				      ))
+		//    ->group (array('outcomeId' => new Expression('outcomes.id'),
+		//		     'planId',
+		//		     'outcomeText' => new Expression('outcomes.outcome_text'),
+		//		      ))
+		      ->order(array('programs.name'))
 	;
-	$select1->combine($select2);
 		
 	$statement = $sql->prepareStatementForSqlObject($select1);
         $resultSet = $statement->execute();
@@ -729,33 +774,97 @@ class DatabaseSql extends AbstractTableGateway
      * Get all the plans for the given deparment, program name, year, and action
      *
      * The view action cannot see the drafted plans
-     * The modify action can see the drafted plans 
+     * The modify action can see the drafted plans
+     * This query gets the plans with outcomes.  The next query gets the meta plans.
+     * These must be separated because of a bug in ZF2 when performing an order by on a combine statement.
      */
-    public function getPlans($unitId, $names, $year, $action)
+    public function getPlansWithOutcomes($unitId, $names, $year, $action)
+    {
+        $whereoutcomes = new \Zend\Db\Sql\Where();
+    
+	// if the action is view or provide feedback do not return plans that are in a draft status
+	if ($action == "View" || $action == "Provide Feedback") {
+	    $whereoutcomes	
+		->equalTo('units.id', $unitId)
+		->and
+		->in('programs.name', $names)
+		->and
+		->equalTo('plans.year', $year)
+		->and
+		->equalTo('plans.active_flag', 1)
+		->and
+		->equalTo('plans.meta_flag', 0)
+		->and
+		->nest()
+		->equalTo('plans.draft_flag', 0)
+		->or
+		->isNull('plans.draft_flag')
+		->unnest();
+        }
+        else {
+	    // modify can see all the plans
+	    $whereoutcomes
+		->equalTo('units.id', $unitId)
+		->and
+		->in('programs.name', $names)
+		->and
+		->equalTo('plans.year', $year)
+		->and
+		->equalTo('plans.meta_flag', 0)
+		->and
+		->equalTo('plans.active_flag', 1);
+	}
+
+	$sql = new Sql($this->adapter);
+	
+	// get plans with outcomes
+	// This gets tricky because we want to get all the programs associated with each outcome in a plan
+	// Since there can be many outcomes from multiple programs, you need to first identify the plans
+	// and then get all the information to display.  This looks redundant but is required.
+	
+	// This first query gets all the plans associated with the user chosen unit/program/year
+	$selectPlans = $sql->select()
+			    ->columns(array('planId' => new Expression('plans.id')))
+		  	    ->from('plans', array('id' => 'plans.id'))
+			    ->join('plan_programs', 'plan_programs.plan_id = plans.id', array())
+			    ->join('programs', 'programs.id = plan_programs.program_id', array())
+		            ->join('units', 'programs.unit_id = units.id', array())
+	;
+	$selectPlans->where($whereoutcomes);
+
+	// This query gets all the outcomes associated with the plans and the outcomes corresponding programs
+	// This will show outcomes even if they are inactive since the plan was created and referenced them
+	$select = $sql->select()
+                      ->columns(array('planId' => new Expression('plans.id'), 'year', 'draft_flag'))
+		      ->from('plans', array('id' => 'plans.id'))
+		      ->join('plan_outcomes', 'plan_outcomes.plan_id = plans.id', array())
+		      ->join('outcomes', 'outcomes.id = plan_outcomes.outcome_id', array('text' => 'outcome_text'))
+		      ->join('programs', 'programs.id = outcomes.program_id', array('program_name' => 'name'))
+		      ->where(new In('plans.id', $selectPlans))
+		      ->where(array('plan_outcomes.active_flag' => 1, 'plans.year' => $year))
+		      ->order(array('plans.id', 'programs.name'))
+        ;
+
+	$statement = $sql->prepareStatementForSqlObject($select);
+        $result = $statement->execute();
+	return $result;
+    }
+    
+     /**
+     * Get all the plans for the given deparment, program name, year, and action
+     *
+     * The view action cannot see the drafted plans
+     * The modify action can see the drafted plans
+     * This query gets the plans with meta assessment.  The previous query gets the outcome plans.
+     * These must be separated because of a bug in ZF2 when performing an order by on a combine statement.
+     */
+    public function getPlansWithMeta($unitId, $names, $year, $action)
     {
     $whereoutcomes = new \Zend\Db\Sql\Where();
     $wheremeta = new \Zend\Db\Sql\Where();
     
     // if the action is view or provide feedback do not return plans that are in a draft status
     if ($action == "View" || $action == "Provide Feedback") {
-	$whereoutcomes	
-	    ->equalTo('units.id', $unitId)
-	    ->and
-	    ->in('programs.name', $names)
-	    ->and
-	    ->equalTo('plans.year', $year)
-	    ->and
-    	    ->equalTo('plan_outcomes.active_flag', 1)
-	    ->and
-    	    ->equalTo('plans.active_flag', 1)
-	    ->and
-	    ->equalTo('plans.meta_flag', 0)
-	    ->and
-	    ->nest()
-	    ->equalTo('plans.draft_flag', 0)
-	    ->or
-	    ->isNull('plans.draft_flag')
-	    ->unnest();
 	$wheremeta	
 	    ->equalTo('units.id', $unitId)
 	    ->and
@@ -775,19 +884,6 @@ class DatabaseSql extends AbstractTableGateway
     }
     else {
 	// modify can see all the plans
-	$whereoutcomes
-	    ->equalTo('units.id', $unitId)
-	    ->and
-	    ->in('programs.name', $names)
-	    ->and
-	    ->equalTo('plans.year', $year)
-	    ->and
-	    ->equalTo('plans.meta_flag', 0)
-	    ->and
-    	    ->equalTo('plan_outcomes.active_flag', 1)
-	    ->and
-    	    ->equalTo('plans.active_flag', 1);
-	    
 	$wheremeta
 	    ->equalTo('units.id', $unitId)
 	    ->and
@@ -798,42 +894,25 @@ class DatabaseSql extends AbstractTableGateway
 	    ->equalTo('plans.meta_flag', 1)
 	    ->and
     	    ->equalTo('plans.active_flag', 1);
-    }
-
-
+       }
 
 	$sql = new Sql($this->adapter);
 	
-	// get plans with outcomes
+		// get plans with meta assessment
 	$select = $sql->select()
-                      ->columns(array('planId' => new Expression('plans.id'), 'year', 'meta_flag', 'draft_flag'))
-		      ->from('plans', array('id' => 'plans.id'))
-		      ->join('plan_outcomes','plans.id = plan_outcomes.plan_id', array())
-                      ->join('outcomes','plan_outcomes.outcome_id = outcomes.id', array('text' => 'outcome_text'))
-                      ->join('plan_programs', 'plan_programs.plan_id = plans.id', array())
-		      ->join('programs', 'plan_programs.program_id = programs.id', array())
-		      ->join('units', 'programs.unit_id = units.id', array())
-		   ;
-	$select->where($whereoutcomes);
-	
-	// get plans with meta assessment
-	$select2 = $sql->select()
-                      ->columns(array('planId' => new Expression('plans.id'), 'year', 'meta_flag', 'draft_flag', 'text' => 'meta_description'))
+                      ->columns(array('planId' => new Expression('plans.id'), 'year', 'draft_flag', 'text' => 'meta_description'))
 		      ->from('plans', array('id' => 'plans.id'))
 		      ->join('plan_programs', 'plan_programs.plan_id = plans.id', array())
-		      ->join('programs', 'plan_programs.program_id = programs.id', array())
+		      ->join('programs', 'plan_programs.program_id = programs.id', array('program_name' => 'name'))
 		      ->join('units', 'programs.unit_id = units.id', array())
+		      ->order(array('plans.id', 'programs.name'))
 		   ;
-	$select2->where($wheremeta);
-    
-	$select->combine($select2);
-	
-        $statement = $sql->prepareStatementForSqlObject($select);
+	$select->where($wheremeta);
+  
+	$statement = $sql->prepareStatementForSqlObject($select);
         $result = $statement->execute();
-
-        return $result;
+	return $result;
     }
-    
     
     /**
      * Get all the outcomes for the given deparment, program name, year and action

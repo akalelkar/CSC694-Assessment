@@ -133,11 +133,13 @@ dd {
 
 <script>
 
+// performs initialization on page load
 $(document).ready(function () {
-    
     // set years for year dropdowns
     var currentYear = new Date().getFullYear();
-    // startyear for dropdowns set in session namespace variables
+    
+    // startyear for dropdowns is the namespace appStartYear set in the
+    // controller - the queries won't work for old data
     var startYear = <?php echo $startYear ?>;
 	    
     // create the list of years the user can select
@@ -146,7 +148,7 @@ $(document).ready(function () {
     // 2012 - 2013 is from July 2012 - June 2013
     // repeat until startyear
 	    
-    // get today's data
+    // get today's date
     var today = new Date();
     
     // identify the month and year
@@ -159,8 +161,10 @@ $(document).ready(function () {
 	year++;
     }
 	    
-    // set the complete number of years to display in the year selector 
-    var yearsToDisplay = year - startYear + 1; // add one since the last entry needs to be the (year before the low year) to the (low year)
+    // set the complete number of years to display in the year selector
+    // since most of the queries won't work for data from old system, start
+    // 
+    var yearsToDisplay = year - startYear + 1; // add one since the earliest entry is year ending for the start year
 
     var resetyear = year;
     $('#q1year').append('<option  data-hidden="true"></option>');
@@ -215,7 +219,7 @@ $(document).ready(function () {
     $('#printbutton').hide();
 })
 
-
+// Handles query 1 via ajax call to corresponding method in controller
 $(document).on('change', '#q1year', function () {
     // clear rhs of page
     $('#resultsTable').html("");
@@ -231,13 +235,13 @@ $(document).on('change', '#q1year', function () {
     $('.selectpicker').selectpicker('refresh');
     
     // create url for redirect url(route, array(controller, action))
-    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery1')); ?>";
+    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getquery1')); ?>";
     urlform = urlform + '/' + year;
     ajaxCall(urlform);
     
 });
 
-
+// Handles query 2 via ajax call to corresponding method in controller
 $(document).on('change', '#q2year', function () {
     // clear rhs of page
     $('#resultsTable').html("");
@@ -253,12 +257,13 @@ $(document).on('change', '#q2year', function () {
     $('.selectpicker').selectpicker('refresh');
     
     // create url for redirect url(route, array(controller, action))
-    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery2')); ?>";
+    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getquery2')); ?>";
     urlform = urlform + '/' + year;
     ajaxCall(urlform);
   
 });
 
+// Handles query 3 via ajax call to corresponding method in controller
 $(document).on('change', '#q3year', function () {
     // clear rhs of page
     $('#resultsTable').html("");
@@ -274,12 +279,13 @@ $(document).on('change', '#q3year', function () {
     $('.selectpicker').selectpicker('refresh');
     
     // create url for redirect url(route, array(controller, action))
-    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery3')); ?>";
+    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getquery3')); ?>";
     urlform = urlform + '/' + year;
     ajaxCall(urlform);
   
 });
 
+// Handles query 4 via ajax call to corresponding method in controller
 $(document).on('change', '#q4year', function () {
     // clear rhs of page
     $('#resultsTable').html("");
@@ -295,12 +301,13 @@ $(document).on('change', '#q4year', function () {
     $('.selectpicker').selectpicker('refresh');
     
     // create url for redirect url(route, array(controller, action))
-    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery4')); ?>";
+    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getquery4')); ?>";
     urlform = urlform + '/' + year;
     ajaxCall(urlform);
   
 });
 
+// Handles query 5 via ajax call to corresponding method in controller
 $(document).on('click', '#query5', function () {
     // clear rhs of page
     $('#resultsTable').html("");
@@ -317,11 +324,12 @@ $(document).on('click', '#query5', function () {
     // replace all dashes to send via URL
     date = date.replace(/-/g, '');
     // create url for redirect url(route, array(controller, action))
-    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery5')); ?>";
+    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getquery5')); ?>";
     urlform = urlform + '/' + date;
     ajaxCall(urlform);
 });
 
+// Handles query 6 via ajax call to corresponding method in controller
 $(document).on('click', '#query6', function () {
     // clear rhs of page
     $('#resultsTable').html("");
@@ -330,10 +338,11 @@ $(document).on('click', '#query6', function () {
     resetDropDowns();
     
     // create url for redirect url(route, array(controller, action))
-    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery6')); ?>";
+    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getquery6')); ?>";
     ajaxCall(urlform);
 });
 
+// Handles query 7 via ajax call to corresponding method in controller
 $(document).on('click', '#query7', function () {
     // clear rhs of page
     $('#resultsTable').html("");
@@ -342,11 +351,11 @@ $(document).on('click', '#query7', function () {
     resetDropDowns();
     
     // create url for redirect url(route, array(controller, action))
-    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery7')); ?>";
+    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getquery7')); ?>";
     ajaxCall(urlform);
 });
 
-
+// Handles query 8 via ajax call to corresponding method in controller
 $(document).on('change', '#q8year', function () {
     // clear rhs of page
     $('#resultsTable').html("");
@@ -362,12 +371,13 @@ $(document).on('change', '#q8year', function () {
     $('.selectpicker').selectpicker('refresh');
     
     // create url for redirect url(route, array(controller, action))
-    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery8')); ?>";
+    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getquery8')); ?>";
     urlform = urlform + '/' + year;
     ajaxCall(urlform);
   
 });
 
+// Handles query 9 via ajax call to corresponding method in controller
 $(document).on('click', '#query9', function () {
     // clear rhs of page
     $('#resultsTable').html("");
@@ -384,11 +394,12 @@ $(document).on('click', '#query9', function () {
     // replace all dashes to send via URL
     date = date.replace(/-/g, '');
     // create url for redirect url(route, array(controller, action))
-    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery9')); ?>";
+    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getquery9')); ?>";
     urlform = urlform + '/' + date;
     ajaxCall(urlform);
 });
 
+// Handles query 10 via ajax call to corresponding method in controller
 $(document).on('click', '#query10', function () {
     // clear rhs of page
     $('#resultsTable').html("");
@@ -397,12 +408,12 @@ $(document).on('click', '#query10', function () {
     resetDropDowns();
     
     // create url for redirect url(route, array(controller, action))
-    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getQuery10')); ?>";
+    var urlform = "<?php echo $this->url('query', array('controller'=>'queries', 'action'=>'getquery10')); ?>";
     ajaxCall(urlform);
 });
 
+// asynchronous ajax code to populate program/degree selector
 function ajaxCall(urlform){
-            // asynchronous ajax code to populate program/degree selector
         $.ajax({
           url: urlform,
           type: "GET",
@@ -420,6 +431,7 @@ function ajaxCall(urlform){
        });
 }
 
+// Resets all drop downs and other stuff
 function resetDropDowns(){
     // reset dropdowns except dropdown matching parameter
     $('select[name=q1year]').val(1);
@@ -429,10 +441,11 @@ function resetDropDowns(){
     $('select[name=q8year]').val(1);
     $('#dp5').val('');
     $('#dp9').val('');
-    //$('html, body').animate((
-    //scrollTop: $("#topofpage").offset().top}, 0);
-    
-    $(window).scrollTop($("#topofpage").offset().top);
+   
+    // scroll to top of page after user chooses query option
+    $("html, body").animate({ scrollTop: 0 }, 0);
+   
+    // refresh selectpicker
     $('.selectpicker').selectpicker('refresh');
 }
 

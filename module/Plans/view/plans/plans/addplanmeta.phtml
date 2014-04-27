@@ -7,7 +7,7 @@
     $form = $this->form;
     $form->setAttribute('class', 'form-horizontal');
     $form->setAttribute('enctype', 'multipart/form-data');
-    $form->setAttribute('action', $this->url('plans',array('action'=>'insertMeta')));
+    $form->setAttribute('action', $this->url('plans',array('action'=>'insertmeta')));
     $form->prepare();
 ?>	
 
@@ -63,7 +63,7 @@
 			    ?>
 			
 	    		<!-- use partials to load the upload buttons -->
-			<?php echo $this->partial('plans/plans/plans-upload-button-partial.phtml', array('form' => $form,)); ?>
+			<?php echo $this->partial('plans/plans/plansuploadbuttonpartial.phtml', array('form' => $form,)); ?>
     
 			<!-- add the save draft and submit buttons -->
 			<?php

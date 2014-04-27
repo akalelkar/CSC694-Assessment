@@ -3,7 +3,7 @@
 if(!$results){
     echo 'There are no reports associated with this plan';
 }else{
-    $form->setAttribute('action', $this->url('reports', array('action' => 'addFeedback')));
+    $form->setAttribute('action', $this->url('reports', array('action' => 'addfeedback')));
     $form->setAttribute('name', 'data');
     $form->setAttribute('id', 'data');
     $form->setAttribute('enctype', 'multipart/form-data');

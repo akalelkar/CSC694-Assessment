@@ -38,30 +38,30 @@
         
             foreach ($outcomes as $outcome) :
         
-            // output the first two columns for everybody
-            echo("<tr>");
-            echo("<td>" . $this->escapeHtml($counter . '. ') . "</td>");
-            echo("<td>" . $this->escapeHtml($outcome['outcome_text']) . "</td>");
-        
-            if ($adminFlag == true){
-            // include the buttons on the page if it's someone with permission who's logged in
-                echo("<td class='col-md-3'><div class='pull-right'>");
-        
-                // the outcome text is the second parameter of the editHandler - it's stored and read from the button's value attribute to avoid issues with JavaScript and parenthesis
-                echo("<button type='button' id='b" . $counter . "' class='btn btn-primary btn-xs noprint' value='" . (trim($this->escapeHtml($outcome['outcome_text']))));
-                echo("' onclick='editHandler(" . $this->escapeHtml($outcome['id']) . ", " . "$(this).val(), " . $counter . ");'>Modify &raquo;</button> ");
-        
-                // use this jQuery to access the value of the modify button from the delete button - i.e. evaluates to $("#b1") for button one
-                $jQueryPart = "$(\"#b" . $counter . "\")";
-                
-                // second button
-                echo("<button type='button' class='btn btn-warning btn-xs noprint' onclick='deleteHandler(");
-                echo($this->escapeHtml($outcome['id']) . ", " . $jQueryPart . ".val());'>Delete &raquo;</button>");
-                echo("</div></td>");
-            }
-            // close out the row and increment count for everybody
-            $counter++;
-            echo("</tr>");
+                // output the first two columns for everybody
+                echo("<tr>");
+                echo("<td>" . $this->escapeHtml($counter . '. ') . "</td>");
+                echo("<td>" . $this->escapeHtml($outcome['outcome_text']) . "</td>");
+            
+                if ($adminFlag == true){
+                // include the buttons on the page if it's someone with permission who's logged in
+                    echo("<td class='col-md-3'><div class='pull-right'>");
+            
+                    // the outcome text is the second parameter of the editHandler - it's stored and read from the button's value attribute to avoid issues with JavaScript and parenthesis
+                    echo("<button type='button' id='b" . $counter . "' class='btn btn-primary btn-xs noprint' value='" . (trim($this->escapeHtml($outcome['outcome_text']))));
+                    echo("' onclick='editHandler(" . $this->escapeHtml($outcome['id']) . ", " . "$(this).val(), " . $counter . ");'>Modify &raquo;</button> ");
+            
+                    // use this jQuery to access the value of the modify button from the delete button - i.e. evaluates to $("#b1") for button one
+                    $jQueryPart = "$(\"#b" . $counter . "\")";
+                    
+                    // second button
+                    echo("<button type='button' class='btn btn-warning btn-xs noprint' onclick='deleteHandler(");
+                    echo($this->escapeHtml($outcome['id']) . ", " . $jQueryPart . ".val());'>Delete &raquo;</button>");
+                    echo("</div></td>");
+                }
+                // close out the row and increment count for everybody
+                $counter++;
+                echo("</tr>");
             endforeach; 
 
             // add a message if there aren't any outcomes for the selected program
@@ -79,9 +79,6 @@
 <script>
 $(document).ready(function() {
 
-
-
-
     // store the id of the selected program
     var selectedProgram = <?php echo $this->escapeHtml($programId);?>;
 
@@ -90,7 +87,7 @@ $(document).ready(function() {
         // create url for redirect
         var urlform = "<?php echo $this->url('outcomes', array(
                                     'controller'=>'outcomes',
-                                    'action'=>'addOutcome')); ?>";
+                                    'action'=>'addoutcome')); ?>";
         urlform = urlform + '/' + selectedProgram;
       
         // asynchronous ajax code to populate program/degree selector
@@ -114,7 +111,7 @@ function editHandler(outcomeId, outcomeText, outcomeNumber){
     var selectedProgram = <?php echo $this->escapeHtml($programId);?>;    
     var urlform = "<?php echo $this->url('outcomes', array(
                                     'controller'=>'outcomes',
-                                    'action'=>'editOutcome')); ?>";
+                                    'action'=>'editoutcome')); ?>";
     urlform = urlform + '/' + selectedProgram;
         
     // asynchronous ajax code to populate program/degree selector
@@ -142,7 +139,7 @@ function deleteHandler(outcomeId, outcomeText){
    
         var urlform = "<?php echo $this->url('outcomes', array(
                                     'controller'=>'outcomes',
-                                    'action'=>'getOutcomes')); ?>";
+                                    'action'=>'getoutcomes')); ?>";
         urlform = urlform + '/' + selectedProgram;
         
         // asynchronous ajax code to populate program/degree selector

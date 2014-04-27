@@ -3,7 +3,7 @@
     if($results){
 	echo '</br></br></br></br>There is already a report for this plan';
     }else{
-	      $form->setAttribute('action', $this->url('reports', array('action' => 'addNewReport')));
+	      $form->setAttribute('action', $this->url('reports', array('action' => 'addnewreport')));
 	      $form->setAttribute('name', 'data');
 	      $form->setAttribute('id', 'data');
 	      $form->setAttribute('enctype', 'multipart/form-data');

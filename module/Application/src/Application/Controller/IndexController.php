@@ -25,7 +25,8 @@ use Application\Model\AllTables;
 class IndexController extends AbstractActionController
 {
     protected $tableResults;
-    
+  
+    // called when the application is first invoked  
     public function indexAction()
     {
         $namespace = new Container('user');
@@ -36,18 +37,19 @@ class IndexController extends AbstractActionController
                                    ));
     }
     
-     public function authenticateAction()
+    // called when the user hits the login button
+    public function authenticateAction()
     {
         $namespace = new Container('user');
         
-        // adding global startyear
+        // adding startyear to namespace
         // this variable used for determining earliest year in year dropdowns
         // currently 2006 earliest year in database
         $namespace->startYear = 2006;
         
-        // adding global appstartyear
+        // adding appStartYear to namespace
         // this variable set to year this application went live
-        // this matters because the old application did not track the same
+        // this matters because the old application did not track the same data
         // (timestamps, etc.) and some features do not apply to old data
         // this mostly affects queries
         $namespace->appStartYear = 2014;
@@ -67,9 +69,9 @@ class IndexController extends AbstractActionController
                             'message' => $message,
                             ));    
         }
-
-
-        // demo login
+      
+       
+        // demo login - need to remove when live or beta testing
         if ($userName == 'role1') {
             $namespace->userID = 2;
             $namespace->role = 1;
@@ -78,21 +80,21 @@ class IndexController extends AbstractActionController
             return $this->redirect()->toRoute('application');
         }
         else if ($userName == 'role2') {
-            $namespace->userID = 9;
+            $namespace->userID = 4;
             $namespace->role = 2;
             $namespace->userEmail = NULL;   
             $namespace->datatelID = $userName;
             return $this->redirect()->toRoute('application');
         }
         else if ($userName == 'role3') {
-            $namespace->userID = 1;
+            $namespace->userID = 5;
             $namespace->role = 3;
             $namespace->userEmail = NULL;   
             $namespace->datatelID = $userName;
             return $this->redirect()->toRoute('application');
         }
         else if ($userName == 'role4') {
-            $namespace->userID = 21;
+            $namespace->userID = 6;
             $namespace->role = 4;
             $namespace->userEmail = NULL;   
             $namespace->datatelID = $userName;
